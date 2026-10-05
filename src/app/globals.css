@@ -91,13 +91,21 @@ header,
 /*
  * Transisi antarhalaman (PageTransition, key=pathname).
  *
- * PENTING: keyframe `to` HARUS `transform: none` (bukan translateX(0)).
- * Transform apa pun (termasuk translateX(0)) pada wrapper membuat
- * `position: fixed` di dalamnya (mis. overlay OnboardingFlow di "/")
- * berubah menjadi relatif ke wrapper. Saat onboarding, isi wrapper hanya
- * elemen fixed tersebut sehingga tingginya 0px -> overlay 0px -> layar
- * HITAM BLANK total. `transform: none` menghapus containing block begitu
- * animasi selesai, sehingga fixed kembali relatif viewport.
+ * PENTING (bug layar hitam / halaman "terkunci"):
+ * 1. Keyframe `to` HARUS `transform: none` (bukan translateX(0)) —
+ *    transform APA PUN pada wrapper membuat `position: fixed` di
+ *    dalamnya (mis. overlay OnboardingFlow di "/") relatif ke wrapper;
+ *    bila isi wrapper hanya elemen fixed, tingginya 0px -> overlay 0px
+ *    -> layar hitam blank total.
+ * 2. JANGAN pakai `animation-fill-mode: both`. Terverifikasi di
+ *    Chromium: setelah animasi selesai, fill `both` MEMPERTAHANKAN
+ *    hasil interpolasi sebagai matrix identitas (bukan `none`), sehingga
+ *    wrapper tetap menjadi containing block SELAMANYA — elemen fixed
+ *    (overlay onboarding, DetailHeroBar, toast player) kolaps/lepas
+ *    dari viewport, tombol tak tersentuh, halaman seperti terkunci.
+ *    Tanpa fill, begitu animasi usai transform kembali `none` dan fixed
+ *    kembali relatif viewport. (Lapis kedua: PageTransition melepas
+ *    kelas .page-enter di onAnimationEnd.)
  */
 @keyframes page-enter {
   from {
@@ -110,7 +118,7 @@ header,
   }
 }
 .page-enter {
-  animation: page-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: page-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 /* Shell mobile-first: 360px minimum, dibungkus 480px di tengah pada layar lebar.
