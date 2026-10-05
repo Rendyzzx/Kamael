@@ -5,6 +5,7 @@ import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
+import SwUpdateReload from "@/components/pwa/SwUpdateReload";
 import PageTransition from "@/components/nav/PageTransition";
 import ScrollRestore from "@/components/nav/ScrollRestore";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
@@ -119,6 +120,7 @@ export default async function RootLayout({
           <SettingsFab onboardingDone={onboardingDone} />
           <BottomNav defaultPortal={portal} onboardingDone={onboardingDone} />
           <InstallPrompt />
+          <SwUpdateReload />
         </AuthProvider>
       </body>
     </html>
