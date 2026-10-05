@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Portal } from "@/components/portal/portal-events";
+import { writeMirror } from "@/lib/onboarding-mirror";
 import OnboardingCarousel, { ONBOARDING_SLIDE_COUNT } from "./OnboardingCarousel";
 import OnboardingPick from "./OnboardingPick";
 import OnboardingSignIn from "./OnboardingSignIn";
@@ -117,7 +118,17 @@ export default function OnboardingFlow({
     return () => clearTimeout(t);
   }, [step]);
 
+  // Sinkronkan mirror localStorage dengan state server saat flow muncul
+  // (server adalah sumber kebenaran saat Redis sehat; mirror dipakai
+  // hanya sebagai fallback saat Redis down — lihat OnboardingGate).
+  useEffect(() => {
+    writeMirror({ accepted: initial.accepted, completed: initial.completed, type: initial.type });
+  }, [initial.accepted, initial.completed, initial.type]);
+
   async function patchOnboarding(body: Partial<{ accepted: boolean; type: Portal; completed: boolean }>) {
+    // Mirror selalu ditulis DULU: progres perangkat tetap tercatat walau
+    // Redis down/fetch gagal (gerbang "/" memakai mirror saat redisOk=false).
+    writeMirror(body);
     try {
       await fetch("/api/onboarding", {
         method: "POST",

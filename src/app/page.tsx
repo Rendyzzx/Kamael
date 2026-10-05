@@ -6,6 +6,7 @@ import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import type { Portal } from "@/components/portal/portal-events";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import OnboardingGate from "@/components/onboarding/OnboardingGate";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
 import BrandLogo from "@/components/ui/BrandLogo";
@@ -120,7 +121,22 @@ export default async function HomePage() {
   const fallbackAnime = popularAnime[0] ?? animeOngoing[0] ?? null;
   const fallbackDonghua = donghuaLatest[0] ?? donghuaOngoing[0] ?? null;
 
+  // Dashboard dibungkus OnboardingGate: saat Redis down (redisOk=false)
+  // keputusan "sudah selesai" di atas TIDAK bisa dipercaya — gerbang
+  // memeriksa mirror localStorage dan memaksa alur onboarding bagi user
+  // yang belum selesai, alih-alih fail-open ke dashboard (bug Okt 2026).
   return (
+    <OnboardingGate
+      redisOk={status.redisOk}
+      initial={{
+        accepted: status.value.accepted,
+        completed: status.value.completed,
+        type: status.value.type,
+      }}
+      authed={Boolean(userId)}
+      animePoster={animeOngoing[0]?.poster ?? popularAnime[0]?.poster ?? null}
+      donghuaPoster={donghuaLatest[0]?.poster ?? donghuaOngoing[0]?.poster ?? null}
+    >
     <div className="relative">
       <div className="relative" style={{ paddingTop: 16 }}>
         {/* Header: brand + akses profil */}
@@ -207,6 +223,7 @@ export default async function HomePage() {
         </div>
       </div>
     </div>
+    </OnboardingGate>
   );
 }
 
