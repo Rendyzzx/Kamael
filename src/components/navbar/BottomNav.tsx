@@ -4,27 +4,49 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import type { Portal } from "@/components/portal/portal-events";
 
 /**
- * Bottom navigation — fixed, 68px, 5 kolom rata, Material Symbols Rounded.
+ * Bottom navigation — fixed, 68px, Material Symbols Rounded.
+ *
+ * SCOPED PER PANEL: hanya SATU tab portal ditampilkan (Anime ATAU Donghua),
+ * tidak pernah berdua — setiap portal adalah panel sendiri (lihat EntryPortal).
+ * - Di dalam /anime* -> tab "Anime" (live_tv). Di dalam /donghua* -> tab
+ *   "Donghua" (auto_awesome). Di halaman netral (Search/Profil/Settings/
+ *   Favorit/History) -> tab mengikuti preferensi portal tersimpan di Redis
+ *   (prop `defaultPortal`, dikirim dari layout server component).
+ * - Pindah portal HANYA lewat PortalSwitch di header /anime & /donghua, atau
+ *   lewat Settings ("Tampilkan portal lagi") — bukan dari bottom nav.
+ *
  * Item aktif: pill 64x32 bg --nav-active + ikon putih + label 12px/700 di bawah.
  * Item non-aktif: hanya ikon putih 28px, tanpa label.
- * Rute tetap sama (Home/Anime/Donghua/Search/Profil) — hanya tampilan yang berubah.
  */
-const ITEMS = [
-  { href: "/", label: "Home", icon: "home" },
-  { href: "/anime", label: "Anime", icon: "live_tv" },
-  { href: "/donghua", label: "Donghua", icon: "auto_awesome" },
-  { href: "/search", label: "Cari", icon: "search" },
-] as const;
-
-export default function BottomNav() {
+export default function BottomNav({ defaultPortal }: { defaultPortal: Portal }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
   // Player butuh seluruh layar; portal pembuka ("/") juga fullscreen —
   // tanpa bottom nav & header di sana.
   if (pathname.includes("/watch/") || pathname === "/") return null;
+
+  // Portal panel aktif: path /anime*|/donghua* menentukan langsung; di luar
+  // itu (halaman netral) ikut preferensi tersimpan.
+  const portal: Portal = pathname.startsWith("/donghua")
+    ? "donghua"
+    : pathname.startsWith("/anime")
+      ? "anime"
+      : defaultPortal;
+
+  const portalItem =
+    portal === "anime"
+      ? { href: "/anime", label: "Anime", icon: "live_tv" }
+      : { href: "/donghua", label: "Donghua", icon: "auto_awesome" };
+
+  const items = [
+    { href: "/", label: "Home", icon: "home" },
+    portalItem,
+    { href: "/search", label: "Cari", icon: "search" },
+  ] as const;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -40,7 +62,7 @@ export default function BottomNav() {
         className="flex items-center justify-between px-2"
         style={{ height: 68, background: "#1B1C1F" }}
       >
-        {ITEMS.map(({ href, label, icon }) => {
+        {items.map(({ href, label, icon }) => {
           const active = isActive(href);
           return (
             <li key={href} className="flex flex-1 justify-center">

@@ -4,6 +4,10 @@ import BottomNav from "@/components/navbar/BottomNav";
 import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
+import { getAuthenticatedUserId } from "@/lib/auth/session";
+import { getPreference } from "@/lib/redis/preference";
+import { readVisitorId } from "@/lib/visitor";
+import type { Portal } from "@/components/portal/portal-events";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -48,9 +52,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Portal aktif (anime|donghua) dipakai BottomNav agar bottom nav HANYA
+  // menampilkan tab portal yang sedang dipakai — bukan dua tab Anime+Donghua
+  // sekaligus. Sumber: Redis pref:{id} (sama seperti gerbang "/"); fallback
+  // "anime" bila belum pernah memilih atau Redis tidak terjangkau.
+  const userId = await getAuthenticatedUserId();
+  const id = userId ?? (await readVisitorId());
+  const preference = id ? await getPreference(id) : null;
+  const portal: Portal = preference ?? "anime";
+
   return (
     <html lang="id" className={`dark ${bricolage.variable} ${roboto.variable}`}>
       <body>
@@ -62,7 +75,7 @@ export default function RootLayout({
             <main className="flex-1 pb-24">{children}</main>
           </div>
           <SettingsFab />
-          <BottomNav />
+          <BottomNav defaultPortal={portal} />
         </AuthProvider>
       </body>
     </html>
