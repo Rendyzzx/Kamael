@@ -46,7 +46,7 @@ export default function DetailHeroBar({ title }: { title: string }) {
         }}
       >
         <button type="button" onClick={() => router.back()} aria-label="Kembali" className="flex items-center justify-center">
-          <span className="material-symbols-rounded text-white" style={{ fontSize: 28 }}>
+          <span className="material-symbols-rounded text-white" style={{ fontSize: 24 }}>
             arrow_back
           </span>
         </button>

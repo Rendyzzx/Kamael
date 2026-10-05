@@ -49,7 +49,7 @@ export default async function AnimePage({ searchParams }: PageProps) {
       <SearchBox />
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
-        <h1 className="font-display text-[26px] font-bold text-white">Anime</h1>
+        <h1 className="font-display text-[18px] font-bold text-white">Anime</h1>
 
         <Tabs
           items={[

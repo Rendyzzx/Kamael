@@ -22,7 +22,7 @@ export default function GenreSelect({
     <div className="flex flex-wrap" style={{ gap: "12px 10px" }}>
       <Link
         href={basePath}
-        className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+        className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
         style={{
           height: 32,
           border: !activeGenre ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
@@ -37,7 +37,7 @@ export default function GenreSelect({
           <Link
             key={g.id}
             href={`${basePath}?genre=${encodeURIComponent(g.id)}`}
-            className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+            className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
             style={{
               height: 32,
               border: active ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",

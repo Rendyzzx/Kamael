@@ -49,12 +49,12 @@ export default function BottomNav() {
                     className="flex items-center justify-center rounded-chip transition-smooth"
                     style={{ width: 64, height: 32, background: "var(--nav-active)" }}
                   >
-                    <span className="material-symbols-rounded text-white" style={{ fontSize: 24 }}>
+                    <span className="material-symbols-rounded text-white" style={{ fontSize: 22 }}>
                       {icon}
                     </span>
                   </span>
                 ) : (
-                  <span className="material-symbols-rounded text-white" style={{ fontSize: 28 }}>
+                  <span className="material-symbols-rounded text-white" style={{ fontSize: 24 }}>
                     {icon}
                   </span>
                 )}
@@ -81,7 +81,7 @@ export default function BottomNav() {
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-xs font-bold text-white">
                   {session?.user?.name?.charAt(0).toUpperCase() ?? (
-                    <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
+                    <span className="material-symbols-rounded" style={{ fontSize: 17 }}>
                       person
                     </span>
                   )}

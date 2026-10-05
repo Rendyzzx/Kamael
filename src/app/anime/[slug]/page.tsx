@@ -78,10 +78,10 @@ export default async function AnimeDetailPage({ params }: PageProps) {
             className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3"
             style={{ height: 32, background: "rgba(30,30,35,.9)" }}
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 18, color: "var(--yellow)" }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--yellow)" }}>
               calendar_month
             </span>
-            <span className="text-[16px] font-bold" style={{ color: "var(--yellow)" }}>
+            <span className="text-[14px] font-bold" style={{ color: "var(--yellow)" }}>
               {detail.status}
             </span>
           </span>
@@ -114,7 +114,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               <Link
                 key={g.id}
                 href={`/anime?genre=${g.id}`}
-                className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
                 style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
               >
                 {g.title}
@@ -125,7 +125,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
 
         {detail.synopsis ? (
           <section className="mt-6">
-            <h2 className="font-display mb-2 text-[28px] font-light text-white">Synopsis</h2>
+            <h2 className="font-display mb-2 text-[21px] font-light text-white">Synopsis</h2>
             <Synopsis text={detail.synopsis} />
           </section>
         ) : null}
@@ -135,7 +135,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
             <Link
               href={`/anime/watch/${detail.episodeList[0].episodeId}`}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold text-white transition-smooth"
-              style={{ height: 44, fontSize: 18, background: "var(--blue-grad)" }}
+              style={{ height: 44, fontSize: 16, background: "var(--blue-grad)" }}
             >
               <span
                 className="flex items-center justify-center rounded-full"
@@ -163,9 +163,9 @@ export default async function AnimeDetailPage({ params }: PageProps) {
                     key={ep.episodeId}
                     href={`/anime/watch/${ep.episodeId}`}
                     className="flex items-center justify-between rounded-chip px-4 transition-smooth"
-                    style={{ height: 56, background: "var(--surface)" }}
+                    style={{ height: 48, background: "var(--surface)" }}
                   >
-                    <span className="line-clamp-1 text-[16px] font-medium text-white">{ep.title}</span>
+                    <span className="line-clamp-1 text-[14px] font-medium text-white">{ep.title}</span>
                     <span className="shrink-0 pl-2 text-[13px]" style={{ color: "var(--text-2)" }}>
                       {ep.date}
                     </span>

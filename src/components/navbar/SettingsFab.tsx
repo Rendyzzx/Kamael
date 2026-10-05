@@ -27,7 +27,7 @@ export default function SettingsFab() {
             boxShadow: "0 4px 12px rgba(0,0,0,.4)",
           }}
         >
-          <span className="material-symbols-rounded text-black" style={{ fontSize: 28 }}>
+          <span className="material-symbols-rounded text-black" style={{ fontSize: 24 }}>
             settings
           </span>
         </Link>

@@ -12,11 +12,11 @@ export default function SectionHeader({
 }) {
   return (
     <div className="mb-3 flex items-end justify-between gap-4">
-      <h2 className="font-display text-[24px] font-medium leading-tight text-white">{title}</h2>
+      <h2 className="font-display text-[17px] font-medium leading-tight text-white">{title}</h2>
       {href ? (
         <Link
           href={href}
-          className="shrink-0 text-[16px] font-semibold transition-smooth"
+          className="shrink-0 text-[14px] font-semibold transition-smooth"
           style={{ color: "var(--blue)" }}
         >
           {hrefLabel} &gt;

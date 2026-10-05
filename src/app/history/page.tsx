@@ -17,7 +17,7 @@ export default async function HistoryPage() {
   if (!userId) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col items-center justify-center gap-5 px-4 text-center">
-        <h1 className="font-display text-[22px] font-semibold text-white">Login untuk melihat history</h1>
+        <h1 className="font-display text-[18px] font-semibold text-white">Login untuk melihat history</h1>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Watch history tersimpan di akun kamu, bukan hanya di browser ini.
         </p>
@@ -33,7 +33,7 @@ export default async function HistoryPage() {
   return (
     <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="font-display text-[26px] font-bold text-white">Watch History</h1>
+        <h1 className="font-display text-[18px] font-bold text-white">Watch History</h1>
         {history.length > 0 ? <ClearHistoryButton /> : null}
       </div>
 

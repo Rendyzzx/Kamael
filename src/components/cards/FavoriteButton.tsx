@@ -39,7 +39,7 @@ export default function FavoriteButton({
   }, [status, type, contentId]);
 
   const base = "inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold transition-smooth disabled:opacity-60";
-  const style: React.CSSProperties = { height: 44, fontSize: 18, background: "var(--surface-3)", color: "var(--text)" };
+  const style: React.CSSProperties = { height: 44, fontSize: 16, background: "var(--surface-3)", color: "var(--text)" };
 
   if (status === "loading") {
     return <div className="flex-1 animate-pulse rounded-chip" style={{ height: 44, background: "var(--surface-3)" }} aria-hidden="true" />;

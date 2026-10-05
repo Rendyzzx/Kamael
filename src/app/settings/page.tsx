@@ -20,7 +20,7 @@ export default async function SettingsPage() {
 
   return (
     <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-6">
-      <h1 className="font-display text-[26px] font-bold text-white">Settings</h1>
+      <h1 className="font-display text-[18px] font-bold text-white">Settings</h1>
 
       <section className="space-y-3">
         <GroupTitle>Appearance</GroupTitle>

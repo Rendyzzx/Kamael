@@ -17,7 +17,7 @@ export default async function FavoritesPage() {
   if (!userId) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col items-center justify-center gap-5 px-4 text-center">
-        <h1 className="font-display text-[22px] font-semibold text-white">Login untuk melihat favorites</h1>
+        <h1 className="font-display text-[18px] font-semibold text-white">Login untuk melihat favorites</h1>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Simpan anime &amp; donghua favorit ke akunmu agar tersedia di semua perangkat.
         </p>
@@ -36,7 +36,7 @@ export default async function FavoritesPage() {
 
   return (
     <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-8">
-      <h1 className="font-display text-[26px] font-bold text-white">Favorites</h1>
+      <h1 className="font-display text-[18px] font-bold text-white">Favorites</h1>
 
       <section aria-labelledby="favorites-anime">
         <SectionHeader title="Anime" />
@@ -91,7 +91,7 @@ function FavoriteCard({
           />
         ) : null}
       </div>
-      <h3 className="mt-2 line-clamp-2 text-[16px] font-semibold leading-snug text-white">
+      <h3 className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-white">
         {favorite.title || favorite.contentId}
       </h3>
     </Link>

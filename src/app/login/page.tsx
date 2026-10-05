@@ -19,7 +19,7 @@ export default async function LoginPage() {
       </div>
 
       <div className="space-y-1.5">
-        <h1 className="font-display text-[22px] font-semibold text-white">Masuk untuk melanjutkan</h1>
+        <h1 className="font-display text-[18px] font-semibold text-white">Masuk untuk melanjutkan</h1>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Login untuk menyimpan progress tontonan, history, dan favorite kamu di semua perangkat.
         </p>

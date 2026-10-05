@@ -71,7 +71,7 @@ export default function SearchBox() {
         <div className="relative flex items-center">
           <span
             className="material-symbols-rounded absolute pointer-events-none"
-            style={{ left: 24, fontSize: 28, color: "var(--text-2)" }}
+            style={{ left: 24, fontSize: 20, color: "var(--text-2)" }}
           >
             search
           </span>
@@ -87,12 +87,12 @@ export default function SearchBox() {
             aria-label="Cari anime atau donghua"
             className="w-full rounded-chip outline-none"
             style={{
-              height: 54,
+              height: 48,
               background: "#1E1F23",
               color: "var(--text)",
               paddingLeft: 58,
               paddingRight: 16,
-              fontSize: 17,
+              fontSize: 15,
             }}
           />
         </div>

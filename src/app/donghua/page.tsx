@@ -55,7 +55,7 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
       <SearchBox />
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
-        <h1 className="font-display text-[26px] font-bold text-white">Donghua</h1>
+        <h1 className="font-display text-[18px] font-bold text-white">Donghua</h1>
 
         <Tabs
           items={[

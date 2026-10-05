@@ -51,7 +51,7 @@ export default function AnimeCard({
         ) : null}
       </div>
       <h3
-        className="mt-2 line-clamp-2 text-[16px] font-semibold leading-snug text-white transition-smooth"
+        className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-white transition-smooth"
         style={{ fontFamily: "var(--font-montserrat)" }}
       >
         {anime.title}

@@ -76,10 +76,10 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
       <div style={{ padding: "0 var(--page-x-detail)", marginTop: -8 }}>
         {detail.status ? (
           <span className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3" style={{ height: 32, background: "rgba(30,30,35,.9)" }}>
-            <span className="material-symbols-rounded" style={{ fontSize: 18, color: "var(--yellow)" }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--yellow)" }}>
               calendar_month
             </span>
-            <span className="text-[16px] font-bold" style={{ color: "var(--yellow)" }}>
+            <span className="text-[14px] font-bold" style={{ color: "var(--yellow)" }}>
               {detail.status}
             </span>
           </span>
@@ -112,7 +112,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
               <Link
                 key={g.slug}
                 href={`/donghua?genre=${g.slug}`}
-                className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
                 style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
               >
                 {g.name}
@@ -123,7 +123,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
 
         {detail.synopsis ? (
           <section className="mt-6">
-            <h2 className="font-display mb-2 text-[28px] font-light text-white">Synopsis</h2>
+            <h2 className="font-display mb-2 text-[21px] font-light text-white">Synopsis</h2>
             <Synopsis text={detail.synopsis} />
           </section>
         ) : null}
@@ -133,7 +133,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
             <Link
               href={`/donghua/watch/${detail.episodes[0].slug}`}
               className="inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold text-white transition-smooth"
-              style={{ height: 44, fontSize: 18, background: "var(--blue-grad)" }}
+              style={{ height: 44, fontSize: 16, background: "var(--blue-grad)" }}
             >
               <span className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#fff" }}>
                 <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--bg)" }}>
@@ -158,9 +158,9 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
                     key={ep.slug}
                     href={`/donghua/watch/${ep.slug}`}
                     className="flex items-center justify-between rounded-chip px-4 transition-smooth"
-                    style={{ height: 56, background: "var(--surface)" }}
+                    style={{ height: 48, background: "var(--surface)" }}
                   >
-                    <span className="line-clamp-1 text-[16px] font-medium text-white">
+                    <span className="line-clamp-1 text-[14px] font-medium text-white">
                       {episodeLabel(ep.title, ep.title)}
                       {ep.isFinal ? (
                         <span className="ml-1.5 text-xs font-bold" style={{ color: "var(--blue)" }}>

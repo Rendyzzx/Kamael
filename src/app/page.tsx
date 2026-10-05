@@ -58,7 +58,7 @@ export default async function HomePage() {
                 <Image src={featured.poster} alt={featured.title} fill priority sizes="480px" className="object-cover" />
               ) : null}
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/75" />
-              <h1 className="font-display absolute inset-x-3 bottom-3 line-clamp-2 text-center text-[22px] font-medium text-white">
+              <h1 className="font-display absolute inset-x-3 bottom-3 line-clamp-2 text-center text-[18px] font-medium text-white">
                 {featured.title}
               </h1>
             </Link>
@@ -149,7 +149,7 @@ export default async function HomePage() {
           {/* Genres */}
           {genres.length ? (
             <section aria-labelledby="genres" style={{ padding: "0 var(--page-x)" }}>
-              <h2 className="font-display mb-3 text-[28px] font-light text-white">Genres</h2>
+              <h2 className="font-display mb-3 text-[21px] font-light text-white">Genres</h2>
               <ShowMoreChips genres={genres} basePath="/anime" />
             </section>
           ) : null}

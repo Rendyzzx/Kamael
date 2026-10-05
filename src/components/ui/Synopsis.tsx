@@ -10,7 +10,7 @@ export default function Synopsis({ text }: { text: string }) {
     <div>
       <p
         className={expanded ? "" : "line-clamp-5"}
-        style={{ fontSize: 17, lineHeight: 1.7, color: "var(--text-2)", whiteSpace: "pre-line" }}
+        style={{ fontSize: 15, lineHeight: 1.7, color: "var(--text-2)", whiteSpace: "pre-line" }}
       >
         {text}
       </p>

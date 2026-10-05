@@ -79,7 +79,7 @@ export default async function AnimeWatchPage({ params }: PageProps) {
           )}
           {data.animeId ? (
             <Link href={`/anime/${data.animeId}`} className="rounded-chip px-4 py-2.5 text-center text-sm font-semibold text-white transition-smooth" style={{ background: "var(--surface-3)" }}>
-              <span className="material-symbols-rounded" style={{ fontSize: 20, verticalAlign: "middle" }}>list</span>
+              <span className="material-symbols-rounded" style={{ fontSize: 17, verticalAlign: "middle" }}>list</span>
             </Link>
           ) : null}
           {data.nextEpisodeId ? (
@@ -96,11 +96,11 @@ export default async function AnimeWatchPage({ params }: PageProps) {
         {/* Info episode */}
         <div>
           {data.animeId ? (
-            <Link href={`/anime/${data.animeId}`} className="font-display text-[20px] font-medium text-white">
+            <Link href={`/anime/${data.animeId}`} className="font-display text-[17px] font-medium text-white">
               {seriesTitle}
             </Link>
           ) : (
-            <h1 className="font-display text-[20px] font-medium text-white">Anime</h1>
+            <h1 className="font-display text-[17px] font-medium text-white">Anime</h1>
           )}
           <p className="mt-1 text-[15px]" style={{ color: "var(--text-2)" }}>
             {episodeLabel(data.title, data.title)}
@@ -109,7 +109,7 @@ export default async function AnimeWatchPage({ params }: PageProps) {
 
         {animeDetail?.synopsis ? (
           <section>
-            <h2 className="font-display mb-2 text-[20px] font-medium text-white">Deskripsi</h2>
+            <h2 className="font-display mb-2 text-[17px] font-medium text-white">Deskripsi</h2>
             <Synopsis text={animeDetail.synopsis} />
           </section>
         ) : null}
@@ -117,7 +117,7 @@ export default async function AnimeWatchPage({ params }: PageProps) {
         {/* Daftar episode — tab angka scroll horizontal */}
         {data.episodeList.length ? (
           <section aria-label="Daftar episode">
-            <h2 className="font-display mb-3 text-[20px] font-medium text-white">Episode List</h2>
+            <h2 className="font-display mb-3 text-[17px] font-medium text-white">Episode List</h2>
             <div className="flex overflow-x-auto pb-1" style={{ gap: 10 }}>
               {data.episodeList.map((ep) => {
                 const active = ep.episodeId === episodeId;
@@ -126,8 +126,8 @@ export default async function AnimeWatchPage({ params }: PageProps) {
                     key={ep.episodeId}
                     href={`/anime/watch/${ep.episodeId}`}
                     aria-current={active ? "true" : undefined}
-                    className="flex shrink-0 items-center justify-center rounded-app text-[20px] font-bold transition-smooth"
-                    style={{ width: 56, height: 56, background: active ? "#fff" : "var(--surface)", color: active ? "#000" : "#fff" }}
+                    className="flex shrink-0 items-center justify-center rounded-app text-[17px] font-bold transition-smooth"
+                    style={{ width: 48, height: 48, background: active ? "#fff" : "var(--surface)", color: active ? "#000" : "#fff" }}
                   >
                     {ep.eps ?? "•"}
                   </Link>
