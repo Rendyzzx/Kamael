@@ -39,7 +39,8 @@ export default function EntryPortal({
     } catch {
       // Redis/jaringan gagal → biarkan; tetap navigasi (fallback aman).
     }
-    router.push(`/${value}`);
+    // Home ("/") = dashboard trending sesuai portal yang baru dipilih.
+    router.push("/");
   }
 
   return (

@@ -26,7 +26,7 @@ export default function ShowPortalAgain() {
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error("delete-failed");
-      router.push("/");
+      router.push("/portal");
     } catch {
       setError(true);
       setPending(false);

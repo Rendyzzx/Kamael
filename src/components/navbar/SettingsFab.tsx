@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 export default function SettingsFab() {
   const pathname = usePathname();
 
-  if (pathname.includes("/watch/") || pathname === "/settings" || pathname === "/") return null;
+  if (pathname.includes("/watch/") || pathname === "/settings" || pathname === "/portal") return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: 84 }}>

@@ -25,9 +25,10 @@ export default function BottomNav({ defaultPortal }: { defaultPortal: Portal }) 
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Player butuh seluruh layar; portal pembuka ("/") juga fullscreen —
-  // tanpa bottom nav & header di sana.
-  if (pathname.includes("/watch/") || pathname === "/") return null;
+  // Player butuh seluruh layar; "/portal" (gerbang pilih, HALAMAN SENDIRI)
+  // juga fullscreen — tanpa bottom nav & header di sana. "/" sekarang Home
+  // sungguhan (dashboard trending) dan TETAP menampilkan bottom nav.
+  if (pathname.includes("/watch/") || pathname === "/portal") return null;
 
   // Portal panel aktif: path /anime*|/donghua* menentukan langsung; di luar
   // itu (halaman netral) ikut preferensi tersimpan.

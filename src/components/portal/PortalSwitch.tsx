@@ -30,7 +30,9 @@ export default function PortalSwitch({ portal }: { portal: Portal }) {
     } catch {
       // Fallback aman: tetap pindah portal meski simpan preferensi gagal.
     }
-    router.push(`/${other}`);
+    // Home ("/") = dashboard trending; selalu ke sana setelah ganti portal,
+    // dari mana pun toggle ini dipanggil (Home, /anime, /donghua).
+    router.push("/");
   }
 
   return (

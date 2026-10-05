@@ -8,7 +8,7 @@
  * (portal akan tampil lagi, itu kondisi aman).
  */
 import "server-only";
-import { getRedis, safeRedis } from "./client";
+import { getRedis, isRedisConfigured, safeRedis } from "./client";
 
 export type PortalPreference = "anime" | "donghua";
 
@@ -42,6 +42,28 @@ export async function getPreference(id: string): Promise<PortalPreference | null
     const value = await withTimeout(getRedis().get<string>(key(id)));
     return isPreference(value) ? value : null;
   }, null);
+}
+
+/**
+ * Sama seperti getPreference, tapi membedakan "belum pernah memilih" dari
+ * "Redis tidak terjangkau" lewat `redisOk`. Dipakai di gerbang "/" dan
+ * "/portal" supaya gangguan Redis TIDAK membuat pengunjung terjebak
+ * bolak-balik "/" <-> "/portal" — saat redisOk false, "/" cukup default ke
+ * "anime" dan tetap tampil (fail-open), bukan fail-closed ke portal lagi.
+ */
+export async function getPreferenceStatus(
+  id: string
+): Promise<{ value: PortalPreference | null; redisOk: boolean }> {
+  if (!isRedisConfigured()) {
+    return { value: null, redisOk: false };
+  }
+  try {
+    const value = await withTimeout(getRedis().get<string>(key(id)));
+    return { value: isPreference(value) ? value : null, redisOk: true };
+  } catch (err) {
+    console.error("[redis] getPreferenceStatus failed, falling back:", err);
+    return { value: null, redisOk: false };
+  }
 }
 
 /** Simpan preferensi. Return false bila Redis gagal/down (kondisi aman: portal tampil lagi). */
