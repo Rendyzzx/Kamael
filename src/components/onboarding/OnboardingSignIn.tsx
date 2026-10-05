@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import BrandLogo from "@/components/ui/BrandLogo";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import TesterLoginButton from "@/components/auth/TesterLoginButton";
@@ -25,12 +26,7 @@ export default function OnboardingSignIn() {
 
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-8 px-7 text-center">
-      <div className="font-display flex items-center gap-2 text-[22px] font-bold tracking-tight text-white">
-        <span className="material-symbols-rounded" style={{ fontSize: 26, color: "var(--blue)" }}>
-          movie
-        </span>
-        Cyro<span style={{ color: "var(--blue)" }}>nime</span>
-      </div>
+      <BrandLogo size={24} />
 
       <div className="space-y-1.5">
         <h1 className="font-display text-[20px] font-bold text-white">Buat akun / Masuk</h1>

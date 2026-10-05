@@ -8,6 +8,7 @@ import type { Portal } from "@/components/portal/portal-events";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import Button from "@/components/ui/Button";
 import Icon from "@/components/ui/Icon";
+import BrandLogo from "@/components/ui/BrandLogo";
 import { getAnimeHome, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
 import { getLatestDonghua, getOngoingDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
@@ -124,15 +125,8 @@ export default async function HomePage() {
       <div className="relative" style={{ paddingTop: 16 }}>
         {/* Header: brand + akses profil */}
         <header className="flex items-center justify-between" style={{ padding: "0 var(--page-x)" }}>
-          <Link href="/" className="font-display flex items-center gap-2 text-[21px] font-bold tracking-tight text-white">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              {/* Logo: matahari senja di garis horizon — digambar tangan, tidak simetris */}
-              <path d="M4.5 17.6h15.2" stroke="var(--peach)" stroke-width="1.75" stroke-linecap="round"/>
-              <path d="M12 4.9c3.9 0 6.7 2.7 6.7 6.4 0 2.5-1.6 4.7-3.9 5.7" stroke="var(--amber)" stroke-width="1.75" stroke-linecap="round" fill="none"/>
-              <path d="M12 4.9c-3.9 0-6.7 2.7-6.7 6.4 0 2.5 1.6 4.7 3.9 5.7" stroke="var(--sunset)" stroke-width="1.75" stroke-linecap="round" fill="none"/>
-              <path d="M12 13.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z" fill="var(--amber)"/>
-            </svg>
-            Cyronime
+          <Link href="/" aria-label="Cyronime">
+            <BrandLogo size={21} />
           </Link>
           <div className="flex items-center gap-2.5">
             <PortalSwitch portal={portal} />

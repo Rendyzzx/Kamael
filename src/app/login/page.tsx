@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
+import BrandLogo from "@/components/ui/BrandLogo";
 import TesterLoginButton from "@/components/auth/TesterLoginButton";
 
 export const metadata: Metadata = {
@@ -15,9 +16,7 @@ export default async function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col items-center justify-center gap-8 px-4 text-center">
-      <div className="font-display flex items-center gap-2 text-2xl font-bold tracking-tight text-white">
-        Cyro<span style={{ color: "var(--blue)" }}>nime</span>
-      </div>
+      <BrandLogo size={26} />
 
       <div className="space-y-1.5">
         <h1 className="font-display text-[18px] font-semibold text-white">Masuk untuk melanjutkan</h1>
