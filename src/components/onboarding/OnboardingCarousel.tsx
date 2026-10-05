@@ -12,19 +12,19 @@ interface Slide {
 const SLIDES: Slide[] = [
   {
     key: "highlights",
-    image: "/onboarding/feature-highlights.png",
+    image: "/onboarding/feature-highlights.webp",
     title: "Fitur Unggulan",
     description: "Koleksi anime dan donghua terlengkap, update episode cepat, tampilan ringan dan rapi.",
   },
   {
     key: "watch-download",
-    image: "/onboarding/feature-watch-download.png",
+    image: "/onboarding/feature-watch-download.webp",
     title: "Nonton & Unduh",
     description: "Streaming langsung lewat beberapa server pilihan, atau unduh episode untuk ditonton offline.",
   },
   {
     key: "subscribe",
-    image: "/onboarding/feature-subscribe.png",
+    image: "/onboarding/feature-subscribe.webp",
     title: "Subscribe Series",
     description: "Fitur Subscribe Series memungkinkan kamu untuk menerima info dan notifikasi update terbaru berdasarkan episode.",
   },
