@@ -27,9 +27,39 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PlayerSource, QualityGroup } from "@/types/player";
 import { sourceKey } from "@/types/player";
-import { pickInitialQuality } from "./sources";
+import { detectSourceType, pickInitialQuality } from "./sources";
 
 const QUALITY_LS_KEY = "cyronime:quality";
+
+/**
+ * Cache embeddability per HOSTNAME (bukan per URL — kebijakan CSP/XFO sebuah
+ * provider berlaku untuk seluruh domainnya, jadi sekali ketahuan otakuwatch7
+ * diblokir, semua episode lain yang memakai server itu langsung tahu tanpa
+ * fetch ulang). Hidup selama tab terbuka, cukup untuk satu sesi menonton.
+ */
+const embedCheckCache = new Map<string, Promise<boolean>>();
+
+/** True bila sumber embed (iframe) ini TIDAK diblokir X-Frame-Options/CSP
+ * untuk ditampilkan di domain kita — lihat /api/embed-check. Sumber hls/mp4
+ * tidak perlu dicek (tidak lewat iframe). */
+function checkEmbeddable(url: string): Promise<boolean> {
+  let host: string;
+  try {
+    host = new URL(url).host;
+  } catch {
+    return Promise.resolve(false);
+  }
+  const cached = embedCheckCache.get(host);
+  if (cached) return cached;
+  const promise = fetch(`/api/embed-check?url=${encodeURIComponent(url)}`, {
+    signal: AbortSignal.timeout(6500),
+  })
+    .then((res) => (res.ok ? (res.json() as Promise<{ embeddable?: boolean }>) : { embeddable: false }))
+    .then((data) => Boolean(data.embeddable))
+    .catch(() => false);
+  embedCheckCache.set(host, promise);
+  return promise;
+}
 
 export interface RaceEntry {
   source: PlayerSource;
@@ -158,12 +188,35 @@ export function usePlayerSources(args: {
       );
       pendingResolvesRef.current = candidates.length;
 
+      // Finalisasi satu kandidat: sumber embed (iframe) WAJIB lolos cek
+      // embeddability (/api/embed-check) dulu sebelum masuk race — tanpa ini,
+      // server yang diblokir X-Frame-Options/CSP milik provider bisa "menang"
+      // race walau nanti tampil kosong/ikon rusak (onLoad iframe tetap
+      // terpicu meski kontennya ditolak browser). hls/mp4 langsung lolos.
+      const finalizeCandidate = (source: PlayerSource, key: string, url: string) => {
+        const settle = (ok: boolean) => {
+          if (raceSeqRef.current !== seq) return;
+          pendingResolvesRef.current -= 1;
+          if (ok) {
+            addToPool(source, url, seq);
+          } else {
+            failedRef.current.add(key);
+            setFailedKeys(new Set(failedRef.current));
+            checkExhausted(seq);
+          }
+        };
+        if (detectSourceType(url) !== "embed") {
+          settle(true);
+          return;
+        }
+        checkEmbeddable(url).then(settle);
+      };
+
       for (const source of candidates) {
         const key = sourceKey(source);
         const direct = source.url ?? urlCacheRef.current[key];
         if (direct) {
-          pendingResolvesRef.current -= 1;
-          addToPool(source, direct, seq);
+          finalizeCandidate(source, key, direct);
           continue;
         }
         if (!source.serverId || !resolveEndpoint) {
@@ -182,8 +235,7 @@ export function usePlayerSources(args: {
             if (raceSeqRef.current !== seq) return;
             if (!data.url) throw new Error("no-url");
             urlCacheRef.current[key] = data.url;
-            pendingResolvesRef.current -= 1;
-            addToPool(source, data.url, seq);
+            finalizeCandidate(source, key, data.url);
           })
           .catch(() => {
             if (raceSeqRef.current !== seq) return;
@@ -318,13 +370,6 @@ export function usePlayerSources(args: {
       const key = sourceKey(source);
       const direct = source.url ?? urlCacheRef.current[key];
 
-      const finish = (url: string) => {
-        if (raceSeqRef.current !== seq) return;
-        setActiveSource(source);
-        setActiveUrl(url);
-        setResolving(false);
-        setStatusMessage(null);
-      };
       const fail = () => {
         if (raceSeqRef.current !== seq) return;
         failedRef.current.add(key);
@@ -332,6 +377,29 @@ export function usePlayerSources(args: {
         setManualServer(false);
         const group = groups.find((g) => g.quality === source.quality) ?? null;
         race(group);
+      };
+      // Sama seperti race otomatis: sumber embed WAJIB lolos cek
+      // embeddability dulu — pilihan manual pun bisa kena blokir provider.
+      const finish = (url: string) => {
+        if (raceSeqRef.current !== seq) return;
+        if (detectSourceType(url) !== "embed") {
+          setActiveSource(source);
+          setActiveUrl(url);
+          setResolving(false);
+          setStatusMessage(null);
+          return;
+        }
+        checkEmbeddable(url).then((ok) => {
+          if (raceSeqRef.current !== seq) return;
+          if (ok) {
+            setActiveSource(source);
+            setActiveUrl(url);
+            setResolving(false);
+            setStatusMessage(null);
+          } else {
+            fail();
+          }
+        });
       };
 
       if (direct) {

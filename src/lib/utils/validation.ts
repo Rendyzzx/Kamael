@@ -45,3 +45,24 @@ export function episodeLabel(title: string, fallback = "Episode"): string {
   if (m) return `Episode ${m[1]}`;
   return fallback;
 }
+
+/**
+ * Validasi URL target untuk pengecekan embeddability (/api/embed-check).
+ * Hanya http(s), bukan localhost/IP privat — endpoint ini melakukan fetch
+ * server-side ke URL yang diberikan, jadi harus ditutup dari penyalahgunaan
+ * sebagai proxy SSRF ke jaringan internal.
+ */
+export function isSafeEmbedUrl(raw: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+  const host = u.hostname.toLowerCase();
+  if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "0.0.0.0") return false;
+  if (/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.)/.test(host)) return false;
+  if (host.endsWith(".local") || host.endsWith(".internal")) return false;
+  return true;
+}
