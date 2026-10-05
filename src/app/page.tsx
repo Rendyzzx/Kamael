@@ -1,17 +1,25 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import AnimeCard from "@/components/cards/AnimeCard";
+import DonghuaCard from "@/components/cards/DonghuaCard";
 import SearchBox from "@/components/navbar/SearchBox";
 import EntryPortal from "@/components/portal/EntryPortal";
+import PortalSwitch from "@/components/portal/PortalSwitch";
+import type { Portal } from "@/components/portal/portal-events";
 import { getAnimeHome, getCompletedAnime } from "@/lib/api/anime";
+import { getLatestDonghua, getOngoingDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { listProgress, type WatchProgress } from "@/lib/redis/watching";
+import type { DonghuaListItem } from "@/types/donghua";
 
 /**
- * Homepage — fokus anime (keputusan user Okt 2026): donghua TIDAK
- * dicampur di home; akses donghua lewat portal /donghua (BottomNav).
- * header brand -> search -> hero "lanjut nonton" (es mencair) ->
- * rail Anime Terbaru -> ranking Terpopuler.
+ * Homepage mengikuti portal pilihan user (keputusan user Okt 2026):
+ * cookie `cyronime_portal` (anime|donghua) yang diset EntryPortal.
+ * - portal anime: hero lanjut nonton / populer -> rail Anime Terbaru
+ *   -> ranking Terpopuler (khusus anime).
+ * - portal donghua: hero lanjut nonton / terbaru -> rail Donghua
+ *   Terbaru -> rail Donghua Ongoing (khusus donghua).
  * Data yang tidak disediakan API (jadwal tayang, countdown, jumlah
  * penonton) tidak dipalsukan; ranking diurutkan dari skor asli.
  */
@@ -19,27 +27,47 @@ export const revalidate = 600;
 
 export default async function HomePage() {
   const userId = await getAuthenticatedUserId();
+  // Portal: cookie pilihan EntryPortal; default anime bila belum memilih.
+  const portal: Portal =
+    (await cookies()).get("cyronime_portal")?.value === "donghua" ? "donghua" : "anime";
 
-  const [animeHomeRes, animeCompletedRes, continueRes] = await Promise.allSettled([
-    getAnimeHome(),
-    getCompletedAnime(1),
-    userId ? listProgress(userId) : Promise.resolve([]),
-  ]);
+  // Hanya fetch data portal aktif; portal lain dilewati (Promise.resolve(null)).
+  const skip = () => Promise.resolve(null);
+  const [animeHomeRes, animeCompletedRes, donghuaLatestRes, donghuaOngoingRes, continueRes] =
+    await Promise.allSettled([
+      portal === "anime" ? getAnimeHome() : skip(),
+      portal === "anime" ? getCompletedAnime(1) : skip(),
+      portal === "donghua" ? getLatestDonghua(1) : skip(),
+      portal === "donghua" ? getOngoingDonghua(1) : skip(),
+      userId ? listProgress(userId) : Promise.resolve([] as WatchProgress[]),
+    ]);
 
-  const animeOngoing = animeHomeRes.status === "fulfilled" ? animeHomeRes.value.ongoing : [];
-  const popularAnime =
-    animeCompletedRes.status === "fulfilled"
-      ? [...animeCompletedRes.value.items].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
+  const animeHome =
+    portal === "anime" && animeHomeRes.status === "fulfilled" ? animeHomeRes.value : null;
+  const animeCompleted =
+    portal === "anime" && animeCompletedRes.status === "fulfilled" ? animeCompletedRes.value : null;
+  const donghuaLatest: DonghuaListItem[] =
+    portal === "donghua" && donghuaLatestRes.status === "fulfilled"
+      ? (donghuaLatestRes.value ?? [])
       : [];
+  const donghuaOngoing: DonghuaListItem[] =
+    portal === "donghua" && donghuaOngoingRes.status === "fulfilled"
+      ? (donghuaOngoingRes.value ?? [])
+      : [];
+  const animeOngoing = animeHome?.ongoing ?? [];
+  const popularAnime = animeCompleted
+    ? [...animeCompleted.items].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
+    : [];
   const continueWatching = continueRes.status === "fulfilled" ? continueRes.value : [];
 
-  // Hero: lanjut nonton (data Redis) atau anime terpopuler.
-  const resume = continueWatching[0] ?? null;
-  const fallbackFeatured = popularAnime[0] ?? animeOngoing[0] ?? null;
+  // Hero: lanjut nonton (data Redis, difilter per portal) atau unggulan portal.
+  const resume = continueWatching.find((p) => p.type === portal) ?? null;
+  const fallbackAnime = popularAnime[0] ?? animeOngoing[0] ?? null;
+  const fallbackDonghua = donghuaLatest[0] ?? donghuaOngoing[0] ?? null;
 
   return (
     <div className="relative">
-      <EntryPortal />
+      <EntryPortal portal={portal} />
 
       {/* Gradient biru lembut di area atas (mengikuti mood mockup, tema Cyronime) */}
       <div
@@ -60,16 +88,19 @@ export default async function HomePage() {
             </span>
             Cyro<span style={{ color: "var(--blue)" }}>nime</span>
           </Link>
-          <Link
-            href="/profile"
-            aria-label="Profil"
-            className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
-            style={{ background: "var(--surface)" }}
-          >
-            <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--text)" }}>
-              person
-            </span>
-          </Link>
+          <div className="flex items-center gap-2.5">
+            <PortalSwitch portal={portal} />
+            <Link
+              href="/profile"
+              aria-label="Profil"
+              className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
+              style={{ background: "var(--surface)" }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--text)" }}>
+                person
+              </span>
+            </Link>
+          </div>
         </header>
 
         <div style={{ marginTop: 14 }}>
@@ -77,32 +108,64 @@ export default async function HomePage() {
         </div>
 
         <div className="space-y-8" style={{ marginTop: "var(--section-gap)" }}>
-          {/* ===== HERO: Lanjut nonton / unggulan ===== */}
+          {/* ===== HERO: Lanjut nonton / unggulan portal ===== */}
           {resume ? (
             <HomeHeroResume item={resume} />
-          ) : fallbackFeatured ? (
-            <HomeHeroFeatured item={fallbackFeatured} />
+          ) : portal === "anime" && fallbackAnime ? (
+            <HomeHeroFeatured item={fallbackAnime} />
+          ) : portal === "donghua" && fallbackDonghua ? (
+            <HomeHeroFeaturedDonghua item={fallbackDonghua} />
           ) : null}
 
-          {/* ===== Anime Terbaru ===== */}
-          {animeOngoing.length ? (
-            <HomeRail
-              title="Anime Terbaru"
-              note="Episode terbaru yang sedang tayang."
-              href="/anime"
-            >
-              {animeOngoing.slice(0, 15).map((a, i) => (
-                <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
-                  <AnimeCard anime={a} priority={i < 4} />
-                </div>
-              ))}
-            </HomeRail>
-          ) : (
-            <EmptyFallback />
-          )}
+          {portal === "anime" ? (
+            <>
+              {/* ===== Anime Terbaru ===== */}
+              {animeOngoing.length ? (
+                <HomeRail
+                  title="Anime Terbaru"
+                  note="Episode terbaru yang sedang tayang."
+                  href="/anime"
+                >
+                  {animeOngoing.slice(0, 15).map((a, i) => (
+                    <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
+                      <AnimeCard anime={a} priority={i < 4} />
+                    </div>
+                  ))}
+                </HomeRail>
+              ) : (
+                <EmptyFallback />
+              )}
 
-          {/* ===== Terpopuler: ranking by skor asli ===== */}
-          {popularAnime.length ? <HomeRanking items={popularAnime.slice(0, 5)} /> : null}
+              {/* ===== Terpopuler: ranking by skor asli ===== */}
+              {popularAnime.length ? <HomeRanking items={popularAnime.slice(0, 5)} /> : null}
+            </>
+          ) : (
+            <>
+              {/* ===== Donghua Terbaru ===== */}
+              {donghuaLatest.length ? (
+                <HomeRail title="Donghua Terbaru" note="Rilisan donghua terbaru." href="/donghua">
+                  {donghuaLatest.slice(0, 15).map((d, i) => (
+                    <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
+                      <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} priority={i < 4} />
+                    </div>
+                  ))}
+                </HomeRail>
+              ) : (
+                <EmptyFallback />
+              )}
+
+              {/* ===== Donghua Ongoing ===== */}
+              {donghuaOngoing.length ? (
+                <HomeRail title="Donghua Ongoing" note="Donghua yang masih tayang." href="/donghua">
+                  {donghuaOngoing.slice(0, 15).map((d, i) => (
+                    <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
+                      <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} />
+                    </div>
+                  ))}
+                </HomeRail>
+              ) : null}
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -233,6 +296,65 @@ function HomeHeroFeatured({
           <div className="mt-3.5 flex items-center gap-3">
             <Link
               href={`/anime/${item.animeId}`}
+              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
+              style={{ background: "var(--blue-grad)" }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
+                play_arrow
+              </span>
+              Mulai Nonton
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- HERO: unggulan donghua (portal donghua) ---------- */
+function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
+  return (
+    <section aria-label="Donghua terbaru" style={{ padding: "0 var(--page-x)" }}>
+      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+        {item.poster ? (
+          <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
+        ) : null}
+
+        <div className="hero-ice" aria-hidden="true" />
+        <div className="hero-edge" aria-hidden="true">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
+          </svg>
+          {item.currentEpisode ? (
+            <span
+              className="absolute rounded-chip font-bold"
+              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--maroon)", color: "#fff" }}
+            >
+              {item.currentEpisode}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+
+        <span
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
+          style={{ padding: "7px 14px", background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+        >
+          Donghua terbaru
+        </span>
+
+        <div className="absolute inset-x-5 bottom-5 z-[5]">
+          <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
+            {item.title}
+          </h1>
+          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+            {item.status ?? "Donghua"}
+            {item.sub ? ` · ${item.sub}` : ""}
+          </p>
+          <div className="mt-3.5 flex items-center gap-3">
+            <Link
+              href={`/donghua/${item.slug}`}
               className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
               style={{ background: "var(--blue-grad)" }}
             >

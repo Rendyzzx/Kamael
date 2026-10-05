@@ -1,29 +1,63 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { PORTAL_COOKIE, PORTAL_SWITCH_EVENT, type Portal } from "./portal-events";
 
-const KEY = "cyronime_portal_seen";
+const SESSION_SEEN = "cyronime_portal_seen";
+
+function hasPortalCookie(): boolean {
+  if (typeof document === "undefined") return true;
+  return document.cookie
+    .split("; ")
+    .some((c) => c.startsWith(`${PORTAL_COOKIE}=`));
+}
+
+function setPortalCookie(value: Portal) {
+  document.cookie = `${PORTAL_COOKIE}=${value}; path=/; max-age=31536000; samesite=lax`;
+}
 
 /**
- * Portal awal: pilihAnime atau Donghua saat pertama masuk situs.
- * Tampil sekali per sesi browser (sessionStorage); pilihan atau "Lewati"
- * menutup portal. Tidak mengunci akses — semua halaman tetap bisa dibuka.
+ * Portal pemilih kategori: Anime (khusus anime) atau Donghua (khusus donghua).
+ * - Tampil saat pengunjung belum pernah memilih (belum ada cookie).
+ * - Pilihan disimpan di cookie 1 tahun → home (server) menampilkan konten
+ *   sesuai portal; memilih ulang memakai tombol ganti portal di header home.
+ * - "Lewati" hanya menutup untuk sesi ini; portal default = anime.
  */
-export default function EntryPortal() {
+export default function EntryPortal({ portal }: { portal: Portal }) {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
   const [closing, setClosing] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem(KEY)) {
+    const seen = sessionStorage.getItem(SESSION_SEEN);
+    if (!hasPortalCookie() && !seen) {
       setVisible(true);
     }
+
+    const onSwitch = () => {
+      setClosing(false);
+      setVisible(true);
+    };
+    window.addEventListener(PORTAL_SWITCH_EVENT, onSwitch);
+    return () => window.removeEventListener(PORTAL_SWITCH_EVENT, onSwitch);
   }, []);
 
-  function dismiss() {
-    sessionStorage.setItem(KEY, "1");
+  function close() {
     setClosing(true);
     setTimeout(() => setVisible(false), 260);
+  }
+
+  function skip() {
+    sessionStorage.setItem(SESSION_SEEN, "1");
+    close();
+  }
+
+  function choose(next: Portal) {
+    setPortalCookie(next);
+    close();
+    // Server home membaca cookie; refresh agar konten berganti portal.
+    if (next !== portal) router.refresh();
   }
 
   if (!visible) return null;
@@ -32,7 +66,7 @@ export default function EntryPortal() {
     <div
       role="dialog"
       aria-modal="false"
-      aria-label="Pilih kategori"
+      aria-label="Pilih portal"
       className="z-[90] flex flex-col transition-smooth"
       style={{
         position: "fixed",
@@ -62,10 +96,10 @@ export default function EntryPortal() {
         </div>
 
         <div className="space-y-4">
-          <Link
-            href="/anime"
-            onClick={dismiss}
-            className="relative flex items-center gap-4 overflow-hidden rounded-card p-5 transition-smooth active:scale-[.98]"
+          <button
+            type="button"
+            onClick={() => choose("anime")}
+            className="relative flex w-full items-center gap-4 overflow-hidden rounded-card p-5 text-left transition-smooth active:scale-[.98]"
             style={{ background: "linear-gradient(135deg, rgba(21,101,192,.35), rgba(33,150,243,.16)), var(--surface)" }}
           >
             <span
@@ -85,12 +119,12 @@ export default function EntryPortal() {
             <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--blue)" }} aria-hidden="true">
               arrow_forward
             </span>
-          </Link>
+          </button>
 
-          <Link
-            href="/donghua"
-            onClick={dismiss}
-            className="relative flex items-center gap-4 overflow-hidden rounded-card p-5 transition-smooth active:scale-[.98]"
+          <button
+            type="button"
+            onClick={() => choose("donghua")}
+            className="relative flex w-full items-center gap-4 overflow-hidden rounded-card p-5 text-left transition-smooth active:scale-[.98]"
             style={{ background: "linear-gradient(135deg, rgba(122,26,34,.4), rgba(90,26,32,.2)), var(--surface)" }}
           >
             <span
@@ -110,16 +144,16 @@ export default function EntryPortal() {
             <span className="material-symbols-rounded" style={{ fontSize: 22, color: "#D9535E" }} aria-hidden="true">
               arrow_forward
             </span>
-          </Link>
+          </button>
         </div>
 
         <button
           type="button"
-          onClick={dismiss}
+          onClick={skip}
           className="mx-auto block rounded-chip px-4 py-2 text-[13px] font-semibold transition-smooth"
           style={{ background: "transparent", color: "var(--text-2)" }}
         >
-          Lewati, langsung ke Home
+          Lewati
         </button>
       </div>
     </div>
