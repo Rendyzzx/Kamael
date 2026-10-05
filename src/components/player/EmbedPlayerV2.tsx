@@ -64,11 +64,16 @@ export default function EmbedPlayerV2({
   const barBtnStyle = { color: "var(--frost)" } as const;
 
   return (
-    <div className="absolute inset-0 flex flex-col">
-      {/* Bar tipis di atas iframe: prev / label episode / next / pengaturan */}
+    <div className="absolute inset-0">
+      {/* Bar atas iframe: prev / label episode / next / pengaturan — simetris,
+          gradient tipis (bukan panel solid) agar tidak terasa "menumpuk"
+          dengan kontrol bawaan server pihak ketiga di dalam iframe. */}
       <div
-        className="flex shrink-0 items-center"
-        style={{ height: 40, background: "rgba(13,19,32,0.9)", borderBottom: "1px solid rgba(29,39,64,.5)" }}
+        className="absolute inset-x-0 top-0 z-10 flex shrink-0 items-center"
+        style={{
+          height: 44,
+          background: "linear-gradient(180deg, rgba(13,19,32,.85), transparent)",
+        }}
       >
         {prevHref ? (
           <Link href={prevHref} aria-label="Episode sebelumnya" className={barBtn} style={barBtnStyle}>
@@ -102,8 +107,8 @@ export default function EmbedPlayerV2({
         </button>
       </div>
 
-      {/* Iframe embed */}
-      <div className="relative flex-1 bg-black">
+      {/* Iframe embed — mengisi seluruh area 16:9; bar atas melayang di atasnya */}
+      <div className="absolute inset-0 bg-black">
         {url ? (
           <iframe
             key={url}

@@ -3,25 +3,27 @@
 /**
  * PlayerShell — satu pintu player untuk halaman watch.
  *
- * - Menjalankan usePlayerSources (pemilihan kualitas, fallback server, resolve).
+ * - Menjalankan usePlayerSources (pemilihan kualitas, race server paralel).
  * - Mode native (<video> + hls.js) untuk sumber hls/mp4; mode embed (iframe)
  *   untuk sumber pihak ketiga. Kontrol transport hanya ada di mode native —
  *   mode embed tidak berpura-pura bisa mengendalikan player pihak ketiga.
  * - Me-render pil status, spinner tengah, overlay error buatan, toast, dan
  *   menu pengaturan (bottom sheet ala YouTube) bersama untuk kedua mode.
+ * - ServerRace (tersembunyi) berjalan di belakang spinner selagi beberapa
+ *   server kualitas aktif di-race bersamaan; pemenangnya baru dirender nyata.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PlayerSource, QualityGroup } from "@/types/player";
-import { sourceKey } from "@/types/player";
+import type { PlayerSource } from "@/types/player";
 import { usePlayerSources } from "@/lib/player/usePlayerSources";
 import { detectSourceType, qualityLabel } from "@/lib/player/sources";
 import NativePlayer from "./NativePlayer";
 import EmbedPlayerV2 from "./EmbedPlayerV2";
 import SettingsSheet from "./SettingsSheet";
+import ServerRace from "./ServerRace";
 import { CenterSpinner, ErrorOverlay, PlayerToast, StatusPill } from "./PlayerChrome";
 
 export interface PlayerShellProps {
-  groups: QualityGroup[];
+  groups: import("@/types/player").QualityGroup[];
   /** Endpoint resolve serverId (anime) atau null (donghua: URL sudah final). */
   resolveEndpoint: string | null;
   /** Berubah = episode lain. */
@@ -74,7 +76,7 @@ export default function PlayerShell(props: PlayerShellProps) {
   const handleSelectQuality = useCallback(
     (quality: string) => {
       api.setQuality(quality, { manual: true });
-      showToast(`${qualityLabel(quality)} akan dipakai di episode berikutnya`);
+      showToast(`${qualityLabel(quality)} dipakai mulai sekarang`);
     },
     [api, showToast]
   );
@@ -88,19 +90,10 @@ export default function PlayerShell(props: PlayerShellProps) {
   );
 
   const handleSelectAutoServer = useCallback(() => {
-    // Kembali ke server pertama yang belum gagal di kualitas aktif.
-    const group = api.activeGroup;
-    if (!group) return;
-    const candidate = group.sources.find((s) => !api.failedKeys.has(sourceKey(s)));
-    if (candidate) api.pickSource(candidate);
+    api.goAutomatic();
   }, [api]);
 
-  const autoServerActive = (() => {
-    const group = api.activeGroup;
-    if (!group || !activeSource) return true;
-    const firstOk = group.sources.find((s) => !api.failedKeys.has(sourceKey(s)));
-    return firstOk === activeSource || firstOk === undefined;
-  })();
+  const autoServerActive = !api.manualServer;
 
   const handleReport = useCallback(() => {
     fetch("/api/report", {
@@ -134,7 +127,7 @@ export default function PlayerShell(props: PlayerShellProps) {
           track={track}
           speed={speed}
         />
-      ) : (
+      ) : activeUrl ? (
         <EmbedPlayerV2
           api={api}
           url={activeUrl}
@@ -143,10 +136,20 @@ export default function PlayerShell(props: PlayerShellProps) {
           nextHref={props.nextHref}
           onOpenSettings={() => setSettingsOpen(true)}
         />
-      )}
+      ) : null}
+
+      {/* Race diam-diam di belakang spinner/pil status — tak terlihat pengguna */}
+      {api.resolving && !activeUrl && api.racePool.length ? (
+        <ServerRace
+          key={api.raceGeneration}
+          pool={api.racePool}
+          onWin={api.handleRaceWin}
+          onEntryFailed={api.handleRaceEntryFailed}
+        />
+      ) : null}
 
       <StatusPill message={api.statusMessage} />
-      {!api.allFailed ? <CenterSpinner show={api.resolving && !api.statusMessage} /> : null}
+      {!api.allFailed ? <CenterSpinner show={api.resolving && !activeUrl && !api.statusMessage} /> : null}
 
       {api.allFailed ? (
         <ErrorOverlay

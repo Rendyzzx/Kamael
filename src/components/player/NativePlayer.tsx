@@ -14,7 +14,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type Hls from "hls.js";
 import type { PlayerSourcesApi } from "@/lib/player/usePlayerSources";
-import { detectSourceType } from "@/lib/player/sources";
+import { detectSourceType, qualityLabel } from "@/lib/player/sources";
 
 const AUTONEXT_KEY = "cyronime:autonext";
 const AUTO_RESUME_KEY = "cyronime_auto_resume";
@@ -450,6 +450,7 @@ export default function NativePlayer(props: NativePlayerProps) {
   const progressPct = duration > 0 ? (current / duration) * 100 : 0;
   const idle = !controlsVisible && playing;
   const centerBtn = "flex h-11 w-11 items-center justify-center rounded-full";
+  const smallBtn = "flex h-9 w-9 items-center justify-center rounded-full";
   const centerBtnStyle = { color: "var(--frost)" } as const;
 
   return (
@@ -557,13 +558,15 @@ export default function NativePlayer(props: NativePlayerProps) {
         </div>
       ) : null}
 
-      {/* Kontrol (hilang otomatis saat video berjalan) */}
+      {/* Kontrol (hilang otomatis saat video berjalan) — satu panel bawah,
+          simetris: transport di tengah, lalu seekbar, lalu baris sekunder.
+          Tidak ada tombol play dobel seperti sebelumnya. */}
       <div
-        className="absolute inset-0 z-10"
+        className="absolute inset-x-0 bottom-0 z-10 px-3 pb-2.5"
         style={{ opacity: idle ? 0 : 1, pointerEvents: idle ? "none" : "auto", transition: "opacity .2s" }}
       >
-        {/* Baris tengah: Prev / -10 / Play / +10 / Next */}
-        <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1">
+        {/* Baris 1: Prev / -10 / Play / +10 / Next — simetris, gap rata */}
+        <div className="mb-2.5 flex items-center justify-center gap-2.5">
           <button
             type="button"
             onClick={() => goEpisode(props.prevHref)}
@@ -574,30 +577,30 @@ export default function NativePlayer(props: NativePlayerProps) {
                 : "Episode pertama"
             }
             aria-disabled={!props.prevHref}
-            className={`${centerBtn} flex-col disabled:opacity-35`}
+            className={`${centerBtn} flex-col disabled:opacity-30`}
             style={centerBtnStyle}
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 26 }}>skip_previous</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 24 }}>skip_previous</span>
             {props.prevLabel ? (
-              <span className="text-[10px]" style={{ color: "var(--muted)" }}>{props.prevLabel}</span>
+              <span className="text-[9px] leading-none" style={{ color: "var(--muted)" }}>{props.prevLabel}</span>
             ) : null}
           </button>
           <button type="button" onClick={() => skip(-SEEK_STEP)} aria-label="Mundur 10 detik" className={centerBtn} style={centerBtnStyle}>
-            <span className="material-symbols-rounded" style={{ fontSize: 26 }}>replay_10</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 24 }}>replay_10</span>
           </button>
           <button
             type="button"
             onClick={togglePlay}
             aria-label={playing ? "Jeda" : "Putar"}
-            className="flex h-16 w-16 items-center justify-center rounded-full"
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full"
             style={{ background: "var(--frost)", color: "var(--ink)" }}
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 32 }}>
+            <span className="material-symbols-rounded" style={{ fontSize: 30 }}>
               {playing ? "pause" : "play_arrow"}
             </span>
           </button>
           <button type="button" onClick={() => skip(SEEK_STEP)} aria-label="Maju 10 detik" className={centerBtn} style={centerBtnStyle}>
-            <span className="material-symbols-rounded" style={{ fontSize: 26 }}>forward_10</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 24 }}>forward_10</span>
           </button>
           <button
             type="button"
@@ -609,18 +612,21 @@ export default function NativePlayer(props: NativePlayerProps) {
                 : "Episode terakhir"
             }
             aria-disabled={!props.nextHref}
-            className={`${centerBtn} flex-col disabled:opacity-35`}
+            className={`${centerBtn} flex-col disabled:opacity-30`}
             style={centerBtnStyle}
           >
-            <span className="material-symbols-rounded" style={{ fontSize: 26 }}>skip_next</span>
+            <span className="material-symbols-rounded" style={{ fontSize: 24 }}>skip_next</span>
             {props.nextLabel ? (
-              <span className="text-[10px]" style={{ color: "var(--muted)" }}>{props.nextLabel}</span>
+              <span className="text-[9px] leading-none" style={{ color: "var(--muted)" }}>{props.nextLabel}</span>
             ) : null}
           </button>
         </div>
 
-        {/* Bar bawah: seekbar, waktu, putar otomatis, pengaturan, fullscreen */}
-        <div className="absolute inset-x-0 bottom-0 px-2 pb-1">
+        {/* Baris 2: waktu + seekbar */}
+        <div className="mb-1">
+          <span className="block text-[12px] tabular-nums" style={{ color: "var(--frost)" }}>
+            {fmt(current)} / {fmt(duration)}
+          </span>
           <div
             role="slider"
             tabIndex={0}
@@ -628,48 +634,63 @@ export default function NativePlayer(props: NativePlayerProps) {
             aria-valuemin={0}
             aria-valuemax={Math.floor(duration) || 0}
             aria-valuenow={Math.floor(current)}
-            className="relative h-6 cursor-pointer touch-none"
+            className="relative mt-1 h-5 cursor-pointer touch-none"
             onPointerDown={onSeekPointerDown}
             onKeyDown={(e) => {
               if (e.key === "ArrowLeft") skip(-5);
               if (e.key === "ArrowRight") skip(5);
             }}
           >
-            <div className="absolute left-0 right-0 top-[10px] h-[3px] rounded" style={{ background: "rgba(234,246,250,.25)" }} />
-            <div className="absolute left-0 top-[10px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(234,246,250,.4)" }} />
-            <div className="absolute left-0 top-[10px] h-[3px] rounded" style={{ width: `${progressPct}%`, background: "var(--glacier)" }} />
-            <div className="absolute top-[7px] h-3.5 w-3.5 rounded-full" style={{ left: `calc(${progressPct}% - 7px)`, background: "var(--glacier)" }} />
+            <div className="absolute left-0 right-0 top-[9px] h-[3px] rounded" style={{ background: "rgba(234,246,250,.25)" }} />
+            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(234,246,250,.4)" }} />
+            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${progressPct}%`, background: "var(--glacier)" }} />
+            <div className="absolute top-[6px] h-3.5 w-3.5 rounded-full" style={{ left: `calc(${progressPct}% - 7px)`, background: "var(--glacier)" }} />
           </div>
-          <div className="flex items-center gap-1 pb-1">
-            <button type="button" onClick={togglePlay} aria-label={playing ? "Jeda" : "Putar"} className={centerBtn} style={centerBtnStyle}>
-              <span className="material-symbols-rounded">{playing ? "pause" : "play_arrow"}</span>
-            </button>
-            <span className="ml-1 whitespace-nowrap text-[12px] tabular-nums" style={{ color: "var(--frost)" }}>
-              {fmt(current)} / {fmt(duration)}
+        </div>
+
+        {/* Baris 3: Otomatis (kiri) — kualitas / kecepatan / pengaturan / layar penuh (kanan) */}
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            role="switch"
+            aria-checked={autonext}
+            aria-label="Putar otomatis episode berikutnya"
+            onClick={toggleAutonext}
+            className="flex h-9 items-center gap-1.5 text-[11px] font-semibold"
+            style={{ color: "var(--muted)" }}
+          >
+            Otomatis
+            <span className="relative block h-4 w-8 rounded-full" style={{ background: autonext ? "var(--glacier)" : "rgba(234,246,250,.28)" }}>
+              <span
+                className="absolute top-0.5 h-3 w-3 rounded-full"
+                style={{ left: autonext ? "18px" : "2px", background: autonext ? "var(--ink)" : "var(--frost)" }}
+              />
             </span>
-            <div className="flex-1" />
+          </button>
+          <div className="flex items-center gap-1">
             <button
               type="button"
-              role="switch"
-              aria-checked={autonext}
-              aria-label="Putar otomatis episode berikutnya"
-              onClick={toggleAutonext}
-              className="flex h-11 items-center gap-1.5 px-1 text-[11px] font-semibold"
-              style={{ color: "var(--muted)" }}
+              onClick={onOpenSettings}
+              aria-label="Pilih kualitas"
+              className="flex h-9 items-center rounded-chip px-2.5 text-[12px] font-semibold"
+              style={{ color: "var(--frost)", background: "rgba(234,246,250,.1)" }}
             >
-              Otomatis
-              <span className="relative block h-4 w-8 rounded-full" style={{ background: autonext ? "var(--glacier)" : "rgba(234,246,250,.28)" }}>
-                <span
-                  className="absolute top-0.5 h-3 w-3 rounded-full"
-                  style={{ left: autonext ? "18px" : "2px", background: autonext ? "var(--ink)" : "var(--frost)" }}
-                />
-              </span>
+              {qualityLabel(api.quality)}
             </button>
-            <button type="button" onClick={onOpenSettings} aria-label="Pengaturan pemutar" className={centerBtn} style={centerBtnStyle}>
-              <span className="material-symbols-rounded">settings</span>
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              aria-label="Pilih kecepatan"
+              className="flex h-9 items-center rounded-chip px-2.5 text-[12px] font-semibold"
+              style={{ color: "var(--frost)", background: "rgba(234,246,250,.1)" }}
+            >
+              {speed}x
             </button>
-            <button type="button" onClick={toggleFullscreen} aria-label="Layar penuh" className={centerBtn} style={centerBtnStyle}>
-              <span className="material-symbols-rounded">fullscreen</span>
+            <button type="button" onClick={onOpenSettings} aria-label="Pengaturan pemutar" className={smallBtn} style={centerBtnStyle}>
+              <span className="material-symbols-rounded" style={{ fontSize: 20 }}>settings</span>
+            </button>
+            <button type="button" onClick={toggleFullscreen} aria-label="Layar penuh" className={smallBtn} style={centerBtnStyle}>
+              <span className="material-symbols-rounded" style={{ fontSize: 20 }}>fullscreen</span>
             </button>
           </div>
         </div>
