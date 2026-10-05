@@ -1,18 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import AnimeCard from "@/components/cards/AnimeCard";
-import DonghuaCard from "@/components/cards/DonghuaCard";
 import SearchBox from "@/components/navbar/SearchBox";
 import EntryPortal from "@/components/portal/EntryPortal";
 import { getAnimeHome, getCompletedAnime } from "@/lib/api/anime";
-import { getLatestDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { listProgress, type WatchProgress } from "@/lib/redis/watching";
 
 /**
- * Homepage — layout mengikuti mockup user:
+ * Homepage — fokus anime (keputusan user Okt 2026): donghua TIDAK
+ * dicampur di home; akses donghua lewat portal /donghua (BottomNav).
  * header brand -> search -> hero "lanjut nonton" (es mencair) ->
- * rail Anime Terbaru -> rail Donghua Terbaru -> ranking Terpopuler.
+ * rail Anime Terbaru -> ranking Terpopuler.
  * Data yang tidak disediakan API (jadwal tayang, countdown, jumlah
  * penonton) tidak dipalsukan; ranking diurutkan dari skor asli.
  */
@@ -21,15 +20,13 @@ export const revalidate = 600;
 export default async function HomePage() {
   const userId = await getAuthenticatedUserId();
 
-  const [animeHomeRes, donghuaLatestRes, animeCompletedRes, continueRes] = await Promise.allSettled([
+  const [animeHomeRes, animeCompletedRes, continueRes] = await Promise.allSettled([
     getAnimeHome(),
-    getLatestDonghua(1),
     getCompletedAnime(1),
     userId ? listProgress(userId) : Promise.resolve([]),
   ]);
 
   const animeOngoing = animeHomeRes.status === "fulfilled" ? animeHomeRes.value.ongoing : [];
-  const donghuaLatest = donghuaLatestRes.status === "fulfilled" ? donghuaLatestRes.value : [];
   const popularAnime =
     animeCompletedRes.status === "fulfilled"
       ? [...animeCompletedRes.value.items].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
@@ -97,19 +94,6 @@ export default async function HomePage() {
               {animeOngoing.slice(0, 15).map((a, i) => (
                 <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
                   <AnimeCard anime={a} priority={i < 4} />
-                </div>
-              ))}
-            </HomeRail>
-          ) : (
-            <EmptyFallback />
-          )}
-
-          {/* ===== Donghua Terbaru ===== */}
-          {donghuaLatest.length ? (
-            <HomeRail title="Donghua Terbaru" note="Rilisan donghua terbaru." href="/donghua">
-              {donghuaLatest.slice(0, 15).map((d, i) => (
-                <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
-                  <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} priority={i < 4} />
                 </div>
               ))}
             </HomeRail>
