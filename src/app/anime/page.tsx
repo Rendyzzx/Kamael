@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import AnimeCard from "@/components/cards/AnimeCard";
-import Pagination from "@/components/ui/Pagination";
+import InfiniteGridAnime from "@/components/ui/InfiniteGridAnime";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
 import SearchBox from "@/components/navbar/SearchBox";
@@ -21,11 +21,10 @@ interface PageProps {
   searchParams: Promise<{ tab?: string; page?: string; genre?: string }>;
 }
 
-function buildHref(params: { tab: string; page?: number; genre?: string }): string {
+function buildHref(params: { tab: string; genre?: string }): string {
   const sp = new URLSearchParams();
   sp.set("tab", params.tab);
   if (params.genre) sp.set("genre", params.genre);
-  if (params.page && params.page > 1) sp.set("page", String(params.page));
   const qs = sp.toString();
   return qs ? `/anime?${qs}` : "/anime";
 }
@@ -61,26 +60,20 @@ export default async function AnimePage({ searchParams }: PageProps) {
 
         <GenreSelect genres={genresRes} basePath="/anime" activeGenre={genre} />
 
-        {list.items.length ? (
-          <div className="grid grid-cols-3 gap-3">
-            {list.items.map((a, i) => (
-              <AnimeCard key={a.animeId} anime={a} priority={i < 6} />
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-app p-4 text-sm" style={{ background: "var(--surface)", color: "var(--text-2)" }}>
-            {genre
+        <InfiniteGridAnime
+          key={`${tab}-${genre ?? ""}-${page}`}
+          initialItems={list.items}
+          initialHasNext={list.pagination.hasNextPage}
+          initialPage={list.pagination.currentPage}
+          tab={tab}
+          genre={genre}
+          renderItem={(a, i) => <AnimeCard anime={a} priority={i < 6} />}
+          getKey={(a) => a.animeId}
+          emptyMessage={
+            genre
               ? "Tidak ada anime untuk genre ini, atau data sedang tidak tersedia."
-              : "Data sedang tidak tersedia. Silakan coba beberapa saat lagi."}
-          </p>
-        )}
-
-        <Pagination
-          currentPage={list.pagination.currentPage}
-          hasPrev={list.pagination.hasPrevPage}
-          hasNext={list.pagination.hasNextPage}
-          totalPages={list.pagination.totalPages}
-          buildHref={(p) => buildHref({ tab, page: p, genre })}
+              : "Data sedang tidak tersedia. Silakan coba beberapa saat lagi."
+          }
         />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import DonghuaCard from "@/components/cards/DonghuaCard";
-import Pagination from "@/components/ui/Pagination";
+import InfiniteGridDonghua from "@/components/ui/InfiniteGridDonghua";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
 import SearchBox from "@/components/navbar/SearchBox";
@@ -24,11 +24,10 @@ interface PageProps {
 
 type Tab = "latest" | "ongoing" | "completed";
 
-function buildHref(params: { tab: Tab; page?: number; genre?: string }): string {
+function buildHref(params: { tab: Tab; genre?: string }): string {
   const sp = new URLSearchParams();
   sp.set("tab", params.tab);
   if (params.genre) sp.set("genre", params.genre);
-  if (params.page && params.page > 1) sp.set("page", String(params.page));
   const qs = sp.toString();
   return qs ? `/donghua?${qs}` : "/donghua";
 }
@@ -68,26 +67,20 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
 
         <GenreSelect genres={genresRes.map((g) => ({ id: g.slug, title: g.name }))} basePath="/donghua" activeGenre={genre} />
 
-        {items.length ? (
-          <div className="grid grid-cols-3 gap-3">
-            {items.map((d, i) => (
-              <DonghuaCard key={d.slug} donghua={d} href={`/donghua/${d.slug}`} priority={i < 6} />
-            ))}
-          </div>
-        ) : (
-          <p className="rounded-app p-4 text-sm" style={{ background: "var(--surface)", color: "var(--text-2)" }}>
-            {genre
+        <InfiniteGridDonghua
+          key={`${tab}-${genre ?? ""}-${page}`}
+          initialItems={items}
+          initialHasNext={items.length ? mayHaveNext : false}
+          initialPage={page}
+          tab={tab}
+          genre={genre}
+          renderItem={(d) => <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} />}
+          getKey={(d) => d.slug}
+          emptyMessage={
+            genre
               ? "Tidak ada donghua untuk genre ini, atau data sedang tidak tersedia."
-              : "Data sedang tidak tersedia. Silakan coba beberapa saat lagi."}
-          </p>
-        )}
-
-        <Pagination
-          currentPage={page}
-          hasPrev={page > 1}
-          hasNext={items.length ? mayHaveNext : false}
-          totalPages={null}
-          buildHref={(p) => buildHref({ tab, page: p, genre })}
+              : "Data sedang tidak tersedia. Silakan coba beberapa saat lagi."
+          }
         />
       </div>
     </div>
