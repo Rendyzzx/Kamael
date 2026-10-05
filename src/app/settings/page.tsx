@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { auth, signOut } from "@/lib/auth/session";
+import { cookies } from "next/headers";
+import { auth, signOut, getAuthenticatedUserId } from "@/lib/auth/session";
+import { deleteOnboarding } from "@/lib/redis/onboarding";
+import { readVisitorId, VISITOR_COOKIE } from "@/lib/visitor";
 import AutoResumeToggle from "@/components/settings/AutoResumeToggle";
 import RestartOnboarding from "@/components/settings/RestartOnboarding";
 
@@ -75,6 +78,14 @@ export default async function SettingsPage() {
           <form
             action={async () => {
               "use server";
+              // Logout = kembali ke AWAL: hapus state onboarding (user ID dan
+              // visitor ID) + cookie visitor, jadi login berikutnya melewati
+              // alur lengkap dari splash lagi.
+              const uid = await getAuthenticatedUserId();
+              if (uid) await deleteOnboarding(uid);
+              const vid = await readVisitorId();
+              if (vid) await deleteOnboarding(vid);
+              (await cookies()).delete(VISITOR_COOKIE);
               await signOut({ redirectTo: "/" });
             }}
           >

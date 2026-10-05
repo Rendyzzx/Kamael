@@ -19,7 +19,7 @@ export default function SettingsFab({ onboardingDone }: { onboardingDone: boolea
     return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: "calc(84px + env(safe-area-inset-bottom))" }}>
+    <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: "calc(92px + env(safe-area-inset-bottom))" }}>
       <div className="relative">
         <Link
           href="/settings"
@@ -28,6 +28,9 @@ export default function SettingsFab({ onboardingDone }: { onboardingDone: boolea
           style={{
             width: 56,
             height: 56,
+            // WAJIB bottom: 0 — tanpa ini Link menggantung dari atas container
+            // (tinggi 0) dan turun 56px MENIMPA bottom nav (bug "mepet profile").
+            bottom: 0,
             right: 16,
             boxShadow: "0 4px 12px rgba(0,0,0,.4)",
           }}

@@ -20,37 +20,40 @@ export interface OnboardingInitialState {
 }
 
 /**
- * State machine onboarding first-time experience (6 langkah). Dimount oleh
- * "/" HANYA ketika onboarding belum selesai (completed && type belum
- * terpenuhi) — lihat src/app/page.tsx. Setiap checkpoint penting (accept,
- * pilihan type, selesai) di-POST ke /api/onboarding (Redis); kegagalan
- * jaringan/Redis tidak pernah menghalangi progres LOKAL (fallback aman —
- * state hanya tidak tersimpan, bukan macet).
+ * State machine onboarding ala aplikasi native: Splash -> Disclaimer ->
+ * Intro maskot -> Carousel fitur -> LOGIN (Google, WAJIB — tidak ada tamu)
+ * -> Pilih Tontonan -> selesai. Login selalu datang SEBELUM pilihan
+ * anime/donghua, seperti onboarding aplikasi pada umumnya.
  *
- * Resume: jika sudah pernah accept/pilih tapi belum selesai (menutup app
- * di tengah jalan), langsung lanjut dari checkpoint terakhir — bukan
- * mengulang dari splash.
+ * Dimount oleh "/" HANYA ketika onboarding belum selesai (completed && type
+ * belum terpenuhi) — lihat src/app/page.tsx. Checkpoint penting (accept,
+ * type+completed) di-POST ke /api/onboarding (Redis); kegagalan
+ * jaringan/Redis tidak pernah menghalangi progres LOKAL.
+ *
+ * Resume: user yang SUDAH login (prop `authed`) tidak pernah melihat lagi
+ * splash/intro/carousel/signin — langsung mendarat di step yang relevan
+ * (disclaimer bila belum accept, atau Pilih Tontonan bila sudah).
  */
 export default function OnboardingFlow({
   initial,
+  authed,
   animePoster,
   donghuaPoster,
 }: {
   initial: OnboardingInitialState;
+  authed: boolean;
   animePoster: string | null;
   donghuaPoster: string | null;
 }) {
   const router = useRouter();
   const resumeStep: Step = useMemo(() => {
-    if (initial.type) return "signin";
-    if (initial.accepted) return "intro";
-    return "splash";
-  }, [initial]);
+    if (authed) return initial.accepted ? "pick" : "disclaimer";
+    return initial.accepted ? "intro" : "splash";
+  }, [initial, authed]);
 
   const [step, setStep] = useState<Step>(resumeStep);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [pickPending, setPickPending] = useState<Portal | null>(null);
-  const [signinPending, setSigninPending] = useState<"google" | "guest" | null>(null);
 
   // Langkah 1 Splash: auto-advance 2 detik. Hanya berjalan bila memang
   // start dari splash (resume tidak pernah mendarat di sini).
@@ -80,7 +83,7 @@ export default function OnboardingFlow({
 
   function handleCarouselNext() {
     if (carouselIndex < ONBOARDING_SLIDE_COUNT - 1) setCarouselIndex((i) => i + 1);
-    else setStep("pick");
+    else setStep(authed ? "pick" : "signin");
   }
 
   function handleCarouselBack() {
@@ -88,26 +91,12 @@ export default function OnboardingFlow({
     else setStep("intro");
   }
 
+  // Pilih Tontonan adalah LANGKAH TERAKHIR: pilihan = onboarding selesai.
   async function handlePick(type: Portal) {
     setPickPending(type);
-    await patchOnboarding({ type });
+    await patchOnboarding({ type, completed: true });
     setPickPending(null);
-    setStep("signin");
-  }
-
-  async function handleGoogle() {
-    setSigninPending("google");
-    // Simpan completed=true SEBELUM redirect ke Google, supaya saat kembali
-    // ke "/" lewat callback, gerbang server langsung melihat onboarding
-    // selesai (bukan menampilkan onboarding lagi).
-    await patchOnboarding({ completed: true });
-    // signIn("google") memicu navigasi penuh ke halaman consent Google;
-    // dilakukan di komponen OnboardingSignIn (butuh next-auth/react langsung).
-  }
-
-  async function handleGuest() {
-    setSigninPending("guest");
-    await patchOnboarding({ completed: true });
+    // "/" di-refresh -> gerbang server melihat completed && type -> dashboard.
     router.refresh();
   }
 
@@ -127,7 +116,7 @@ export default function OnboardingFlow({
           index={carouselIndex}
           onBack={handleCarouselBack}
           onNext={handleCarouselNext}
-          onSkip={() => setStep("pick")}
+          onSkip={() => setStep(authed ? "pick" : "signin")}
           onDotSelect={setCarouselIndex}
         />
       ) : null}
@@ -144,7 +133,19 @@ export default function OnboardingFlow({
         />
       ) : null}
       {step === "signin" ? (
-        <OnboardingSignIn onGoogle={handleGoogle} onGuest={handleGuest} pending={signinPending} />
+        authed ? (
+          // Safety net: state signin + sudah login tidak terjadi pada resume
+          // normal — kalau terjadi, lompat langsung ke pilihan tontonan.
+          <OnboardingPick
+            animePoster={animePoster}
+            donghuaPoster={donghuaPoster}
+            onBack={() => setStep("carousel")}
+            onPick={handlePick}
+            pending={pickPending}
+          />
+        ) : (
+          <OnboardingSignIn />
+        )
       ) : null}
     </div>
   );

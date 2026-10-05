@@ -20,7 +20,8 @@ import type { DonghuaListItem } from "@/types/donghua";
  *
  * 1. Onboarding BELUM selesai (completed && type belum terpenuhi) -> render
  *    <OnboardingFlow /> (splash -> disclaimer -> intro -> carousel ->
- *    pilih tontonan -> masuk), fullscreen, TANPA redirect ke route lain.
+ *    LOGIN Google wajib -> pilih tontonan), fullscreen, TANPA redirect ke
+ *    route lain. Alur ala aplikasi native: masuk dulu, baru pilih.
  * 2. Onboarding SUDAH selesai -> dashboard trending sesuai `type` yang
  *    dipilih (hero, lanjut nonton, rail, ranking) — keputusan user Okt
  *    2026 bahwa Home harus tetap jadi dashboard, bukan sekadar gerbang.
@@ -33,10 +34,24 @@ export const revalidate = 600;
 
 export default async function HomePage() {
   const userId = await getAuthenticatedUserId();
-  const id = userId ?? (await readVisitorId());
-  const status = id
+  const visitorId = userId ? null : await readVisitorId();
+  const id = userId ?? visitorId;
+  let status = id
     ? await getOnboardingStatus(id)
     : { value: { accepted: false, completed: false, type: null as Portal | null }, redisOk: true };
+
+  // User yang BARU login: checkpoint "accept disclaimer" mungkin masih
+  // tersimpan di bawah visitor ID (dari sesi pra-login). Merge supaya
+  // mereka resume di langkah Pilih Tontonan, bukan mengulang disclaimer.
+  if (userId && status.redisOk) {
+    const preLogin = await readVisitorId();
+    if (preLogin) {
+      const visitorStatus = await getOnboardingStatus(preLogin);
+      if (visitorStatus.redisOk && visitorStatus.value.accepted) {
+        status = { ...status, value: { ...status.value, accepted: true } };
+      }
+    }
+  }
 
   const onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
 
@@ -59,6 +74,7 @@ export default async function HomePage() {
           completed: status.value.completed,
           type: status.value.type,
         }}
+        authed={Boolean(userId)}
         animePoster={animePoster}
         donghuaPoster={donghuaPoster}
       />

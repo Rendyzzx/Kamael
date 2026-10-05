@@ -1,28 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { signIn } from "next-auth/react";
 
 /**
- * Langkah 6 onboarding: "Masuk" — Sign in with Google atau lanjut sebagai
- * tamu. Kedua pilihan menandai onboarding `completed` (ditangani parent
- * lewat onGoogle/onGuest) sebelum benar-benar pindah.
+ * Langkah login onboarding — WAJIB, tidak ada opsi tamu (perilaku aplikasi
+ * native: semua pengguna punya akun). Google adalah satu-satunya metode
+ * (Auth.js). Setelah login sukses, user kembali ke "/" dan melanjutkan ke
+ * langkah Pilih Tontonan.
  */
-export default function OnboardingSignIn({
-  onGoogle,
-  onGuest,
-  pending,
-}: {
-  onGoogle: () => Promise<void>;
-  onGuest: () => void;
-  pending: "google" | "guest" | null;
-}) {
+export default function OnboardingSignIn() {
+  const [busy, setBusy] = useState(false);
+
   async function handleGoogle() {
-    // Simpan completed=true dulu (lihat parent), BARU redirect ke Google —
-    // supaya saat kembali dari OAuth, gerbang server sudah melihat selesai.
-    await onGoogle();
+    setBusy(true);
+    // callbackUrl "/" -> setelah consent Google, kembali ke gerbang "/" yang
+    // sekarang melihat session -> resume di langkah Pilih Tontonan.
     await signIn("google", { callbackUrl: "/" });
   }
+
+  const isPending = busy;
 
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-8 px-7 text-center">
@@ -34,9 +32,10 @@ export default function OnboardingSignIn({
       </div>
 
       <div className="space-y-1.5">
-        <h1 className="font-display text-[20px] font-bold text-white">Hampir selesai</h1>
+        <h1 className="font-display text-[20px] font-bold text-white">Buat akun / Masuk</h1>
         <p className="text-[14px]" style={{ color: "var(--text-2)" }}>
-          Masuk untuk menyimpan progres tontonan, history, dan favorit di semua perangkat.
+          Masuk dulu dengan Google untuk melanjutkan. Setelah itu kamu bisa memilih tontonan
+          favorit — progres, history, dan favorit tersimpan otomatis di akunmu.
         </p>
       </div>
 
@@ -44,10 +43,10 @@ export default function OnboardingSignIn({
         <button
           type="button"
           onClick={handleGoogle}
-          disabled={pending !== null}
+          disabled={isPending}
           className="flex w-full items-center justify-center gap-2.5 rounded-chip bg-white px-4 py-3 text-sm font-bold text-black transition-smooth hover:bg-white/90 active:scale-[.98] disabled:opacity-60"
         >
-          {pending === "google" ? (
+          {isPending ? (
             <span className="material-symbols-rounded animate-spin" style={{ fontSize: 18 }}>
               progress_activity
             </span>
@@ -59,22 +58,7 @@ export default function OnboardingSignIn({
               <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.3 0 3.26 2.7 1.27 6.66l4 3.1C6.22 6.91 8.87 4.75 12 4.75z" />
             </svg>
           )}
-          Sign in with Google
-        </button>
-
-        <button
-          type="button"
-          onClick={onGuest}
-          disabled={pending !== null}
-          className="flex w-full items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-bold text-white transition-smooth active:scale-[.98] disabled:opacity-60"
-          style={{ background: "var(--surface)" }}
-        >
-          {pending === "guest" ? (
-            <span className="material-symbols-rounded animate-spin" style={{ fontSize: 18 }}>
-              progress_activity
-            </span>
-          ) : null}
-          Lanjut sebagai tamu
+          {isPending ? "Mengalihkan..." : "Lanjut dengan Google"}
         </button>
       </div>
 
