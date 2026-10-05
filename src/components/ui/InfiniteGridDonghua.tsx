@@ -1,11 +1,15 @@
 "use client";
 
+import DonghuaCard from "@/components/cards/DonghuaCard";
 import type { DonghuaListItem } from "@/types/donghua";
 import InfiniteGrid from "@/components/ui/InfiniteGrid";
 
 /**
  * Wrapper InfiniteGrid khusus listing Donghua — tahu cara memanggil
- * /api/donghua/list dengan tab/genre yang sedang aktif.
+ * /api/donghua/list dengan tab/genre yang sedang aktif, dan cara
+ * merender DonghuaCard. renderItem/getKey didefinisikan di sini
+ * (bukan diterima dari Server Component) karena fungsi tidak bisa
+ * dikirim lewat RSC boundary.
  */
 export default function InfiniteGridDonghua({
   initialItems,
@@ -13,8 +17,6 @@ export default function InfiniteGridDonghua({
   initialPage,
   tab,
   genre,
-  renderItem,
-  getKey,
   emptyMessage,
 }: {
   initialItems: DonghuaListItem[];
@@ -22,8 +24,6 @@ export default function InfiniteGridDonghua({
   initialPage: number;
   tab: string;
   genre?: string;
-  renderItem: (item: DonghuaListItem, index: number) => React.ReactNode;
-  getKey: (item: DonghuaListItem) => string;
   emptyMessage: string;
 }) {
   return (
@@ -31,9 +31,9 @@ export default function InfiniteGridDonghua({
       initialItems={initialItems}
       initialHasNext={initialHasNext}
       initialPage={initialPage}
-      renderItem={renderItem}
-      getKey={getKey}
       emptyMessage={emptyMessage}
+      getKey={(d) => d.slug}
+      renderItem={(d, i) => <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} priority={i < 6} />}
       fetchPage={async (page) => {
         const sp = new URLSearchParams();
         sp.set("tab", tab);

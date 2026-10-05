@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import AnimeCard from "@/components/cards/AnimeCard";
 import InfiniteGridAnime from "@/components/ui/InfiniteGridAnime";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
@@ -67,8 +66,6 @@ export default async function AnimePage({ searchParams }: PageProps) {
           initialPage={list.pagination.currentPage}
           tab={tab}
           genre={genre}
-          renderItem={(a, i) => <AnimeCard anime={a} priority={i < 6} />}
-          getKey={(a) => a.animeId}
           emptyMessage={
             genre
               ? "Tidak ada anime untuk genre ini, atau data sedang tidak tersedia."

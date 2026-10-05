@@ -1,11 +1,15 @@
 "use client";
 
+import AnimeCard from "@/components/cards/AnimeCard";
 import type { AnimeListItem } from "@/types/anime";
 import InfiniteGrid from "@/components/ui/InfiniteGrid";
 
 /**
  * Wrapper InfiniteGrid khusus listing Anime — tahu cara memanggil
- * /api/anime/list dengan tab/genre yang sedang aktif.
+ * /api/anime/list dengan tab/genre yang sedang aktif, dan cara
+ * merender AnimeCard. renderItem/getKey didefinisikan di sini (bukan
+ * diterima dari Server Component) karena fungsi tidak bisa dikirim
+ * lewat RSC boundary.
  */
 export default function InfiniteGridAnime({
   initialItems,
@@ -13,8 +17,6 @@ export default function InfiniteGridAnime({
   initialPage,
   tab,
   genre,
-  renderItem,
-  getKey,
   emptyMessage,
 }: {
   initialItems: AnimeListItem[];
@@ -22,8 +24,6 @@ export default function InfiniteGridAnime({
   initialPage: number;
   tab: string;
   genre?: string;
-  renderItem: (item: AnimeListItem, index: number) => React.ReactNode;
-  getKey: (item: AnimeListItem) => string;
   emptyMessage: string;
 }) {
   return (
@@ -31,9 +31,9 @@ export default function InfiniteGridAnime({
       initialItems={initialItems}
       initialHasNext={initialHasNext}
       initialPage={initialPage}
-      renderItem={renderItem}
-      getKey={getKey}
       emptyMessage={emptyMessage}
+      getKey={(a) => a.animeId}
+      renderItem={(a, i) => <AnimeCard anime={a} priority={i < 6} />}
       fetchPage={async (page) => {
         const sp = new URLSearchParams();
         sp.set("tab", tab);

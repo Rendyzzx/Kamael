@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import DonghuaCard from "@/components/cards/DonghuaCard";
 import InfiniteGridDonghua from "@/components/ui/InfiniteGridDonghua";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
@@ -74,8 +73,6 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
           initialPage={page}
           tab={tab}
           genre={genre}
-          renderItem={(d) => <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} />}
-          getKey={(d) => d.slug}
           emptyMessage={
             genre
               ? "Tidak ada donghua untuk genre ini, atau data sedang tidak tersedia."
