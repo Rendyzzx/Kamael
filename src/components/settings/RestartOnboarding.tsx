@@ -6,27 +6,29 @@ import { useRouter } from "next/navigation";
 const REQUEST_TIMEOUT_MS = 5_000;
 
 /**
- * Opsi Settings "Tampilkan portal lagi": hapus preferensi portal di Redis
- * (pref:{id}) lewat DELETE /api/preference, lalu buka "/" — tanpa preferensi,
- * gerbang "/" merender portal pilihan lagi. Redis gagal → tampilkan pesan
- * (jangan navigasi, karena "/" akan me-redirect balik ke preferensi lama).
+ * Settings > "Ulangi Onboarding": hapus state onboarding di Redis
+ * (onboarding:{id}) lewat DELETE /api/onboarding, lalu refresh "/" —
+ * tanpa state, "/" akan merender onboarding dari splash lagi.
+ * Redis gagal -> tampilkan pesan (jangan navigasi dulu, supaya tidak
+ * memberi kesan berhasil padahal state lama masih tersimpan).
  */
-export default function ShowPortalAgain() {
+export default function RestartOnboarding() {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(false);
 
-  async function showPortal() {
+  async function restart() {
     if (pending) return;
     setPending(true);
     setError(false);
     try {
-      const res = await fetch("/api/preference", {
+      const res = await fetch("/api/onboarding", {
         method: "DELETE",
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error("delete-failed");
-      router.push("/portal");
+      router.push("/");
+      router.refresh();
     } catch {
       setError(true);
       setPending(false);
@@ -37,7 +39,7 @@ export default function ShowPortalAgain() {
     <div>
       <button
         type="button"
-        onClick={showPortal}
+        onClick={restart}
         disabled={pending}
         className="flex w-full items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-bold transition-smooth active:scale-[.98]"
         style={{ background: "var(--surface)", color: "var(--blue)" }}
@@ -51,11 +53,11 @@ export default function ShowPortalAgain() {
             restart_alt
           </span>
         )}
-        Tampilkan portal lagi
+        Ulangi Onboarding
       </button>
       {error ? (
         <p className="mt-2 text-xs" style={{ color: "#FF1744" }}>
-          Gagal menghapus preferensi. Coba lagi nanti.
+          Gagal menghapus progres onboarding. Coba lagi nanti.
         </p>
       ) : null}
     </div>

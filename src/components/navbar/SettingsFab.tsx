@@ -8,10 +8,15 @@ import { usePathname } from "next/navigation";
  * agar tetap pas di pojok kanan-bawah "frame" di layar lebar, bukan menempel
  * tepi viewport browser.
  */
-export default function SettingsFab() {
+export default function SettingsFab({ onboardingDone }: { onboardingDone: boolean }) {
   const pathname = usePathname();
 
-  if (pathname.includes("/watch/") || pathname === "/settings" || pathname === "/portal") return null;
+  if (
+    pathname.includes("/watch/") ||
+    pathname === "/settings" ||
+    (pathname === "/" && !onboardingDone)
+  )
+    return null;
 
   return (
     <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: 84 }}>

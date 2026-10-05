@@ -10,7 +10,7 @@ import type { Portal } from "@/components/portal/portal-events";
  * Bottom navigation — fixed, 68px, Material Symbols Rounded.
  *
  * SCOPED PER PANEL: hanya SATU tab portal ditampilkan (Anime ATAU Donghua),
- * tidak pernah berdua — setiap portal adalah panel sendiri (lihat EntryPortal).
+ * tidak pernah berdua — setiap portal adalah panel sendiri.
  * - Di dalam /anime* -> tab "Anime" (live_tv). Di dalam /donghua* -> tab
  *   "Donghua" (auto_awesome). Di halaman netral (Search/Profil/Settings/
  *   Favorit/History) -> tab mengikuti preferensi portal tersimpan di Redis
@@ -21,14 +21,21 @@ import type { Portal } from "@/components/portal/portal-events";
  * Item aktif: pill 64x32 bg --nav-active + ikon putih + label 12px/700 di bawah.
  * Item non-aktif: hanya ikon putih 28px, tanpa label.
  */
-export default function BottomNav({ defaultPortal }: { defaultPortal: Portal }) {
+export default function BottomNav({
+  defaultPortal,
+  onboardingDone,
+}: {
+  defaultPortal: Portal;
+  onboardingDone: boolean;
+}) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Player butuh seluruh layar; "/portal" (gerbang pilih, HALAMAN SENDIRI)
-  // juga fullscreen — tanpa bottom nav & header di sana. "/" sekarang Home
-  // sungguhan (dashboard trending) dan TETAP menampilkan bottom nav.
-  if (pathname.includes("/watch/") || pathname === "/portal") return null;
+  // Player butuh seluruh layar; onboarding first-time experience (tampil DI
+  // "/" selama belum selesai, lihat src/app/page.tsx) juga fullscreen —
+  // tanpa bottom nav & header di sana. Setelah selesai, "/" jadi dashboard
+  // trending sungguhan dan TETAP menampilkan bottom nav.
+  if (pathname.includes("/watch/") || (pathname === "/" && !onboardingDone)) return null;
 
   // Portal panel aktif: path /anime*|/donghua* menentukan langsung; di luar
   // itu (halaman netral) ikut preferensi tersimpan.

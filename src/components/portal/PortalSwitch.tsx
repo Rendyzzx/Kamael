@@ -7,10 +7,11 @@ import type { Portal } from "./portal-events";
 const REQUEST_TIMEOUT_MS = 5_000;
 
 /**
- * Toggle portal di header halaman Anime/Donghua: menampilkan portal aktif;
- * saat ditekan, preferensi di Redis (pref:{id}) DIPERBARUI ke portal lawan
- * lewat POST /api/preference, lalu navigasi ke sana. Redis gagal → tetap
- * pindah (fallback aman; preferensi lama dipakai lagi di kunjungan "/").
+ * Chip toggle portal di header Home/"/anime"/"/donghua": menampilkan portal
+ * aktif; saat ditekan, `type` di state onboarding (Redis onboarding:{id})
+ * DIPERBARUI ke portal lawan lewat POST /api/onboarding, lalu navigasi ke
+ * "/" (Home) supaya dashboard trending portal baru langsung terlihat.
+ * Redis gagal -> tetap pindah (fallback aman).
  */
 export default function PortalSwitch({ portal }: { portal: Portal }) {
   const router = useRouter();
@@ -21,10 +22,10 @@ export default function PortalSwitch({ portal }: { portal: Portal }) {
     if (pending) return;
     setPending(true);
     try {
-      await fetch("/api/preference", {
+      await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value: other }),
+        body: JSON.stringify({ type: other }),
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
     } catch {
@@ -33,6 +34,7 @@ export default function PortalSwitch({ portal }: { portal: Portal }) {
     // Home ("/") = dashboard trending; selalu ke sana setelah ganti portal,
     // dari mana pun toggle ini dipanggil (Home, /anime, /donghua).
     router.push("/");
+    router.refresh();
   }
 
   return (

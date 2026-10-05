@@ -5,7 +5,7 @@ import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
-import { getPreference } from "@/lib/redis/preference";
+import { getOnboardingStatus } from "@/lib/redis/onboarding";
 import { readVisitorId } from "@/lib/visitor";
 import type { Portal } from "@/components/portal/portal-events";
 import "./globals.css";
@@ -55,14 +55,21 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Portal aktif (anime|donghua) dipakai BottomNav agar bottom nav HANYA
-  // menampilkan tab portal yang sedang dipakai — bukan dua tab Anime+Donghua
-  // sekaligus. Sumber: Redis pref:{id} (sama seperti gerbang "/"); fallback
-  // "anime" bila belum pernah memilih atau Redis tidak terjangkau.
+  // Status onboarding (Redis onboarding:{id}) dibaca SEKALI di sini dan
+  // dipakai dua hal:
+  // 1. `portal` -> tab tunggal yang ditampilkan BottomNav di halaman netral
+  //    (Search/Profil/Settings/Favorit/History).
+  // 2. `onboardingDone` -> BottomNav & SettingsFab disembunyikan di "/"
+  //    selama onboarding first-time experience masih berjalan di sana.
+  // Redis tak terjangkau -> fail-open (onboardingDone=true, portal="anime")
+  // supaya nav tidak hilang/macet saat Redis down.
   const userId = await getAuthenticatedUserId();
   const id = userId ?? (await readVisitorId());
-  const preference = id ? await getPreference(id) : null;
-  const portal: Portal = preference ?? "anime";
+  const status = id
+    ? await getOnboardingStatus(id)
+    : { value: { accepted: false, completed: false, type: null as Portal | null }, redisOk: true };
+  const portal: Portal = status.value.type ?? "anime";
+  const onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
 
   return (
     <html lang="id" className={`dark ${bricolage.variable} ${roboto.variable}`}>
@@ -74,8 +81,8 @@ export default async function RootLayout({
           <div className="app-shell flex min-h-screen flex-col">
             <main className="flex-1 pb-24">{children}</main>
           </div>
-          <SettingsFab />
-          <BottomNav defaultPortal={portal} />
+          <SettingsFab onboardingDone={onboardingDone} />
+          <BottomNav defaultPortal={portal} onboardingDone={onboardingDone} />
         </AuthProvider>
       </body>
     </html>

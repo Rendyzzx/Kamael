@@ -1,44 +1,71 @@
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import AnimeCard from "@/components/cards/AnimeCard";
 import DonghuaCard from "@/components/cards/DonghuaCard";
 import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import type { Portal } from "@/components/portal/portal-events";
-import { getAnimeHome, getCompletedAnime } from "@/lib/api/anime";
+import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import { getAnimeHome, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
 import { getLatestDonghua, getOngoingDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
-import { getPreferenceStatus } from "@/lib/redis/preference";
+import { getOnboardingStatus } from "@/lib/redis/onboarding";
 import { readVisitorId } from "@/lib/visitor";
 import { listProgress, type WatchProgress } from "@/lib/redis/watching";
 import type { DonghuaListItem } from "@/types/donghua";
 
 /**
- * Home ("/") = dashboard trending sesuai portal yang SUDAH dipilih di
- * "/portal" (halaman terpisah, bukan bagian dari Home — keputusan user
- * Okt 2026). Preferensi dari Redis pref:{id} (user ID login atau visitor ID
- * cookie httpOnly).
+ * "/" punya DUA peran, dibedakan oleh state onboarding (Redis
+ * onboarding:{id}, lihat src/lib/redis/onboarding.ts):
  *
- * - Belum pernah memilih (Redis terjangkau & kosong) -> redirect("/portal").
- * - Redis TIDAK terjangkau -> fail-open ke "anime" (dashboard tetap tampil,
- *   TIDAK redirect) agar web tidak macet bolak-balik "/" <-> "/portal" saat
- *   Redis down (lihat getPreferenceStatus).
- * - portal anime: hero lanjut nonton / populer -> rail Anime Terbaru
- *   -> ranking Terpopuler (khusus anime).
- * - portal donghua: hero lanjut nonton / terbaru -> rail Donghua
- *   Terbaru -> rail Donghua Ongoing (khusus donghua).
- * Data yang tidak disediakan API (jadwal tayang, countdown, jumlah
- * penonton) tidak dipalsukan; ranking diurutkan dari skor asli.
+ * 1. Onboarding BELUM selesai (completed && type belum terpenuhi) -> render
+ *    <OnboardingFlow /> (splash -> disclaimer -> intro -> carousel ->
+ *    pilih tontonan -> masuk), fullscreen, TANPA redirect ke route lain.
+ * 2. Onboarding SUDAH selesai -> dashboard trending sesuai `type` yang
+ *    dipilih (hero, lanjut nonton, rail, ranking) — keputusan user Okt
+ *    2026 bahwa Home harus tetap jadi dashboard, bukan sekadar gerbang.
+ *
+ * Redis TIDAK terjangkau saat membaca status -> fail-open ke dashboard
+ * portal "anime" (TIDAK memaksa onboarding tampil) supaya web tidak macet
+ * saat Redis down.
  */
 export const revalidate = 600;
 
 export default async function HomePage() {
   const userId = await getAuthenticatedUserId();
   const id = userId ?? (await readVisitorId());
-  const status = id ? await getPreferenceStatus(id) : { value: null, redisOk: true };
-  if (status.redisOk && !status.value) redirect("/portal");
-  const portal: Portal = status.value ?? "anime";
+  const status = id
+    ? await getOnboardingStatus(id)
+    : { value: { accepted: false, completed: false, type: null as Portal | null }, redisOk: true };
+
+  const onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
+
+  if (!onboardingDone) {
+    // Poster latar kartu "Pilih Tontonan" (langkah 5): 1 poster terbaru
+    // tiap kategori. Gagal -> kartu tetap tampil dengan gradient saja.
+    const [animePoster, donghuaPoster] = await Promise.all([
+      getOngoingAnime(1)
+        .then((res) => res.items[0]?.poster ?? null)
+        .catch(() => null),
+      getLatestDonghua(1)
+        .then((items) => items[0]?.poster ?? null)
+        .catch(() => null),
+    ]);
+
+    return (
+      <OnboardingFlow
+        initial={{
+          accepted: status.value.accepted,
+          completed: status.value.completed,
+          type: status.value.type,
+        }}
+        animePoster={animePoster}
+        donghuaPoster={donghuaPoster}
+      />
+    );
+  }
+
+  const portal: Portal = status.value.type ?? "anime";
 
   // Hanya fetch data portal aktif; portal lain dilewati (Promise.resolve(null)).
   const skip = () => Promise.resolve(null);

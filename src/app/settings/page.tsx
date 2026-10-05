@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { auth, signOut } from "@/lib/auth/session";
 import AutoResumeToggle from "@/components/settings/AutoResumeToggle";
-import ShowPortalAgain from "@/components/settings/ShowPortalAgain";
+import RestartOnboarding from "@/components/settings/RestartOnboarding";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -52,14 +52,15 @@ export default async function SettingsPage() {
       </section>
 
       <section className="space-y-3">
-        <GroupTitle>Portal</GroupTitle>
+        <GroupTitle>Onboarding</GroupTitle>
         <div className="rounded-card px-4 py-3.5" style={{ background: "var(--surface)" }}>
-          <p className="text-sm font-semibold text-white">Tampilkan portal lagi</p>
+          <p className="text-sm font-semibold text-white">Ulangi Onboarding</p>
           <p className="mt-0.5 text-xs" style={{ color: "var(--text-2)" }}>
-            Pilihan Anime/Donghua tersimpan di server. Hapus untuk memilih ulang saat membuka Cyronime.
+            Progres onboarding (disclaimer, pilihan tontonan) tersimpan di server. Hapus untuk
+            melihat alur pengenalan dan memilih ulang Anime/Donghua dari awal.
           </p>
         </div>
-        <ShowPortalAgain />
+        <RestartOnboarding />
       </section>
 
       {session?.user ? (
