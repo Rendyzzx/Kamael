@@ -622,34 +622,10 @@ export default function NativePlayer(props: NativePlayerProps) {
           </button>
         </div>
 
-        {/* Baris 2: waktu + seekbar */}
-        <div className="mb-1">
-          <span className="block text-[12px] tabular-nums" style={{ color: "var(--frost)" }}>
-            {fmt(current)} / {fmt(duration)}
-          </span>
-          <div
-            role="slider"
-            tabIndex={0}
-            aria-label="Posisi video"
-            aria-valuemin={0}
-            aria-valuemax={Math.floor(duration) || 0}
-            aria-valuenow={Math.floor(current)}
-            className="relative mt-1 h-5 cursor-pointer touch-none"
-            onPointerDown={onSeekPointerDown}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft") skip(-5);
-              if (e.key === "ArrowRight") skip(5);
-            }}
-          >
-            <div className="absolute left-0 right-0 top-[9px] h-[3px] rounded" style={{ background: "rgba(234,246,250,.25)" }} />
-            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(234,246,250,.4)" }} />
-            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${progressPct}%`, background: "var(--glacier)" }} />
-            <div className="absolute top-[6px] h-3.5 w-3.5 rounded-full" style={{ left: `calc(${progressPct}% - 7px)`, background: "var(--glacier)" }} />
-          </div>
-        </div>
-
-        {/* Baris 3: Otomatis (kiri) — kualitas / kecepatan / pengaturan / layar penuh (kanan) */}
-        <div className="flex items-center justify-between">
+        {/* Baris 2: Otomatis (kiri) — kualitas / kecepatan / layar penuh (kanan).
+            Sesuai mockup: tidak ada ikon gear terpisah — pill kualitas & kecepatan
+            langsung membuka menu pengaturan (yang juga memuat pilihan server/lapor). */}
+        <div className="mb-2 flex items-center justify-between">
           <button
             type="button"
             role="switch"
@@ -686,12 +662,35 @@ export default function NativePlayer(props: NativePlayerProps) {
             >
               {speed}x
             </button>
-            <button type="button" onClick={onOpenSettings} aria-label="Pengaturan pemutar" className={smallBtn} style={centerBtnStyle}>
-              <span className="material-symbols-rounded" style={{ fontSize: 20 }}>settings</span>
-            </button>
             <button type="button" onClick={toggleFullscreen} aria-label="Layar penuh" className={smallBtn} style={centerBtnStyle}>
               <span className="material-symbols-rounded" style={{ fontSize: 20 }}>fullscreen</span>
             </button>
+          </div>
+        </div>
+
+        {/* Baris 3: waktu + seekbar */}
+        <div>
+          <span className="block text-[12px] tabular-nums" style={{ color: "var(--frost)" }}>
+            {fmt(current)} / {fmt(duration)}
+          </span>
+          <div
+            role="slider"
+            tabIndex={0}
+            aria-label="Posisi video"
+            aria-valuemin={0}
+            aria-valuemax={Math.floor(duration) || 0}
+            aria-valuenow={Math.floor(current)}
+            className="relative mt-1 h-5 cursor-pointer touch-none"
+            onPointerDown={onSeekPointerDown}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") skip(-5);
+              if (e.key === "ArrowRight") skip(5);
+            }}
+          >
+            <div className="absolute left-0 right-0 top-[9px] h-[3px] rounded" style={{ background: "rgba(234,246,250,.25)" }} />
+            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(234,246,250,.4)" }} />
+            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${progressPct}%`, background: "var(--glacier)" }} />
+            <div className="absolute top-[6px] h-3.5 w-3.5 rounded-full" style={{ left: `calc(${progressPct}% - 7px)`, background: "var(--glacier)" }} />
           </div>
         </div>
       </div>

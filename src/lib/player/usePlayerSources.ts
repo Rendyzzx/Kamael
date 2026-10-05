@@ -15,6 +15,12 @@
  *   dicatat per episode dan tidak diikutkan lagi di race berikutnya.
  * - Pemilihan server manual (menu pengaturan) melewati race — langsung
  *   dipakai sesuai pilihan pengguna.
+ * - Tanpa preferensi kualitas tersimpan: race dilakukan LINTAS SEMUA kualitas
+ *   sekaligus (bukan dikunci ke satu kualitas default seperti 480p) — siapa
+ *   pun yang paling cepat siap (di kualitas apa pun) langsung dipakai, demi
+ *   menghindari delay loading. Begitu pengguna memilih kualitas secara
+ *   manual, preferensi itu dikunci dan race berikutnya (termasuk saat ganti
+ *   episode & retry otomatis) dibatasi ke kualitas tersebut saja.
  *
  * Preferensi kualitas HANYA ditulis saat pengguna memilih manual.
  */
@@ -107,6 +113,8 @@ export function usePlayerSources(args: {
   const raceSeqRef = useRef(0);
   const poolKeysRef = useRef<Set<string>>(new Set());
   const pendingResolvesRef = useRef(0);
+  /** True setelah pengguna memilih kualitas manual — mengunci race ke kualitas itu saja. */
+  const qualityLockedRef = useRef(false);
 
   const checkExhausted = useCallback((seq: number) => {
     if (raceSeqRef.current !== seq) return;
@@ -189,18 +197,37 @@ export function usePlayerSources(args: {
     [resolveEndpoint, addToPool, checkExhausted]
   );
 
+  /**
+   * Grup kandidat untuk race otomatis.
+   * - Terkunci (ada preferensi kualitas manual): kembalikan grup kualitas itu
+   *   saja — hormati pilihan pengguna.
+   * - Tidak terkunci: gabungkan sumber dari SEMUA grup kualitas jadi satu
+   *   pool race — siapa pun yang tercepat (di kualitas apa pun) yang menang.
+   */
+  const raceCandidateGroup = useCallback(
+    (targetQuality: string | null): QualityGroup | null => {
+      if (qualityLockedRef.current) {
+        return groups.find((g) => g.quality === targetQuality) ?? groups[0] ?? null;
+      }
+      const sources = groups.flatMap((g) => g.sources);
+      return sources.length ? { quality: "__mixed__", sources } : null;
+    },
+    [groups]
+  );
+
   // Inisialisasi kualitas sesuai aturan preferensi (sekali per episode) + race.
   useEffect(() => {
     failedRef.current = new Set();
     urlCacheRef.current = {};
     setFailedKeys(new Set());
     setManualServer(false);
-    const { quality: q, notice } = pickInitialQuality(groups, readStoredQuality());
+    const storedPref = readStoredQuality();
+    qualityLockedRef.current = Boolean(storedPref);
+    const { quality: q, notice } = pickInitialQuality(groups, storedPref);
     setInitialNotice(notice);
     const initialQuality = q || groups[0]?.quality || "";
     setQualityState(initialQuality);
-    const group = groups.find((g) => g.quality === initialQuality) ?? groups[0] ?? null;
-    race(group);
+    race(raceCandidateGroup(initialQuality));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [episodeKey]);
 
@@ -213,6 +240,9 @@ export function usePlayerSources(args: {
     (source: PlayerSource, url: string) => {
       setActiveSource(source);
       setActiveUrl(url);
+      // Race lintas-kualitas: pil kualitas di UI mengikuti kualitas pemenang asli
+      // (bisa berbeda dari "quality" sebelum race selesai).
+      setQualityState(source.quality);
       setResolving(false);
       setStatusMessage(null);
     },
@@ -239,25 +269,24 @@ export function usePlayerSources(args: {
       failedRef.current.add(key);
       setFailedKeys(new Set(failedRef.current));
       setManualServer(false);
-      const group = groups.find((g) => g.quality === failed.quality) ?? null;
-      if (group) {
-        setStatusMessage(`Server ${failed.server} bermasalah. Mencoba server lain…`);
-      }
-      race(group);
+      setStatusMessage(`Server ${failed.server} bermasalah. Mencoba server lain…`);
+      race(raceCandidateGroup(failed.quality));
     },
-    [groups, race]
+    [race, raceCandidateGroup]
   );
 
   const retry = useCallback(() => {
     failedRef.current = new Set();
     setFailedKeys(new Set());
-    const group = groups.find((g) => g.quality === quality) ?? groups[0] ?? null;
-    race(group);
-  }, [groups, quality, race]);
+    race(raceCandidateGroup(quality));
+  }, [quality, race, raceCandidateGroup]);
 
   const setQuality = useCallback(
     (q: string, opts?: { manual?: boolean }) => {
-      if (opts?.manual) writeStoredQuality(q);
+      if (opts?.manual) {
+        writeStoredQuality(q);
+        qualityLockedRef.current = true;
+      }
       setManualServer(false);
       const group = groups.find((g) => g.quality === q) ?? null;
       setQualityState(q);
