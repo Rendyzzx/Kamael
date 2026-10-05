@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { auth } from "@/lib/auth/session";
 import { logoutToOnboarding } from "@/lib/auth/logout-action";
+import LogoutButton from "@/components/auth/LogoutButton";
 import AutoResumeToggle from "@/components/settings/AutoResumeToggle";
 import RestartOnboarding from "@/components/settings/RestartOnboarding";
 
@@ -74,13 +75,7 @@ export default async function SettingsPage() {
             </p>
           </div>
           <form action={logoutToOnboarding}>
-            <button
-              type="submit"
-              className="w-full rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
-              style={{ background: "var(--surface)", color: "#FF1744" }}
-            >
-              Logout
-            </button>
+            <LogoutButton />
           </form>
         </section>
       ) : null}
