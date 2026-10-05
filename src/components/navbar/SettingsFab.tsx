@@ -19,7 +19,7 @@ export default function SettingsFab({ onboardingDone }: { onboardingDone: boolea
     return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: 84 }}>
+    <div className="pointer-events-none fixed inset-x-0 z-40 mx-auto max-w-[480px]" style={{ bottom: "calc(84px + env(safe-area-inset-bottom))" }}>
       <div className="relative">
         <Link
           href="/settings"

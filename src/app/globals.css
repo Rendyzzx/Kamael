@@ -47,6 +47,8 @@
 html {
   scroll-behavior: smooth;
   background: #0b0c0e;
+  /* Matikan pull-to-refresh & overscroll bounce bawaan browser (ala native). */
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -54,17 +56,75 @@ body {
   background: #0b0c0e;
   color: var(--text);
   font-family: var(--font-roboto), "Roboto", sans-serif;
+  /* Hilangkan tap highlight abu-abu/flash bawaan mobile browser. */
+  -webkit-tap-highlight-color: transparent;
+  /* manipulation: pan+pinch tetap boleh, double-tap zoom dimatikan (respons instan). */
+  touch-action: manipulation;
 }
 
-/* Shell mobile-first: 360px minimum, dibungkus 480px di tengah pada layar lebar. */
+/* Elemen UI tidak bisa di-select ala native; konten teks (sinopsis, judul)
+   tetap bisa di-copy — hanya elemen kontrol. */
+button,
+a,
+nav,
+header,
+.material-symbols-rounded,
+.sheet-panel .sticky,
+.onboard-step,
+.rank-num {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Efek press ala native: scale .97 saat aktif (hanya perangkat sentuh,
+   supaya klik desktop & keyboard tidak terpengaruh). Menggunakan property
+   `scale` (bukan transform) agar tidak bentrok dengan transform lain. */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    scale: 0.97;
+    transition: scale 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+}
+
+/* Transisi antarhalaman (PageTransition, key=pathname). */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.page-enter {
+  animation: page-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Shell mobile-first: 360px minimum, dibungkus 480px di tengah pada layar lebar.
+   100dvh = tinggi viewport dinamis (address bar mobile ikut mengecil/besar). */
 .app-shell {
   background: var(--bg);
   min-height: 100vh;
+  min-height: 100dvh;
   max-width: 480px;
   min-width: 360px;
   margin-inline: auto;
   position: relative;
   overflow-x: hidden;
+  /* clip (bukan hidden) supaya .app-shell TIDAK jadi scroll-container —
+     position:sticky (player watch) tetap menempel ke viewport. */
+  overflow-x: clip;
+}
+
+/* Saat dipasang (standalone): notch/status bar iOS tidak menimpa konten.
+   Hanya aktif di display-mode standalone supaya browser biasa tak berubah. */
+@media all and (display-mode: standalone) {
+  .app-shell {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
 h1,
@@ -313,5 +373,14 @@ h3,
   .onboard-loading-dot {
     animation: none;
     opacity: 1;
+  }
+  .page-enter {
+    animation: none;
+  }
+  button:active,
+  a:active,
+  [role="button"]:active {
+    scale: none;
+    transition: none;
   }
 }

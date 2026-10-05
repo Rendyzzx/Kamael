@@ -14,6 +14,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PlayerSource } from "@/types/player";
+import { useFullscreenLock } from "@/lib/player/useFullscreenLock";
 import { usePlayerSources } from "@/lib/player/usePlayerSources";
 import { detectSourceType, qualityLabel } from "@/lib/player/sources";
 import NativePlayer from "./NativePlayer";
@@ -51,6 +52,11 @@ export default function PlayerShell(props: PlayerShellProps) {
   const api = usePlayerSources({ groups, resolveEndpoint, episodeKey });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [speed, setSpeed] = useState(1);
+
+  // Fullscreen player (mode embed iframe maupun native): kunci landscape +
+  // Wake Lock agar layar tidak mati — otomatis dilepas saat keluar fullscreen
+  // (termasuk saat user menekan back / menutup fullscreen bawaan embed).
+  useFullscreenLock();
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

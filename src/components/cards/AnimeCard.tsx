@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import BlurImage from "@/components/ui/BlurImage";
 import type { AnimeListItem } from "@/types/anime";
 
 /**
@@ -18,14 +18,17 @@ export default function AnimeCard({
     <Link href={`/anime/${anime.animeId}`} className="group block" aria-label={anime.title}>
       <div className="relative aspect-[3/4] overflow-hidden rounded-card" style={{ background: "var(--surface)" }}>
         {anime.poster ? (
-          <Image
-            src={anime.poster}
-            alt={anime.title}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            className="object-cover transition-smooth group-hover:scale-105"
-            priority={priority}
-          />
+          <span className="absolute inset-0 transition-smooth group-hover:scale-105">
+            <BlurImage
+              src={anime.poster}
+              alt={anime.title}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+              priority={priority}
+              className="h-full w-full"
+              rounded="rounded-card"
+              imgClassName="object-cover"
+            />
+          </span>
         ) : null}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 

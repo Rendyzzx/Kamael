@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import type { Portal } from "@/components/portal/portal-events";
+import { haptic } from "@/lib/haptic";
 
 /**
  * Bottom navigation — fixed, 68px, Material Symbols Rounded.
@@ -68,13 +69,18 @@ export default function BottomNav({
     >
       <ul
         className="flex items-center justify-between px-2"
-        style={{ height: 68, background: "#1B1C1F" }}
+        style={{ height: "calc(68px + env(safe-area-inset-bottom))", background: "#1B1C1F" }}
       >
         {items.map(({ href, label, icon }) => {
           const active = isActive(href);
           return (
             <li key={href} className="flex flex-1 justify-center">
-              <Link href={href} aria-current={active ? "page" : undefined} className="flex flex-col items-center">
+              <Link
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className="flex flex-col items-center"
+                onPointerDown={() => haptic(8)}
+              >
                 {active ? (
                   <span
                     className="flex items-center justify-center rounded-chip transition-smooth"
@@ -97,7 +103,12 @@ export default function BottomNav({
           );
         })}
         <li className="flex flex-1 justify-center">
-          <Link href="/profile" aria-current={profileActive ? "page" : undefined} className="flex flex-col items-center">
+          <Link
+            href="/profile"
+            aria-current={profileActive ? "page" : undefined}
+            className="flex flex-col items-center"
+            onPointerDown={() => haptic(8)}
+          >
             <span
               className="overflow-hidden rounded-full"
               style={{

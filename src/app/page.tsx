@@ -191,7 +191,7 @@ export default async function HomePage() {
               {/* ===== Donghua Ongoing ===== */}
               {donghuaOngoing.length ? (
                 <HomeRail title="Donghua Ongoing" note="Donghua yang masih tayang." href="/donghua">
-                  {donghuaOngoing.slice(0, 15).map((d, i) => (
+                  {donghuaOngoing.slice(0, 15).map((d) => (
                     <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
                       <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} />
                     </div>

@@ -1,4 +1,18 @@
-/** @type {import('next').NextConfig} */
+import withSerwistInit from "@serwist/next";
+
+/**
+ * @type {import('next').NextConfig}
+ *
+ * Serwist: SW di-build dari src/app/sw.ts -> public/sw.js (jangan di-commit;
+ * sudah di .gitignore). Dev mode: SW otomatis nonaktif (disable di dev) supaya
+ * tidak meng-cache perubahan lokal.
+ */
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+});
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -13,4 +27,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

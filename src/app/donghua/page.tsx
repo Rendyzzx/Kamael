@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import InfiniteGridDonghua from "@/components/ui/InfiniteGridDonghua";
 import Tabs from "@/components/ui/Tabs";
-import GenreSelect from "@/components/ui/GenreSelect";
+import GenreSheet from "@/components/ui/GenreSheet";
 import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import {
@@ -68,7 +68,7 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
           ]}
         />
 
-        <GenreSelect genres={genresRes.map((g) => ({ id: g.slug, title: g.name }))} basePath="/donghua" activeGenre={genre} />
+        <GenreSheet genres={genresRes.map((g) => ({ id: g.slug, title: g.name }))} basePath="/donghua" activeGenre={genre} />
 
         <InfiniteGridDonghua
           key={`${tab}-${genre ?? ""}-${page}`}

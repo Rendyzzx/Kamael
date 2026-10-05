@@ -1,9 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Roboto } from "next/font/google";
 import BottomNav from "@/components/navbar/BottomNav";
 import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
+import PageTransition from "@/components/nav/PageTransition";
+import ScrollRestore from "@/components/nav/ScrollRestore";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { getOnboardingStatus } from "@/lib/redis/onboarding";
 import { readVisitorId } from "@/lib/visitor";
@@ -38,6 +41,27 @@ export const metadata: Metadata = {
   },
   description: DEFAULT_DESC,
   applicationName: SITE_NAME,
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [{ url: "/icons/icon-96.png", type: "image/png", sizes: "96x96" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  // Meta iOS: web app installable full screen + status bar translucent
+  // (Next men-generate apple-mobile-web-app-capable dsb. dari sini).
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Cyronime",
+    // Splash screen iOS (ukuran perangkat umum; bg gelap + logo di tengah).
+    startupImage: [
+      { url: "/splash/splash-1290x2796.png", media: "(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/splash/splash-1284x2778.png", media: "(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/splash/splash-1179x2556.png", media: "(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/splash/splash-1242x2688.png", media: "(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" },
+      { url: "/splash/splash-1668x2388.png", media: "(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" },
+      { url: "/splash/splash-2048x2732.png", media: "(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" },
+    ],
+  },
   openGraph: {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
@@ -50,6 +74,14 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESC,
   },
+};
+
+/* viewport: cover notch (safe-area dipakai header/nav via env()). */
+export const viewport: Viewport = {
+  themeColor: "#121316",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -76,13 +108,17 @@ export default async function RootLayout({
       <body>
         <AuthProvider>
           <SplashScreen />
+          <ScrollRestore />
           {/* Shell mobile-first (min 360px); di layar lebar dibungkus 480px
               di tengah dengan background gelap pekat di luarnya (lihat body/html). */}
           <div className="app-shell flex min-h-screen flex-col">
-            <main className="flex-1 pb-24">{children}</main>
+            <main className="flex-1 pb-24">
+              <PageTransition>{children}</PageTransition>
+            </main>
           </div>
           <SettingsFab onboardingDone={onboardingDone} />
           <BottomNav defaultPortal={portal} onboardingDone={onboardingDone} />
+          <InstallPrompt />
         </AuthProvider>
       </body>
     </html>

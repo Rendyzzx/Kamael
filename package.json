@@ -9,14 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@serwist/next": "^9.5.13",
     "@upstash/redis": "^1.39.0",
     "hls.js": "^1.7.3",
     "next": "^15.5.4",
     "next-auth": "^5.0.0-beta.32",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "serwist": "^9.5.13"
   },
   "devDependencies": {
+    "@serwist/webpack-plugin": "^9.5.13",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",

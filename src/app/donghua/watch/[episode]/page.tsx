@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PlayerShell from "@/components/player/PlayerShell";
 import EpisodeStrip, { type StripEpisode } from "@/components/watch/EpisodeStrip";
+import EpisodeSheet from "@/components/watch/EpisodeSheet";
 import WatchActions from "@/components/watch/WatchActions";
 import WatchTracker from "@/components/watch/WatchTracker";
 import Synopsis from "@/components/ui/Synopsis";
@@ -112,8 +113,12 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* Player full-bleed */}
-      <div style={{ marginInline: "calc(-1 * var(--page-x-detail))" }}>
+      {/* Player full-bleed — sticky di atas: iframe 16:9 menempel saat
+          konten di bawahnya (episode, info, rekomendasi) di-scroll. */}
+      <div
+        className="sticky z-30"
+        style={{ top: 0, marginInline: "calc(-1 * var(--page-x-detail))" }}
+      >
         <PlayerShell
           groups={groups}
           resolveEndpoint={null}
@@ -182,6 +187,11 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
             </h2>
             <Synopsis text={donghuaDetail.synopsis} lines={3} accent="var(--glacier)" />
           </section>
+        ) : null}
+
+        {/* Tombol daftar episode lengkap (bottom sheet draggable) */}
+        {stripEpisodes.length ? (
+          <EpisodeSheet episodes={stripEpisodes} activeId={episodeSlug} totalLabel={`${stripEpisodes.length} eps`} />
         ) : null}
 
         {/* Strip episode horizontal */}

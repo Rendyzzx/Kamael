@@ -9,3 +9,7 @@ build
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Serwist SW build output (dibuat saat `next build`, jangan di-commit)
+public/sw.js
+public/swe-worker*.js

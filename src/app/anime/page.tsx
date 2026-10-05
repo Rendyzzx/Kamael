@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import InfiniteGridAnime from "@/components/ui/InfiniteGridAnime";
 import Tabs from "@/components/ui/Tabs";
-import GenreSelect from "@/components/ui/GenreSelect";
+import GenreSheet from "@/components/ui/GenreSheet";
 import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import {
@@ -61,7 +61,7 @@ export default async function AnimePage({ searchParams }: PageProps) {
           ]}
         />
 
-        <GenreSelect genres={genresRes} basePath="/anime" activeGenre={genre} />
+        <GenreSheet genres={genresRes} basePath="/anime" activeGenre={genre} />
 
         <InfiniteGridAnime
           key={`${tab}-${genre ?? ""}-${page}`}
