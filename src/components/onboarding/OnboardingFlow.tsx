@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Portal } from "@/components/portal/portal-events";
 import OnboardingCarousel, { ONBOARDING_SLIDE_COUNT } from "./OnboardingCarousel";
@@ -54,6 +54,60 @@ export default function OnboardingFlow({
   const [step, setStep] = useState<Step>(resumeStep);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [pickPending, setPickPending] = useState<Portal | null>(null);
+
+  // Step/kondisi terkini untuk handler popstate (stale closure safe).
+  const stepRef = useRef(step);
+  const carouselRef = useRef(carouselIndex);
+  useEffect(() => {
+    stepRef.current = step;
+  }, [step]);
+  useEffect(() => {
+    carouselRef.current = carouselIndex;
+  }, [carouselIndex]);
+
+  // JEBATAN TOMBOL BACK (bugfix): langkah onboarding TIDAK menulis history,
+  // jadi tombol back fisik Android / swipe-back iOS dulunya mundur ke entri
+  // history lama (bisa "teleport" user ke halaman anime dengan onboarding
+  // belum selesai, lalu nyangkut di sana). Solusi: selama onboarding aktif,
+  // push sentinel ke stack history dan tafsirkan popstate sebagai "mundur
+  // satu langkah onboarding" (perilaku aplikasi native), bukan keluar.
+  useEffect(() => {
+    const SENTINEL = { cyronimeOnboarding: true };
+    history.pushState(SENTINEL, "");
+
+    function goBackOneStep() {
+      const s = stepRef.current;
+      if (s === "carousel") {
+        if (carouselRef.current > 0) setCarouselIndex((i) => Math.max(0, i - 1));
+        else setStep("intro");
+      } else if (s === "intro") {
+        setStep("disclaimer");
+      } else if (s === "pick" || s === "signin") {
+        setStep("carousel");
+        setCarouselIndex(ONBOARDING_SLIDE_COUNT - 1);
+      } else if (s === "declined") {
+        setStep("disclaimer");
+      }
+      // splash & disclaimer: tidak ada langkah sebelumnya -> tetap di tempat.
+    }
+
+    function onPopState() {
+      // Back "ditelan": kembalikan sentinel ke puncak stack supaya stack
+      // tidak habis (mencegah exit tak sengaja di tengah onboarding),
+      // lalu jalankan mundur satu langkah.
+      history.pushState(SENTINEL, "");
+      goBackOneStep();
+    }
+
+    window.addEventListener("popstate", onPopState);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      // Buang sentinel dari stack supaya tombol back SETELAH onboarding
+      // selesai tidak "nyangkut" sekali. history.back() ke entri "/" yang
+      // sama: same-document navigation, tidak ada reload/flash.
+      history.back();
+    };
+  }, []);
 
   // Langkah 1 Splash: auto-advance 2 detik. Hanya berjalan bila memang
   // start dari splash (resume tidak pernah mendarat di sini).
