@@ -1,10 +1,10 @@
-/** Blok skeleton untuk grid card. */
+/** Blok skeleton untuk grid card (shimmer --surface-2, lihat .skeleton di globals.css). */
 export function CardSkeletonGrid({ count = 8 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <div className="grid grid-cols-3 gap-3">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="space-y-2">
-          <div className="skeleton aspect-[2/3] w-full" />
+          <div className="skeleton aspect-[3/4] w-full rounded-card" />
           <div className="skeleton h-4 w-4/5" />
           <div className="skeleton h-3 w-1/2" />
         </div>
@@ -13,18 +13,22 @@ export function CardSkeletonGrid({ count = 8 }: { count?: number }) {
   );
 }
 
-/** Skeleton halaman detail. */
+/** Skeleton halaman detail (hero + konten). */
 export function DetailSkeleton() {
   return (
-    <div className="flex flex-col gap-8 md:flex-row">
-      <div className="skeleton aspect-[2/3] w-full max-w-[240px] shrink-0" />
-      <div className="flex-1 space-y-4">
-        <div className="skeleton h-9 w-3/4" />
-        <div className="skeleton h-4 w-1/3" />
-        <div className="skeleton h-4 w-2/3" />
-        <div className="space-y-2 pt-4">
+    <div>
+      <div className="skeleton w-full" style={{ height: 400, borderRadius: 0 }} />
+      <div className="space-y-4" style={{ padding: "24px var(--page-x-detail) 0" }}>
+        <div className="skeleton h-8 w-2/3 rounded-app" />
+        <div className="skeleton h-4 w-1/3 rounded-app" />
+        <div className="flex gap-2">
+          <div className="skeleton w-24 rounded-chip" style={{ height: 32 }} />
+          <div className="skeleton w-24 rounded-chip" style={{ height: 32 }} />
+          <div className="skeleton w-24 rounded-chip" style={{ height: 32 }} />
+        </div>
+        <div className="space-y-2 pt-2">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="skeleton h-3.5 w-full" />
+            <div key={i} className="skeleton h-4 w-full rounded-app" />
           ))}
         </div>
       </div>

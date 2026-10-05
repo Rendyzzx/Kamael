@@ -1,9 +1,24 @@
 import type { Metadata } from "next";
-import Navbar from "@/components/navbar/Navbar";
+import { Montserrat, Roboto } from "next/font/google";
 import BottomNav from "@/components/navbar/BottomNav";
+import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
 import "./globals.css";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-roboto",
+  display: "swap",
+});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const SITE_NAME = "Cyronime";
@@ -37,17 +52,16 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className="dark">
+    <html lang="id" className={`dark ${montserrat.variable} ${roboto.variable}`}>
       <body>
         <AuthProvider>
           <SplashScreen />
-          <Navbar />
-          <main className="mx-auto min-h-[calc(100vh-3.5rem)] max-w-6xl px-4 py-6 pb-20 sm:py-8 md:pb-8">
-            {children}
-          </main>
-          <footer className="hidden border-t border-surface-800 py-6 text-center text-xs text-zinc-600 md:block">
-            Data bersumber dari API publik. Cyronime tidak menyimpan video di server.
-          </footer>
+          {/* Shell mobile-first (min 360px); di layar lebar dibungkus 480px
+              di tengah dengan background gelap pekat di luarnya (lihat body/html). */}
+          <div className="app-shell flex min-h-screen flex-col">
+            <main className="flex-1 pb-24">{children}</main>
+          </div>
+          <SettingsFab />
           <BottomNav />
         </AuthProvider>
       </body>

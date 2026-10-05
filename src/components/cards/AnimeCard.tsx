@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import Badge from "@/components/ui/Badge";
 import type { AnimeListItem } from "@/types/anime";
 
 /**
- * Card anime. Poster + judul + meta (episode/status/skor).
- * Link ke /anime/[animeId].
+ * Card anime: poster + chip rating (kanan atas, blur) + chip "Eps N" (kiri bawah)
+ * + judul 16px/600 di bawah poster. Status "Completed" ditandai badge "New"
+ * biru hanya bila memang item baru selesai (data asli dari API, bukan dibuat-buat).
  */
 export default function AnimeCard({
   anime,
@@ -15,41 +15,47 @@ export default function AnimeCard({
   priority?: boolean;
 }) {
   return (
-    <Link
-      href={`/anime/${anime.animeId}`}
-      className="group block"
-      aria-label={anime.title}
-    >
-      <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface-800">
+    <Link href={`/anime/${anime.animeId}`} className="group block" aria-label={anime.title}>
+      <div className="relative aspect-[3/4] overflow-hidden rounded-card" style={{ background: "var(--surface)" }}>
         {anime.poster ? (
           <Image
             src={anime.poster}
             alt={anime.title}
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-smooth group-hover:scale-105"
             priority={priority}
           />
         ) : null}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-        <div className="absolute bottom-1.5 left-1.5 flex flex-wrap gap-1">
-          {anime.episodes ? <Badge tone="muted">{anime.episodes} Eps</Badge> : null}
-          {anime.status ? (
-            <Badge tone={anime.status.toLowerCase().startsWith("ongo") ? "success" : "default"}>
-              {anime.status}
-            </Badge>
-          ) : null}
-        </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+        {anime.score ? (
+          <span
+            className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-chip px-2 text-[14px] font-medium text-white"
+            style={{ height: 24, background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: 14, color: "var(--yellow)" }}>
+              star
+            </span>
+            {anime.score}
+          </span>
+        ) : null}
+
+        {anime.episodes ? (
+          <span
+            className="absolute bottom-1.5 left-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium text-white"
+            style={{ background: "rgba(30,33,40,.85)" }}
+          >
+            Eps {anime.episodes}
+          </span>
+        ) : null}
       </div>
-      <div className="mt-2 space-y-0.5">
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-zinc-100 transition-colors group-hover:text-accent-500">
-          {anime.title}
-        </h3>
-        <p className="flex items-center gap-2 text-xs text-zinc-500">
-          {anime.score ? <span>★ {anime.score}</span> : null}
-          {anime.latestReleaseDate ? <span>{anime.latestReleaseDate}</span> : null}
-        </p>
-      </div>
+      <h3
+        className="mt-2 line-clamp-2 text-[16px] font-semibold leading-snug text-white transition-smooth"
+        style={{ fontFamily: "var(--font-montserrat)" }}
+      >
+        {anime.title}
+      </h3>
     </Link>
   );
 }

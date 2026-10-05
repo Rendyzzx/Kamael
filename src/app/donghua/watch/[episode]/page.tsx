@@ -2,27 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import EmbedPlayer, { type PlayerServer } from "@/components/player/EmbedPlayer";
-import { getDonghuaEpisode } from "@/lib/api/donghua";
-import { validateSlug } from "@/lib/utils/validation";
-import { episodeLabel } from "@/lib/utils/validation";
+import { getDonghuaDetail, getDonghuaEpisode } from "@/lib/api/donghua";
+import { validateSlug, episodeLabel } from "@/lib/utils/validation";
 import WatchTracker from "@/components/watch/WatchTracker";
+import Synopsis from "@/components/ui/Synopsis";
 
 interface PageProps {
   params: Promise<{ episode: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { episode } = await params;
   const safeSlug = validateSlug(episode);
   if (!safeSlug) return { title: "Episode tidak ditemukan" };
   try {
     const data = await getDonghuaEpisode(safeSlug);
-    return {
-      title: data.title,
-      description: `Nonton ${data.title} subtitle Indonesia.`,
-    };
+    return { title: data.title, description: `Nonton ${data.title} subtitle Indonesia.` };
   } catch {
     return { title: "Episode tidak ditemukan" };
   }
@@ -40,20 +35,17 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
     notFound();
   }
 
-  // Server donghua sudah menyertakan URL embed langsung.
-  const servers: PlayerServer[] = data.servers.map((s) => ({
-    label: s.name,
-    url: s.url,
-  }));
-
+  const servers: PlayerServer[] = data.servers.map((s) => ({ label: s.name, url: s.url }));
   const initialServer: PlayerServer | null = data.mainServer
     ? { label: data.mainServer.name, url: data.mainServer.url }
     : (servers[0] ?? null);
 
   const epNumber = data.episodeList.find((e) => e.slug === episodeSlug)?.episodeNumber ?? null;
 
+  const donghuaDetail = data.donghuaSlug ? await getDonghuaDetail(data.donghuaSlug).catch(() => null) : null;
+
   return (
-    <div className="space-y-6">
+    <div>
       {data.donghuaSlug ? (
         <WatchTracker
           type="donghua"
@@ -64,95 +56,83 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
           poster={data.poster ?? ""}
         />
       ) : null}
-      <EmbedPlayer
-        initialServer={initialServer}
-        servers={servers}
-        resolveEndpoint={null}
-      />
 
-      {/* Judul & navigasi episode */}
-      <div className="space-y-3">
+      <div style={{ marginInline: "calc(-1 * var(--page-x-detail))" }}>
+        <EmbedPlayer initialServer={initialServer} servers={servers} resolveEndpoint={null} />
+      </div>
+
+      <div style={{ padding: "16px var(--page-x-detail) 0" }} className="space-y-6">
+        {/* Navigasi episode */}
+        <div className="flex items-center gap-2">
+          {data.prevEpisodeSlug ? (
+            <Link href={`/donghua/watch/${data.prevEpisodeSlug}`} className="flex-1 rounded-chip px-4 py-2.5 text-center text-sm font-semibold text-white transition-smooth" style={{ background: "var(--surface-3)" }}>
+              &larr; Previous
+            </Link>
+          ) : (
+            <span className="flex-1 cursor-not-allowed rounded-chip px-4 py-2.5 text-center text-sm" style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>
+              &larr; Previous
+            </span>
+          )}
+          {data.donghuaSlug ? (
+            <Link href={`/donghua/${data.donghuaSlug}`} className="rounded-chip px-4 py-2.5 text-center text-sm font-semibold text-white transition-smooth" style={{ background: "var(--surface-3)" }}>
+              <span className="material-symbols-rounded" style={{ fontSize: 20, verticalAlign: "middle" }}>list</span>
+            </Link>
+          ) : null}
+          {data.nextEpisodeSlug ? (
+            <Link href={`/donghua/watch/${data.nextEpisodeSlug}`} className="flex-1 rounded-chip px-4 py-2.5 text-center text-sm font-semibold text-white transition-smooth" style={{ background: "var(--surface-3)" }}>
+              Next &rarr;
+            </Link>
+          ) : (
+            <span className="flex-1 cursor-not-allowed rounded-chip px-4 py-2.5 text-center text-sm" style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>
+              Next &rarr;
+            </span>
+          )}
+        </div>
+
+        {/* Info episode */}
         <div>
-          <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
-            {data.donghuaSlug ? (
-              <Link
-                href={`/donghua/${data.donghuaSlug}`}
-                className="transition-colors hover:text-accent-500"
-              >
-                {data.donghuaTitle ?? data.donghuaSlug}
-              </Link>
-            ) : (
-              data.donghuaTitle ?? "Donghua"
-            )}
-          </h1>
-          <p className="mt-0.5 text-sm text-zinc-400">
+          {data.donghuaSlug ? (
+            <Link href={`/donghua/${data.donghuaSlug}`} className="font-display text-[20px] font-medium text-white">
+              {data.donghuaTitle ?? data.donghuaSlug}
+            </Link>
+          ) : (
+            <h1 className="font-display text-[20px] font-medium text-white">{data.donghuaTitle ?? "Donghua"}</h1>
+          )}
+          <p className="mt-1 text-[15px]" style={{ color: "var(--text-2)" }}>
             {episodeLabel(data.title, data.title)}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {data.prevEpisodeSlug ? (
-            <Link
-              href={`/donghua/watch/${data.prevEpisodeSlug}`}
-              className="rounded-md bg-surface-800 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-surface-700"
-            >
-              ← Previous
-            </Link>
-          ) : (
-            <span className="cursor-not-allowed rounded-md bg-surface-800/50 px-4 py-2 text-sm text-zinc-500">
-              ← Previous
-            </span>
-          )}
-          {data.donghuaSlug ? (
-            <Link
-              href={`/donghua/${data.donghuaSlug}`}
-              className="rounded-md bg-surface-800 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-surface-700"
-            >
-              Episode List
-            </Link>
-          ) : null}
-          {data.nextEpisodeSlug ? (
-            <Link
-              href={`/donghua/watch/${data.nextEpisodeSlug}`}
-              className="rounded-md bg-surface-800 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-surface-700"
-            >
-              Next →
-            </Link>
-          ) : (
-            <span className="cursor-not-allowed rounded-md bg-surface-800/50 px-4 py-2 text-sm text-zinc-500">
-              Next →
-            </span>
-          )}
-        </div>
-      </div>
+        {donghuaDetail?.synopsis ? (
+          <section>
+            <h2 className="font-display mb-2 text-[20px] font-medium text-white">Deskripsi</h2>
+            <Synopsis text={donghuaDetail.synopsis} />
+          </section>
+        ) : null}
 
-      {/* Daftar episode */}
-      {data.episodeList.length ? (
-        <section aria-label="Daftar episode">
-          <h2 className="mb-3 text-base font-semibold">Daftar Episode</h2>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {data.episodeList.map((ep) => (
-              <Link
-                key={ep.slug}
-                href={`/donghua/watch/${ep.slug}`}
-                aria-current={ep.slug === episodeSlug ? "true" : undefined}
-                className={`flex items-center justify-between gap-2 rounded-lg px-3.5 py-2.5 text-sm transition-colors ${
-                  ep.slug === episodeSlug
-                    ? "bg-accent-500/15 text-accent-500"
-                    : "bg-surface-900 text-zinc-200 hover:bg-surface-800"
-                }`}
-              >
-                <span className="line-clamp-2 min-w-0">
-                  {episodeLabel(ep.title, ep.title)}
-                  {ep.isFinal ? (
-                    <span className="ml-1.5 text-xs text-accent-500">END</span>
-                  ) : null}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-      ) : null}
+        {/* Daftar episode — tab angka scroll horizontal */}
+        {data.episodeList.length ? (
+          <section aria-label="Daftar episode">
+            <h2 className="font-display mb-3 text-[20px] font-medium text-white">Episode List</h2>
+            <div className="flex overflow-x-auto pb-1" style={{ gap: 10 }}>
+              {data.episodeList.map((ep) => {
+                const active = ep.slug === episodeSlug;
+                return (
+                  <Link
+                    key={ep.slug}
+                    href={`/donghua/watch/${ep.slug}`}
+                    aria-current={active ? "true" : undefined}
+                    className="flex shrink-0 items-center justify-center rounded-app text-[16px] font-bold transition-smooth"
+                    style={{ width: 56, height: 56, background: active ? "#fff" : "var(--surface)", color: active ? "#000" : "#fff" }}
+                  >
+                    {ep.episodeNumber ?? "•"}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+      </div>
     </div>
   );
 }

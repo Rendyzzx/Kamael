@@ -7,30 +7,44 @@ export const metadata: Metadata = {
   description: "Preferensi tampilan dan playback Cyronime.",
 };
 
+function GroupTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-2)" }}>
+      {children}
+    </h2>
+  );
+}
+
 export default async function SettingsPage() {
   const session = await auth();
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <h1 className="text-xl font-bold tracking-tight">Settings</h1>
+    <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-6">
+      <h1 className="font-display text-[26px] font-bold text-white">Settings</h1>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Appearance</h2>
-        <div className="flex items-center justify-between rounded-lg bg-surface-900 px-4 py-3.5">
+        <GroupTitle>Appearance</GroupTitle>
+        <div className="flex items-center justify-between rounded-card px-4 py-3.5" style={{ background: "var(--surface)" }}>
           <div>
-            <p className="text-sm font-medium text-zinc-100">Theme</p>
-            <p className="text-xs text-zinc-500">Cyronime saat ini menggunakan dark mode secara penuh.</p>
+            <p className="text-sm font-semibold text-white">Theme</p>
+            <p className="text-xs" style={{ color: "var(--text-2)" }}>
+              Cyronime saat ini menggunakan dark mode secara penuh.
+            </p>
           </div>
-          <span className="rounded-md bg-surface-800 px-2.5 py-1 text-xs font-medium text-zinc-300">Dark</span>
+          <span className="rounded-chip px-2.5 py-1 text-xs font-semibold text-white" style={{ background: "var(--surface-3)" }}>
+            Dark
+          </span>
         </div>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Playback</h2>
-        <div className="flex items-center justify-between rounded-lg bg-surface-900 px-4 py-3.5">
+        <GroupTitle>Playback</GroupTitle>
+        <div className="flex items-center justify-between rounded-card px-4 py-3.5" style={{ background: "var(--surface)" }}>
           <div>
-            <p className="text-sm font-medium text-zinc-100">Auto-resume</p>
-            <p className="text-xs text-zinc-500">Lanjutkan otomatis dari posisi terakhir tanpa prompt.</p>
+            <p className="text-sm font-semibold text-white">Auto-resume</p>
+            <p className="text-xs" style={{ color: "var(--text-2)" }}>
+              Lanjutkan otomatis dari posisi terakhir tanpa prompt.
+            </p>
           </div>
           <AutoResumeToggle />
         </div>
@@ -38,10 +52,12 @@ export default async function SettingsPage() {
 
       {session?.user ? (
         <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Account</h2>
-          <div className="rounded-lg bg-surface-900 px-4 py-3.5">
-            <p className="text-sm font-medium text-zinc-100">{session.user.name}</p>
-            <p className="text-xs text-zinc-500">{session.user.email}</p>
+          <GroupTitle>Account</GroupTitle>
+          <div className="rounded-card px-4 py-3.5" style={{ background: "var(--surface)" }}>
+            <p className="text-sm font-semibold text-white">{session.user.name}</p>
+            <p className="text-xs" style={{ color: "var(--text-2)" }}>
+              {session.user.email}
+            </p>
           </div>
           <form
             action={async () => {
@@ -51,7 +67,8 @@ export default async function SettingsPage() {
           >
             <button
               type="submit"
-              className="w-full rounded-lg bg-surface-900 px-4 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-surface-800"
+              className="w-full rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
+              style={{ background: "var(--surface)", color: "#FF1744" }}
             >
               Logout
             </button>
@@ -60,9 +77,9 @@ export default async function SettingsPage() {
       ) : null}
 
       <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">About</h2>
-        <div className="rounded-lg bg-surface-900 px-4 py-3.5 text-sm text-zinc-400">
-          <p className="font-medium text-zinc-100">Cyronime</p>
+        <GroupTitle>About</GroupTitle>
+        <div className="rounded-card px-4 py-3.5 text-sm" style={{ background: "var(--surface)", color: "var(--text-2)" }}>
+          <p className="font-display font-semibold text-white">Cyronime</p>
           <p className="mt-1">
             Platform streaming anime &amp; donghua. Semua konten diambil dari API publik dan di-stream lewat
             embed pihak ketiga — Cyronime tidak menyimpan file video di server.

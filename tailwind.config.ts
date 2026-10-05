@@ -6,21 +6,40 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Netral gelap, bukan hitam pekat: area streaming modern.
-        surface: {
-          950: "#0b0f17",
-          900: "#0f1420",
-          850: "#131926",
-          800: "#1a2130",
-          700: "#242c3f",
+        // Design tokens — lihat :root di globals.css untuk nilai aslinya.
+        app: {
+          bg: "var(--bg)",
+          surface: "var(--surface)",
+          "surface-2": "var(--surface-2)",
+          "surface-3": "var(--surface-3)",
+          text: "var(--text)",
+          "text-2": "var(--text-2)",
         },
-        accent: {
-          500: "#e11d48",
-          600: "#be123c",
+        blue: {
+          DEFAULT: "var(--blue)",
         },
+        yellow: {
+          DEFAULT: "var(--yellow)",
+        },
+        maroon: {
+          DEFAULT: "var(--maroon)",
+        },
+        chip: {
+          border: "var(--chip-border)",
+        },
+        navactive: "var(--nav-active)",
+      },
+      borderRadius: {
+        card: "var(--radius-card)",
+        app: "var(--radius-md)",
+        chip: "var(--radius-pill)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-montserrat)", "sans-serif"],
+        sans: ["var(--font-roboto)", "sans-serif"],
+      },
+      backgroundImage: {
+        "blue-grad": "var(--blue-grad)",
       },
     },
   },

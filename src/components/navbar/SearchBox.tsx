@@ -21,7 +21,6 @@ export default function SearchBox() {
   const boxRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Debounce request
   useEffect(() => {
     const q = query.trim();
     if (q.length < 2) {
@@ -44,7 +43,6 @@ export default function SearchBox() {
     return () => clearTimeout(t);
   }, [query]);
 
-  // Tutup dropdown saat klik di luar
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
@@ -68,31 +66,52 @@ export default function SearchBox() {
   const showDropdown = open && q.length >= 2;
 
   return (
-    <div ref={boxRef} className="relative w-full max-w-md">
+    <div ref={boxRef} className="relative" style={{ margin: "8px 12px" }}>
       <form onSubmit={submit}>
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setOpen(true);
-          }}
-          onFocus={() => setOpen(true)}
-          placeholder="Cari anime atau donghua..."
-          aria-label="Cari anime atau donghua"
-          className="w-full rounded-md bg-surface-800 px-3.5 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none ring-accent-500/50 transition-shadow focus:ring-2"
-        />
+        <div className="relative flex items-center">
+          <span
+            className="material-symbols-rounded absolute pointer-events-none"
+            style={{ left: 24, fontSize: 28, color: "var(--text-2)" }}
+          >
+            search
+          </span>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
+            onFocus={() => setOpen(true)}
+            placeholder="Cari Anime Di Sini"
+            aria-label="Cari anime atau donghua"
+            className="w-full rounded-chip outline-none"
+            style={{
+              height: 54,
+              background: "#1E1F23",
+              color: "var(--text)",
+              paddingLeft: 58,
+              paddingRight: 16,
+              fontSize: 17,
+            }}
+          />
+        </div>
       </form>
 
       {showDropdown ? (
-        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-lg border border-surface-700 bg-surface-850 p-2 shadow-xl">
+        <div
+          className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[70vh] overflow-y-auto rounded-app p-2 shadow-xl"
+          style={{ background: "var(--surface-2)" }}
+        >
           {loading ? (
-            <p className="px-2 py-3 text-sm text-zinc-500">Mencari…</p>
+            <p className="px-2 py-3 text-sm" style={{ color: "var(--text-2)" }}>
+              Mencari…
+            </p>
           ) : hits && (hits.anime.length || hits.donghua.length) ? (
             <>
               {hits.anime.length > 0 ? (
                 <div className="mb-1">
-                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  <p className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--text-2)" }}>
                     Anime
                   </p>
                   {hits.anime.slice(0, 5).map((a) => (
@@ -100,7 +119,8 @@ export default function SearchBox() {
                       key={a.animeId}
                       href={`/anime/${a.animeId}`}
                       onClick={() => setOpen(false)}
-                      className="block truncate rounded-md px-2 py-1.5 text-sm text-zinc-300 hover:bg-surface-700 hover:text-zinc-100"
+                      className="block truncate rounded-app px-2 py-1.5 text-sm transition-smooth hover:bg-app-surface-3"
+                      style={{ color: "var(--text)" }}
                     >
                       {a.title}
                     </Link>
@@ -109,7 +129,7 @@ export default function SearchBox() {
               ) : null}
               {hits.donghua.length > 0 ? (
                 <div>
-                  <p className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                  <p className="px-2 py-1 text-[11px] font-bold uppercase tracking-wider" style={{ color: "var(--text-2)" }}>
                     Donghua
                   </p>
                   {hits.donghua.slice(0, 5).map((d) => (
@@ -117,7 +137,8 @@ export default function SearchBox() {
                       key={d.slug}
                       href={`/donghua/${d.slug}`}
                       onClick={() => setOpen(false)}
-                      className="block truncate rounded-md px-2 py-1.5 text-sm text-zinc-300 hover:bg-surface-700 hover:text-zinc-100"
+                      className="block truncate rounded-app px-2 py-1.5 text-sm transition-smooth hover:bg-app-surface-3"
+                      style={{ color: "var(--text)" }}
                     >
                       {d.title}
                     </Link>
@@ -126,8 +147,8 @@ export default function SearchBox() {
               ) : null}
             </>
           ) : (
-            <p className="px-2 py-3 text-sm text-zinc-500">
-              Tidak ada hasil untuk “{q}”.
+            <p className="px-2 py-3 text-sm" style={{ color: "var(--text-2)" }}>
+              Tidak ada hasil untuk "{q}".
             </p>
           )}
         </div>

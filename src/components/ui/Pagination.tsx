@@ -17,42 +17,34 @@ export default function Pagination({
   totalPages: number | null;
   buildHref: (page: number) => string;
 }) {
-  // Tidak ada apa pun untuk dinavigasi
   if (!hasPrev && hasNext === false) return null;
 
+  const btn = "rounded-chip px-4 py-2 text-sm font-semibold transition-smooth";
+
   return (
-    <nav
-      className="mt-10 flex items-center justify-center gap-3 text-sm"
-      aria-label="Navigasi halaman"
-    >
+    <nav className="mt-8 flex items-center justify-center gap-3 text-sm" aria-label="Navigasi halaman">
       {hasPrev ? (
-        <Link
-          href={buildHref(Math.max(currentPage - 1, 1))}
-          className="rounded-md bg-surface-800 px-4 py-2 font-medium transition-colors hover:bg-surface-700"
-        >
-          ← Sebelumnya
+        <Link href={buildHref(Math.max(currentPage - 1, 1))} className={btn} style={{ background: "var(--surface-3)", color: "var(--text)" }}>
+          &larr; Sebelumnya
         </Link>
       ) : (
-        <span className="cursor-not-allowed rounded-md bg-surface-800/50 px-4 py-2 text-zinc-500">
-          ← Sebelumnya
+        <span className={`${btn} cursor-not-allowed`} style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>
+          &larr; Sebelumnya
         </span>
       )}
 
-      <span className="text-zinc-400">
+      <span style={{ color: "var(--text-2)" }}>
         Halaman {currentPage}
         {totalPages ? ` dari ${totalPages}` : ""}
       </span>
 
       {hasNext !== false ? (
-        <Link
-          href={buildHref(currentPage + 1)}
-          className="rounded-md bg-surface-800 px-4 py-2 font-medium transition-colors hover:bg-surface-700"
-        >
-          Selanjutnya →
+        <Link href={buildHref(currentPage + 1)} className={btn} style={{ background: "var(--surface-3)", color: "var(--text)" }}>
+          Selanjutnya &rarr;
         </Link>
       ) : (
-        <span className="cursor-not-allowed rounded-md bg-surface-800/50 px-4 py-2 text-zinc-500">
-          Selanjutnya →
+        <span className={`${btn} cursor-not-allowed`} style={{ background: "var(--surface-2)", color: "var(--text-2)" }}>
+          Selanjutnya &rarr;
         </span>
       )}
     </nav>

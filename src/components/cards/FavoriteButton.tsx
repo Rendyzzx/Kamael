@@ -5,8 +5,8 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 /**
- * Tombol favorite untuk halaman detail. Guest -> arahkan ke /login.
- * State tidak persist di URL; detail page tetap server-rendered.
+ * Tombol favorite (gaya tombol sekunder spec: tinggi 44px, pill, bg --surface-3,
+ * ikon + teks 18px/700). Guest -> arahkan ke /login.
  */
 export default function FavoriteButton({
   type,
@@ -38,17 +38,20 @@ export default function FavoriteButton({
     };
   }, [status, type, contentId]);
 
+  const base = "inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold transition-smooth disabled:opacity-60";
+  const style: React.CSSProperties = { height: 44, fontSize: 18, background: "var(--surface-3)", color: "var(--text)" };
+
   if (status === "loading") {
-    return <div className="h-[42px] w-36 animate-pulse rounded-md bg-surface-800" aria-hidden="true" />;
+    return <div className="flex-1 animate-pulse rounded-chip" style={{ height: 44, background: "var(--surface-3)" }} aria-hidden="true" />;
   }
 
   if (status !== "authenticated") {
     return (
-      <Link
-        href="/login"
-        className="inline-flex items-center justify-center gap-2 rounded-md bg-surface-800 px-4 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-surface-700"
-      >
-        <HeartIcon filled={false} /> Login untuk Favorite
+      <Link href="/login" className={base} style={style}>
+        <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
+          favorite
+        </span>
+        Login untuk Favorite
       </Link>
     );
   }
@@ -63,9 +66,7 @@ export default function FavoriteButton({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ type, contentId, title, poster }),
           })
-        : await fetch(`/api/favorites?type=${type}&contentId=${encodeURIComponent(contentId)}`, {
-            method: "DELETE",
-          });
+        : await fetch(`/api/favorites?type=${type}&contentId=${encodeURIComponent(contentId)}`, { method: "DELETE" });
       if (res.ok) setIsFavorite(next);
     } catch {
       // abaikan; jangan crash halaman
@@ -75,32 +76,14 @@ export default function FavoriteButton({
   }
 
   return (
-    <button
-      type="button"
-      onClick={toggle}
-      disabled={busy}
-      aria-pressed={isFavorite}
-      className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
-        isFavorite
-          ? "bg-accent-500/15 text-accent-500 hover:bg-accent-500/25"
-          : "bg-surface-800 text-zinc-200 hover:bg-surface-700"
-      }`}
-    >
-      <HeartIcon filled={isFavorite} />
-      {isFavorite ? "Added to Favorites" : "Add to Favorites"}
+    <button type="button" onClick={toggle} disabled={busy} aria-pressed={isFavorite} className={base} style={style}>
+      <span
+        className="material-symbols-rounded"
+        style={{ fontSize: 22, fontVariationSettings: isFavorite ? "'FILL' 1" : "'FILL' 0" }}
+      >
+        favorite
+      </span>
+      {isFavorite ? "Favorit" : "Favorite"}
     </button>
-  );
-}
-
-function HeartIcon({ filled }: { filled: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className="h-4 w-4" fill={filled ? "currentColor" : "none"} aria-hidden="true">
-      <path
-        d="M12 20.3l-1.4-1.3C6.1 15 3.5 12.7 3.5 9.6c0-2.5 2-4.5 4.5-4.5 1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.5 0 4.5 2 4.5 4.5 0 3.1-2.6 5.4-7.1 9.4L12 20.3z"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

@@ -17,8 +17,8 @@ export default async function FavoritesPage() {
   if (!userId) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col items-center justify-center gap-5 px-4 text-center">
-        <h1 className="text-lg font-semibold">Login untuk melihat favorites</h1>
-        <p className="text-sm text-zinc-400">
+        <h1 className="font-display text-[22px] font-semibold text-white">Login untuk melihat favorites</h1>
+        <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Simpan anime &amp; donghua favorit ke akunmu agar tersedia di semua perangkat.
         </p>
         <div className="w-full">
@@ -28,24 +28,24 @@ export default async function FavoritesPage() {
     );
   }
 
-  // Anime dan Donghua tetap dipisah (prompt #15/#16).
+  // Anime dan Donghua tetap dipisah.
   const [animeFavorites, donghuaFavorites] = await Promise.all([
     listFavorites(userId, "anime"),
     listFavorites(userId, "donghua"),
   ]);
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-xl font-bold tracking-tight">Favorites</h1>
+    <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-8">
+      <h1 className="font-display text-[26px] font-bold text-white">Favorites</h1>
 
       <section aria-labelledby="favorites-anime">
         <SectionHeader title="Anime" />
         {animeFavorites.length === 0 ? (
-          <p className="rounded-lg bg-surface-900 p-4 text-sm text-zinc-500">
+          <p className="rounded-app p-4 text-sm" style={{ background: "var(--surface)", color: "var(--text-2)" }}>
             Belum ada anime favorit. Tambahkan lewat tombol ♥ di halaman detail anime.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-3 gap-3">
             {animeFavorites.map((f) => (
               <FavoriteCard key={f.contentId} favorite={f} href={`/anime/${f.contentId}`} />
             ))}
@@ -56,11 +56,11 @@ export default async function FavoritesPage() {
       <section aria-labelledby="favorites-donghua">
         <SectionHeader title="Donghua" />
         {donghuaFavorites.length === 0 ? (
-          <p className="rounded-lg bg-surface-900 p-4 text-sm text-zinc-500">
+          <p className="rounded-app p-4 text-sm" style={{ background: "var(--surface)", color: "var(--text-2)" }}>
             Belum ada donghua favorit. Tambahkan lewat tombol ♥ di halaman detail donghua.
           </p>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-3 gap-3">
             {donghuaFavorites.map((f) => (
               <FavoriteCard key={f.contentId} favorite={f} href={`/donghua/${f.contentId}`} />
             ))}
@@ -80,18 +80,18 @@ function FavoriteCard({
 }) {
   return (
     <Link href={href} className="group block" aria-label={favorite.title}>
-      <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface-800">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-card" style={{ background: "var(--surface)" }}>
         {favorite.poster ? (
           <Image
             src={favorite.poster}
             alt={favorite.title}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 33vw, 160px"
+            className="object-cover transition-smooth group-hover:scale-105"
           />
         ) : null}
       </div>
-      <h3 className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-zinc-100 transition-colors group-hover:text-accent-500">
+      <h3 className="mt-2 line-clamp-2 text-[16px] font-semibold leading-snug text-white">
         {favorite.title || favorite.contentId}
       </h3>
     </Link>

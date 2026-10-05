@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 };
 
 const LINKS = [
-  { href: "/history", label: "Watch History", desc: "Riwayat episode yang sudah ditonton" },
-  { href: "/favorites", label: "Favorites", desc: "Anime & donghua yang kamu simpan" },
-  { href: "/settings", label: "Settings", desc: "Tema dan preferensi lainnya" },
+  { href: "/history", label: "Watch History", desc: "Riwayat episode yang sudah ditonton", icon: "schedule" },
+  { href: "/favorites", label: "Favorites", desc: "Anime & donghua yang kamu simpan", icon: "playlist_play" },
+  { href: "/settings", label: "Settings", desc: "Tema dan preferensi lainnya", icon: "settings" },
 ] as const;
 
 export default async function ProfilePage() {
@@ -21,8 +21,8 @@ export default async function ProfilePage() {
   if (!session?.user) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col items-center justify-center gap-5 px-4 text-center">
-        <h1 className="text-lg font-semibold">Kamu belum login</h1>
-        <p className="text-sm text-zinc-400">
+        <h1 className="font-display text-[22px] font-semibold text-white">Kamu belum login</h1>
+        <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Login untuk melihat profile, continue watching, history, dan favorite.
         </p>
         <div className="w-full">
@@ -35,28 +35,37 @@ export default async function ProfilePage() {
   const { name, email, image } = session.user;
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <section className="flex items-center gap-4 rounded-lg bg-surface-900 p-4">
-        <div className="h-14 w-14 overflow-hidden rounded-full bg-surface-800">
+    <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-6">
+      <h1 className="font-display text-[26px] font-bold text-white">Profile</h1>
+
+      <section className="flex items-center gap-4 rounded-card p-4" style={{ background: "var(--surface)" }}>
+        <div className="overflow-hidden rounded-full" style={{ width: 56, height: 56, background: "var(--surface-3)" }}>
           {image ? (
             <Image src={image} alt={name ?? "Avatar"} width={56} height={56} className="h-14 w-14 object-cover" />
           ) : null}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-zinc-100">{name}</p>
-          <p className="truncate text-sm text-zinc-500">{email}</p>
+          <p className="truncate font-display text-[17px] font-bold text-white">{name}</p>
+          <p className="truncate text-sm" style={{ color: "var(--text-2)" }}>
+            {email}
+          </p>
         </div>
       </section>
 
-      <section className="divide-y divide-surface-800 overflow-hidden rounded-lg bg-surface-900">
+      <section className="divide-y overflow-hidden rounded-card" style={{ background: "var(--surface)" }}>
         {LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className="flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-surface-800">
-            <div>
-              <p className="text-sm font-medium text-zinc-100">{l.label}</p>
-              <p className="text-xs text-zinc-500">{l.desc}</p>
+          <Link key={l.href} href={l.href} className="flex items-center gap-3 px-4 py-3.5 transition-smooth hover:bg-app-surface-3">
+            <span className="material-symbols-rounded" style={{ fontSize: 24, color: "var(--text-2)" }}>
+              {l.icon}
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-white">{l.label}</p>
+              <p className="text-xs" style={{ color: "var(--text-2)" }}>
+                {l.desc}
+              </p>
             </div>
-            <span aria-hidden="true" className="text-zinc-500">
-              &rarr;
+            <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--text-2)" }} aria-hidden="true">
+              chevron_right
             </span>
           </Link>
         ))}
@@ -70,7 +79,8 @@ export default async function ProfilePage() {
       >
         <button
           type="submit"
-          className="w-full rounded-lg bg-surface-900 px-4 py-3 text-sm font-semibold text-red-400 transition-colors hover:bg-surface-800"
+          className="w-full rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
+          style={{ background: "var(--surface)", color: "#FF1744" }}
         >
           Logout
         </button>

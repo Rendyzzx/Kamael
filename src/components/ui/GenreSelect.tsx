@@ -1,6 +1,4 @@
-"use client";
-
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 interface Genre {
   id: string;
@@ -8,8 +6,8 @@ interface Genre {
 }
 
 /**
- * Dropdown filter genre. Client component karena butuh interaksi;
- * hasilnya tetap URL-driven (Server Component yang fetch data).
+ * Filter genre sebagai chip (bukan dropdown) — Server Component, URL-driven.
+ * Chip genre: tinggi 32px, pill, border 1.5px --chip-border, bg maroon tipis.
  */
 export default function GenreSelect({
   genres,
@@ -20,33 +18,36 @@ export default function GenreSelect({
   basePath: string;
   activeGenre?: string;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  function onChange(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page"); // ganti genre = reset halaman
-    if (value) params.set("genre", value);
-    else params.delete("genre");
-    const qs = params.toString();
-    router.push(qs ? `${basePath}?${qs}` : basePath);
-  }
-
   return (
-    <label className="flex items-center gap-2 text-sm text-zinc-400">
-      Genre
-      <select
-        value={activeGenre ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-md bg-surface-800 px-2.5 py-1.5 text-sm text-zinc-100 outline-none ring-accent-500/50 focus:ring-2"
+    <div className="flex flex-wrap" style={{ gap: "12px 10px" }}>
+      <Link
+        href={basePath}
+        className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+        style={{
+          height: 32,
+          border: !activeGenre ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
+          background: !activeGenre ? "rgba(33,150,243,.15)" : "rgba(90,26,32,.15)",
+        }}
       >
-        <option value="">Semua</option>
-        {genres.map((g) => (
-          <option key={g.id} value={g.id}>
+        Semua
+      </Link>
+      {genres.map((g) => {
+        const active = activeGenre === g.id;
+        return (
+          <Link
+            key={g.id}
+            href={`${basePath}?genre=${encodeURIComponent(g.id)}`}
+            className="inline-flex items-center rounded-chip px-4 text-[16px] font-medium text-white transition-smooth"
+            style={{
+              height: 32,
+              border: active ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
+              background: active ? "rgba(33,150,243,.15)" : "rgba(90,26,32,.15)",
+            }}
+          >
             {g.title}
-          </option>
-        ))}
-      </select>
-    </label>
+          </Link>
+        );
+      })}
+    </div>
   );
 }

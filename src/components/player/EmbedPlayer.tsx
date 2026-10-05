@@ -23,17 +23,12 @@ export default function EmbedPlayer({
   servers,
   resolveEndpoint,
 }: {
-  /** Server aktif pertama (mis. defaultStreamingUrl). */
   initialServer: PlayerServer | null;
-  /** Semua pilihan server. */
   servers: PlayerServer[];
-  /** Endpoint proxy untuk resolve serverId anime, mis. "/api/anime/server". Null untuk donghua (URL langsung). */
   resolveEndpoint: string | null;
 }) {
   const [active, setActive] = useState<PlayerServer | null>(initialServer);
-  const [activeUrl, setActiveUrl] = useState<string | null>(
-    initialServer?.url ?? null
-  );
+  const [activeUrl, setActiveUrl] = useState<string | null>(initialServer?.url ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
@@ -61,9 +56,7 @@ export default function EmbedPlayer({
       }
       setLoading(true);
       try {
-        const res = await fetch(
-          `${resolveEndpoint}/${encodeURIComponent(server.serverId)}`
-        );
+        const res = await fetch(`${resolveEndpoint}/${encodeURIComponent(server.serverId)}`);
         if (!res.ok) throw new Error("resolve failed");
         const data = (await res.json()) as { url?: string };
         if (!data.url) throw new Error("no url");
@@ -86,7 +79,7 @@ export default function EmbedPlayer({
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
+      <div className="relative aspect-video w-full overflow-hidden bg-black" style={{ borderRadius: 0 }}>
         {activeUrl && !error ? (
           <iframe
             key={frameKey}
@@ -100,17 +93,18 @@ export default function EmbedPlayer({
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4 text-center">
             {loading ? (
-              <p className="text-sm text-zinc-400">Menyiapkan server…</p>
+              <p className="text-sm" style={{ color: "var(--text-2)" }}>
+                Menyiapkan server…
+              </p>
             ) : (
               <>
-                <p className="text-sm font-medium text-zinc-300">
-                  Server tidak dapat diputar.
-                </p>
+                <p className="text-sm font-semibold text-white">Server tidak dapat diputar.</p>
                 <div className="flex flex-wrap justify-center gap-2">
                   <button
                     type="button"
                     onClick={retry}
-                    className="rounded-md bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+                    className="rounded-chip px-5 py-2.5 text-sm font-bold text-white transition-smooth"
+                    style={{ background: "var(--blue-grad)" }}
                   >
                     Coba lagi
                   </button>
@@ -118,11 +112,11 @@ export default function EmbedPlayer({
                     <button
                       type="button"
                       onClick={() => {
-                        const next =
-                          servers.find((s) => s !== active) ?? null;
+                        const next = servers.find((s) => s !== active) ?? null;
                         if (next) void selectServer(next);
                       }}
-                      className="rounded-md bg-surface-700 px-4 py-2 text-sm font-medium text-zinc-200 transition-colors hover:bg-surface-800"
+                      className="rounded-chip px-5 py-2.5 text-sm font-semibold text-white transition-smooth"
+                      style={{ background: "var(--surface-3)" }}
                     >
                       Server lain
                     </button>
@@ -136,8 +130,8 @@ export default function EmbedPlayer({
 
       {/* Pilihan server */}
       {servers.length > 1 ? (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs font-medium text-zinc-500">
+        <div className="flex items-center gap-2 overflow-x-auto px-0 pb-1" style={{ paddingInline: "var(--page-x-detail)", paddingTop: 12 }}>
+          <span className="shrink-0 text-xs font-bold" style={{ color: "var(--text-2)" }}>
             Server:
           </span>
           {servers.map((s) => {
@@ -148,11 +142,12 @@ export default function EmbedPlayer({
                 type="button"
                 onClick={() => void selectServer(s)}
                 disabled={loading && !isActiveServer}
-                className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors disabled:opacity-50 ${
+                className="shrink-0 rounded-chip px-3 py-1.5 text-xs font-semibold transition-smooth disabled:opacity-50"
+                style={
                   isActiveServer
-                    ? "bg-accent-500 text-white"
-                    : "bg-surface-800 text-zinc-300 hover:bg-surface-700"
-                }`}
+                    ? { background: "var(--blue)", color: "#fff" }
+                    : { background: "var(--surface-3)", color: "var(--text)" }
+                }
               >
                 {s.label}
               </button>

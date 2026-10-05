@@ -24,9 +24,8 @@ export default function AutoResumeToggle() {
       role="switch"
       aria-checked={enabled}
       onClick={toggle}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-        enabled ? "bg-accent-500" : "bg-surface-700"
-      }`}
+      className="relative h-6 w-11 shrink-0 rounded-chip transition-smooth"
+      style={{ background: enabled ? "var(--blue)" : "var(--surface-3)" }}
     >
       <span
         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${

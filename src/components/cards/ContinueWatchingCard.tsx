@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { WatchProgress } from "@/lib/redis/watching";
 
 /**
- * Card "Continue Watching": poster + episode terakhir.
+ * Card "Terakhir Ditonton": landscape 130x76, radius 16px.
  * Progress bar hanya ditampilkan bila position/duration diketahui player;
  * player embed tidak mengeksposnya, jadi jangan tampilkan persen palsu.
  */
@@ -18,40 +18,26 @@ export default function ContinueWatchingCard({ item }: { item: WatchProgress }) 
   const href = `/${item.type}/watch/${item.episodeId}`;
 
   return (
-    <Link href={href} className="group block w-36 shrink-0 sm:w-40" aria-label={`Lanjutkan ${item.title}`}>
-      <div className="relative aspect-[2/3] overflow-hidden rounded-lg bg-surface-800">
+    <Link href={href} className="group block shrink-0 snap-start" style={{ width: 130 }} aria-label={`Lanjutkan ${item.title}`}>
+      <div className="relative overflow-hidden rounded-app" style={{ width: 130, height: 76, background: "var(--surface)" }}>
         {item.poster ? (
-          <Image
-            src={item.poster}
-            alt={item.title}
-            fill
-            sizes="160px"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          <Image src={item.poster} alt={item.title} fill sizes="130px" className="object-cover transition-smooth group-hover:scale-105" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center bg-surface-850 text-xl font-black text-zinc-700">
+          <span className="flex h-full w-full items-center justify-center text-lg font-black" style={{ color: "var(--text-2)" }}>
             {item.title?.charAt(0).toUpperCase() ?? "?"}
           </span>
         )}
         {known ? (
           <div className="absolute inset-x-0 bottom-0 h-1 bg-black/40">
-            <div className="h-full bg-accent-500" style={{ width: `${percent}%` }} />
+            <div className="h-full" style={{ width: `${percent}%`, background: "var(--blue)" }} />
           </div>
-        ) : (
-          <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-200">
-            Lanjut
-          </span>
-        )}
-      </div>
-      <div className="mt-2 space-y-0.5">
-        <h3 className="line-clamp-2 text-sm font-medium leading-snug text-zinc-100 transition-colors group-hover:text-accent-500">
-          {item.title}
-        </h3>
-        <p className="text-xs text-zinc-500">
+        ) : null}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+        <span className="absolute bottom-1 left-1.5 line-clamp-1 max-w-[90%] text-[11px] font-semibold text-white">
           {item.episode ? `Episode ${item.episode}` : "Lanjutkan"}
-          {known ? ` \u00b7 ${percent}%` : ""}
-        </p>
+        </span>
       </div>
+      <h3 className="mt-1.5 line-clamp-1 text-[13px] font-medium leading-snug text-white">{item.title}</h3>
     </Link>
   );
 }

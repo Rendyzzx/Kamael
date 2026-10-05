@@ -24,13 +24,10 @@ export default function SplashScreen() {
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-surface-950 transition-opacity duration-300"
+      className="fixed inset-0 z-[100] flex items-center justify-center #0B0C0E transition-opacity duration-300"
     >
-      <span className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-        <span className="flex h-9 w-9 items-center justify-center rounded-md bg-accent-500 text-base font-black text-white">
-          C
-        </span>
-        Cyro<span className="text-accent-500">nime</span>
+      <span className="font-display flex items-center text-2xl font-bold tracking-tight text-white">
+        Cyro<span style={{ color: "var(--blue)" }}>nime</span>
       </span>
     </div>
   );
