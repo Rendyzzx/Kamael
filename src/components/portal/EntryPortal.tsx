@@ -33,8 +33,16 @@ export default function EntryPortal() {
       role="dialog"
       aria-modal="false"
       aria-label="Pilih kategori"
-      className="app-shell fixed inset-0 z-[90] flex flex-col transition-smooth"
+      className="z-[90] flex flex-col transition-smooth"
       style={{
+        position: "fixed",
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        maxWidth: 480,
+        minWidth: 360,
+        marginInline: "auto",
         background:
           "radial-gradient(120% 40% at 50% 0%, rgba(33,150,243,.16), transparent 70%), var(--bg)",
         opacity: closing ? 0 : 1,
