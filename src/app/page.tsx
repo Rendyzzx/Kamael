@@ -2,31 +2,31 @@ import Image from "next/image";
 import Link from "next/link";
 import AnimeCard from "@/components/cards/AnimeCard";
 import DonghuaCard from "@/components/cards/DonghuaCard";
-import ContinueWatchingCard from "@/components/cards/ContinueWatchingCard";
-import SectionHeader from "@/components/ui/SectionHeader";
-import HorizontalRow from "@/components/ui/HorizontalRow";
-import ShowMoreChips from "@/components/ui/ShowMoreChips";
 import SearchBox from "@/components/navbar/SearchBox";
-import { getAnimeGenres, getAnimeHome, getCompletedAnime } from "@/lib/api/anime";
-import { getLatestDonghua, getCompletedDonghua } from "@/lib/api/donghua";
+import EntryPortal from "@/components/portal/EntryPortal";
+import { getAnimeHome, getCompletedAnime } from "@/lib/api/anime";
+import { getLatestDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
-import { listProgress } from "@/lib/redis/watching";
+import { listProgress, type WatchProgress } from "@/lib/redis/watching";
 
-/** Homepage: fokus pada konten. Request API dibatasi + di-cache. */
+/**
+ * Homepage — layout mengikuti mockup user:
+ * header brand -> search -> hero "lanjut nonton" (es mencair) ->
+ * rail Anime Terbaru -> rail Donghua Terbaru -> ranking Terpopuler.
+ * Data yang tidak disediakan API (jadwal tayang, countdown, jumlah
+ * penonton) tidak dipalsukan; ranking diurutkan dari skor asli.
+ */
 export const revalidate = 600;
 
 export default async function HomePage() {
   const userId = await getAuthenticatedUserId();
 
-  const [animeHomeRes, donghuaLatestRes, animeCompletedRes, donghuaCompletedRes, genresRes, continueRes] =
-    await Promise.allSettled([
-      getAnimeHome(),
-      getLatestDonghua(1),
-      getCompletedAnime(1),
-      getCompletedDonghua(1),
-      getAnimeGenres(),
-      userId ? listProgress(userId) : Promise.resolve([]),
-    ]);
+  const [animeHomeRes, donghuaLatestRes, animeCompletedRes, continueRes] = await Promise.allSettled([
+    getAnimeHome(),
+    getLatestDonghua(1),
+    getCompletedAnime(1),
+    userId ? listProgress(userId) : Promise.resolve([]),
+  ]);
 
   const animeOngoing = animeHomeRes.status === "fulfilled" ? animeHomeRes.value.ongoing : [];
   const donghuaLatest = donghuaLatestRes.status === "fulfilled" ? donghuaLatestRes.value : [];
@@ -34,128 +34,317 @@ export default async function HomePage() {
     animeCompletedRes.status === "fulfilled"
       ? [...animeCompletedRes.value.items].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
       : [];
-  const donghuaCompleted = donghuaCompletedRes.status === "fulfilled" ? donghuaCompletedRes.value : [];
-  const genres = genresRes.status === "fulfilled" ? genresRes.value : [];
-  const continueWatching = continueRes.status === "fulfilled" ? continueRes.value.slice(0, 10) : [];
+  const continueWatching = continueRes.status === "fulfilled" ? continueRes.value : [];
 
-  const featured = animeOngoing[0] ?? null;
+  // Hero: lanjut nonton (data Redis) atau anime terpopuler.
+  const resume = continueWatching[0] ?? null;
+  const fallbackFeatured = popularAnime[0] ?? animeOngoing[0] ?? null;
 
   return (
-    <div>
-      {/* Background gradient maroon -> bg, hanya di area atas Home */}
+    <div className="relative">
+      <EntryPortal />
+
+      {/* Gradient biru lembut di area atas (mengikuti mood mockup, tema Cyronime) */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[420px]"
-        style={{ background: "linear-gradient(180deg,#5A1A20 0%,#3A1218 25%,#121316 60%)" }}
+        style={{
+          background:
+            "radial-gradient(120% 40% at 50% 0%, rgba(33,150,243,.14), transparent 70%), var(--bg)",
+        }}
         aria-hidden="true"
       />
 
       <div className="relative" style={{ paddingTop: 16 }}>
-        {/* Featured — satu konten unggulan dari data asli (ongoing teratas) */}
-        {featured ? (
-          <section aria-labelledby="featured-anime" style={{ padding: "0 var(--page-x)" }}>
-            <Link href={`/anime/${featured.animeId}`} className="group relative block overflow-hidden rounded-card" style={{ height: 150 }}>
-              {featured.poster ? (
-                <Image src={featured.poster} alt={featured.title} fill priority sizes="480px" className="object-cover" />
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/75" />
-              <h1 className="font-display absolute inset-x-3 bottom-3 line-clamp-2 text-center text-[18px] font-medium text-white">
-                {featured.title}
-              </h1>
-            </Link>
-          </section>
-        ) : null}
+        {/* Header: brand + akses profil */}
+        <header className="flex items-center justify-between" style={{ padding: "0 var(--page-x)" }}>
+          <Link href="/" className="font-display flex items-center gap-2 text-[22px] font-bold tracking-tight text-white">
+            <span className="material-symbols-rounded" style={{ fontSize: 26, color: "var(--blue)" }}>
+              movie
+            </span>
+            Cyro<span style={{ color: "var(--blue)" }}>nime</span>
+          </Link>
+          <Link
+            href="/profile"
+            aria-label="Profil"
+            className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
+            style={{ background: "var(--surface)" }}
+          >
+            <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--text)" }}>
+              person
+            </span>
+          </Link>
+        </header>
 
-        <div style={{ marginTop: "var(--section-gap)" }}>
+        <div style={{ marginTop: 14 }}>
           <SearchBox />
         </div>
 
         <div className="space-y-8" style={{ marginTop: "var(--section-gap)" }}>
-          {/* Terakhir Ditonton */}
-          {continueWatching.length > 0 ? (
-            <section aria-labelledby="continue-watching" style={{ padding: "0 var(--page-x)" }}>
-              <SectionHeader title="Terakhir Ditonton" />
-              <HorizontalRow>
-                {continueWatching.map((item) => (
-                  <ContinueWatchingCard key={item.contentId} item={item} />
-                ))}
-              </HorizontalRow>
-            </section>
+          {/* ===== HERO: Lanjut nonton / unggulan ===== */}
+          {resume ? (
+            <HomeHeroResume item={resume} />
+          ) : fallbackFeatured ? (
+            <HomeHeroFeatured item={fallbackFeatured} />
           ) : null}
 
-          {/* Anime Terbaru */}
-          <section aria-labelledby="anime-terbaru" style={{ padding: "0 var(--page-x)" }}>
-            <SectionHeader title="Anime Terbaru" href="/anime" />
-            {animeOngoing.length ? (
-              <HorizontalRow>
-                {animeOngoing.slice(0, 15).map((a, i) => (
-                  <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
-                    <AnimeCard anime={a} priority={i < 4} />
-                  </div>
-                ))}
-              </HorizontalRow>
-            ) : (
-              <EmptyFallback />
-            )}
-          </section>
+          {/* ===== Anime Terbaru ===== */}
+          {animeOngoing.length ? (
+            <HomeRail
+              title="Anime Terbaru"
+              note="Episode terbaru yang sedang tayang."
+              href="/anime"
+            >
+              {animeOngoing.slice(0, 15).map((a, i) => (
+                <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
+                  <AnimeCard anime={a} priority={i < 4} />
+                </div>
+              ))}
+            </HomeRail>
+          ) : (
+            <EmptyFallback />
+          )}
 
-          {/* Donghua Terbaru */}
-          <section aria-labelledby="donghua-terbaru" style={{ padding: "0 var(--page-x)" }}>
-            <SectionHeader title="Donghua Terbaru" href="/donghua" />
-            {donghuaLatest.length ? (
-              <HorizontalRow>
-                {donghuaLatest.slice(0, 15).map((d, i) => (
-                  <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
-                    <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} priority={i < 4} />
-                  </div>
-                ))}
-              </HorizontalRow>
-            ) : (
-              <EmptyFallback />
-            )}
-          </section>
+          {/* ===== Donghua Terbaru ===== */}
+          {donghuaLatest.length ? (
+            <HomeRail title="Donghua Terbaru" note="Rilisan donghua terbaru." href="/donghua">
+              {donghuaLatest.slice(0, 15).map((d, i) => (
+                <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
+                  <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} priority={i < 4} />
+                </div>
+              ))}
+            </HomeRail>
+          ) : (
+            <EmptyFallback />
+          )}
 
-          {/* Anime Terpopuler — anime tamat diurutkan skor tertinggi (data asli) */}
-          <section aria-labelledby="popular-anime" style={{ padding: "0 var(--page-x)" }}>
-            <SectionHeader title="Anime Terpopuler" href="/anime" />
-            {popularAnime.length ? (
-              <HorizontalRow>
-                {popularAnime.slice(0, 15).map((a) => (
-                  <div key={a.animeId} className="shrink-0 snap-start" style={{ width: 128 }}>
-                    <AnimeCard anime={a} />
-                  </div>
-                ))}
-              </HorizontalRow>
-            ) : (
-              <EmptyFallback />
-            )}
-          </section>
-
-          {/* Donghua Tamat — listing donghua tidak membawa skor, jadi tidak dilabeli "Popular" */}
-          <section aria-labelledby="donghua-tamat" style={{ padding: "0 var(--page-x)" }}>
-            <SectionHeader title="Donghua Tamat" href="/donghua" />
-            {donghuaCompleted.length ? (
-              <HorizontalRow>
-                {donghuaCompleted.slice(0, 15).map((d) => (
-                  <div key={d.slug} className="shrink-0 snap-start" style={{ width: 128 }}>
-                    <DonghuaCard donghua={d} href={`/donghua/${d.slug}`} />
-                  </div>
-                ))}
-              </HorizontalRow>
-            ) : (
-              <EmptyFallback />
-            )}
-          </section>
-
-          {/* Genres */}
-          {genres.length ? (
-            <section aria-labelledby="genres" style={{ padding: "0 var(--page-x)" }}>
-              <h2 className="font-display mb-3 text-[21px] font-light text-white">Genres</h2>
-              <ShowMoreChips genres={genres} basePath="/anime" />
-            </section>
-          ) : null}
+          {/* ===== Terpopuler: ranking by skor asli ===== */}
+          {popularAnime.length ? <HomeRanking items={popularAnime.slice(0, 5)} /> : null}
         </div>
       </div>
     </div>
+  );
+}
+
+/* ---------- HERO: lanjut nonton (data asli Redis) ---------- */
+function HomeHeroResume({ item }: { item: WatchProgress }) {
+  const known =
+    typeof item.position === "number" && typeof item.duration === "number" && item.duration > 0;
+  const percent = known
+    ? Math.min(100, Math.round(((item.position as number) / (item.duration as number)) * 100))
+    : null;
+
+  return (
+    <section aria-label="Lanjut nonton" style={{ padding: "0 var(--page-x)" }}>
+      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+        {item.poster ? (
+          <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
+        ) : null}
+
+        {/* Es mencair (dekoratif, tema blue) */}
+        <div className="hero-ice" aria-hidden="true" />
+        <div className="hero-edge" aria-hidden="true">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
+          </svg>
+          {item.episode ? (
+            <span
+              className="absolute rounded-chip font-bold"
+              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--blue)", color: "#fff" }}
+            >
+              EP {item.episode}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+
+        <span
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
+          style={{ padding: "7px 14px", background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+        >
+          Lanjut nonton
+        </span>
+
+        <div className="absolute inset-x-5 bottom-5 z-[5]">
+          <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
+            {item.title}
+          </h1>
+          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+            {item.episode ? `Episode ${item.episode}` : "Lanjutkan dari terakhir kali"}
+            {percent !== null ? ` · ${percent}% ditonton` : ""}
+          </p>
+          <div className="mt-3.5 flex items-center gap-3">
+            <Link
+              href={`/${item.type}/watch/${item.episodeId}`}
+              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
+              style={{ background: "var(--blue-grad)" }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
+                play_arrow
+              </span>
+              Lanjutkan
+            </Link>
+            <Link
+              href={`/${item.type}/${item.contentId}`}
+              aria-label="Detail"
+              className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
+              style={{ background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+            >
+              <span className="material-symbols-rounded text-white" style={{ fontSize: 22 }}>
+                info
+              </span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- HERO: unggulan (anime populer) bila belum ada history ---------- */
+function HomeHeroFeatured({
+  item,
+}: {
+  item: { animeId: string; title: string; poster: string; score: string | null; episodes: number | null };
+}) {
+  return (
+    <section aria-label="Sedang populer" style={{ padding: "0 var(--page-x)" }}>
+      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+        {item.poster ? (
+          <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
+        ) : null}
+
+        <div className="hero-ice" aria-hidden="true" />
+        <div className="hero-edge" aria-hidden="true">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
+          </svg>
+          {item.score ? (
+            <span
+              className="absolute rounded-chip font-bold"
+              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--blue)", color: "#fff" }}
+            >
+              {item.score}
+            </span>
+          ) : null}
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+
+        <span
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
+          style={{ padding: "7px 14px", background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+        >
+          Sedang populer
+        </span>
+
+        <div className="absolute inset-x-5 bottom-5 z-[5]">
+          <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
+            {item.title}
+          </h1>
+          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+            {item.score ? `Skor ${item.score}` : "Tonton sekarang"}
+            {item.episodes ? ` · ${item.episodes} eps` : ""}
+          </p>
+          <div className="mt-3.5 flex items-center gap-3">
+            <Link
+              href={`/anime/${item.animeId}`}
+              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
+              style={{ background: "var(--blue-grad)" }}
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
+                play_arrow
+              </span>
+              Mulai Nonton
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Section rail dengan judul gaya mockup ---------- */
+function HomeRail({
+  title,
+  note,
+  href,
+  children,
+}: {
+  title: string;
+  note?: string;
+  href?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="flex items-baseline justify-between" style={{ padding: "0 var(--page-x)", marginBottom: 4 }}>
+        <h2 className="font-display text-[20px] font-bold tracking-tight text-white">{title}</h2>
+        {href ? (
+          <Link href={href} className="text-[13px] font-semibold" style={{ color: "var(--blue)" }}>
+            Lihat Semua
+          </Link>
+        ) : null}
+      </div>
+      {note ? (
+        <p className="mb-3 text-[12px]" style={{ padding: "0 var(--page-x)", color: "var(--text-2)" }}>
+          {note}
+        </p>
+      ) : null}
+      <div className="flex gap-3 overflow-x-auto px-3 pb-1" style={{ scrollbarWidth: "none", scrollSnapType: "x proximity" }}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Ranking "Terpopuler" (skor asli, bukan viewers palsu) ---------- */
+function HomeRanking({
+  items,
+}: {
+  items: { animeId: string; title: string; poster: string; score: string | null; episodes: number | null }[];
+}) {
+  return (
+    <section aria-label="Terpopuler" style={{ padding: "0 var(--page-x)" }}>
+      <div className="flex items-baseline justify-between" style={{ marginBottom: 4 }}>
+        <h2 className="font-display text-[20px] font-bold tracking-tight text-white">Terpopuler</h2>
+      </div>
+      <p className="mb-3 text-[12px]" style={{ color: "var(--text-2)" }}>
+        Diurutkan dari skor tertinggi.
+      </p>
+      <ol className="grid gap-2.5">
+        {items.map((a, i) => (
+          <li key={a.animeId}>
+            <Link
+              href={`/anime/${a.animeId}`}
+              className="grid items-center gap-3 rounded-app transition-smooth"
+              style={{
+                gridTemplateColumns: "44px 56px 1fr auto",
+                background: "var(--surface)",
+                padding: "10px 14px 10px 6px",
+              }}
+            >
+              <span className={`rank-num ${i === 0 ? "top" : ""}`}>{i + 1}</span>
+              <span className="relative overflow-hidden rounded-app" style={{ width: 56, height: 74, background: "var(--surface-3)" }}>
+                {a.poster ? (
+                  <Image src={a.poster} alt={a.title} fill sizes="56px" className="object-cover" />
+                ) : null}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-[14px] font-semibold text-white">{a.title}</span>
+                <span className="mt-0.5 block text-[12px]" style={{ color: "var(--text-2)" }}>
+                  {a.score ? `Skor ${a.score}` : "Tamat"}
+                  {a.episodes ? ` · ${a.episodes} eps` : ""}
+                </span>
+              </span>
+              <span className="material-symbols-rounded" style={{ fontSize: 20, color: "var(--text-2)" }} aria-hidden="true">
+                chevron_right
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }
 
