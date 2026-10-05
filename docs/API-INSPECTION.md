@@ -67,3 +67,40 @@ API Sanga ini sendiri SUDAH menjadi scraper Otakudesu (data dari otakudesu.blog,
 2. `lib/api/otakudesu.ts` — adapter anime, normalisasi union fields.
 3. `lib/api/donghua.ts` — adapter donghua, normalisasi href (`/donghua/x` → API path), mapping field beda nama (rating/score, episodeList/episodes_list, dll).
 4. Semua perubahan struktur API cukup diperbaiki di adapter — UI hanya mengenal type hasil normalisasi.
+
+## Inspeksi lanjutan: modul lain & thumbnail per episode (Okt 2026)
+
+Eksplorasi endpoint di luar Otakudesu/Donghua yang sudah dipakai Cyronime.
+
+### Inventaris modul API (di luar yang dipakai)
+
+| Modul | Catatan |
+| --- | --- |
+| Samehadaku | Server per kualitas (360p/480p/720p/1080p), popular, movies, batch, schedule. Banyak embed via Blogger Video. |
+| Animasu | Search lanjutan (filter genre), characters |
+| Kusonime | Browsing per musim/tahun, tipe ONA/OVA/Special |
+| Anoboy, Oploverz, Stream, Animekuindo, Alqanime | Sumber anime alternatif |
+| Nimegami | J-Drama & Live Action |
+| Animekompi | Search suggest/autocomplete, tooltip, filter studio/season/status/type, Live Action & Tokusatsu |
+| Winbu | Film, series Jepang/Korea/China/Barat, TV show |
+| Donghub | Donghua alternatif; home punya slider/popular/latest |
+| Kuramanime | Error pada saat inspeksi — jangan dipakai |
+| Nekopoi | 18+ — di luar scope produk |
+
+Semua modul berbagi rate limit yang sama (30 req/menit, ban permanen) → multi-source tetap wajib cache dua lapis.
+
+### Thumbnail per episode
+
+- Otakudesu, Anichin, Animekompi, Samehadaku (episode detail): TIDAK punya thumbnail per episode — hanya poster series yang dipakai ulang.
+- **Samehadaku `home` / `recent`**: thumbnail per episode untuk rilisan terbaru (contoh `Kanata-kara-Episode-1-300x169.jpg`, 16:9) — kandidat rail "Episode terbaru" di masa depan.
+- Donghub `home` latest/popular: poster series + nomor episode terbaru per item.
+
+### Fitur modul terpasang yang belum dipakai Cyronime
+
+- Otakudesu: `/anime/schedule` (jadwal rilis per hari), `/anime/batch/:slug`, `/anime/unlimited`.
+- Donghua: `/anime/donghua/schedule`, `/anime/donghua/az-list/:huruf`, `/anime/donghua/seasons/:tahun`.
+
+### Field download (sudah dinormalisasi sejak rebuild player)
+
+- Otakudesu episode: `downloadUrl.qualities[]` → `{title: "Mp4_360p", size, urls:[{title, url}]}` (Pdrain, Acefile, GoFile, Mega, dst).
+- Donghua episode: `download_url_{360p..1080p}.Mirrored` (satu URL per kualitas).

@@ -5,6 +5,7 @@
  * Struktur mentah terdokumentasi di docs/API-INSPECTION.md.
  */
 import { apiFetch } from "./client";
+import { normalizeDonghuaDownloads } from "@/lib/player/sources";
 import type {
   DonghuaDetail,
   DonghuaEpisodeDetail,
@@ -81,6 +82,7 @@ interface RawEpisodePage {
     next_episode?: { slug?: string | null } | null;
   } | null;
   episodes_list?: RawEpisodeItem[] | null;
+  download_url?: Record<string, { Mirrored?: string | null } | undefined> | null;
 }
 
 /* ---------- Helpers ---------- */
@@ -297,6 +299,7 @@ export async function getDonghuaEpisode(
     mainServer,
     prevEpisodeSlug: str(res.navigation?.previous_episode?.slug) ?? null,
     nextEpisodeSlug: str(res.navigation?.next_episode?.slug) ?? null,
+    downloads: normalizeDonghuaDownloads(res.download_url ?? null),
     episodeList,
   };
 }

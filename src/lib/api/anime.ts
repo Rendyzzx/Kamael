@@ -5,6 +5,7 @@
  * Struktur mentah terdokumentasi di docs/API-INSPECTION.md.
  */
 import { apiFetch } from "./client";
+import { normalizeAnimeDownloads } from "@/lib/player/sources";
 import type {
   AnimeDetail,
   AnimeEpisodeDetail,
@@ -100,6 +101,12 @@ interface RawEpisodeData {
   info?: {
     episodeList?: RawEpisode[] | null;
     genreList?: RawGenre[] | null;
+  } | null;
+  downloadUrl?: {
+    qualities?: {
+      title?: string | null;
+      urls?: { title?: string | null; url?: string | null }[] | null;
+    }[] | null;
   } | null;
 }
 
@@ -334,6 +341,7 @@ export async function getAnimeEpisode(
 
   return {
     title: str(d.title) ?? episodeId,
+    downloads: normalizeAnimeDownloads(d.downloadUrl ?? null),
     animeId: str(d.animeId) ?? "",
     animeTitle: null, // API tidak menyertakan judul anime di response episode
     releaseTime: str(d.releaseTime),

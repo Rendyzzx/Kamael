@@ -69,7 +69,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
           <Image src={detail.poster} alt={detail.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 40%, var(--bg) 100%)" }} />
-        <DetailHeroBar title={detail.title} />
+        <DetailHeroBar title={detail.title} backHref="/anime" />
       </div>
 
       <div style={{ padding: "0 var(--page-x-detail)", marginTop: -8 }}>

@@ -67,6 +67,14 @@ export interface AnimeQualityGroup {
   servers: AnimeServerOption[];
 }
 
+/**
+ * Link download hasil normalisasi (dari downloadUrl.qualities response episode).
+ * Additive: field ini sudah ada di response API, hanya belum dinormalisasi.
+ */
+import type { DownloadOption } from "@/types/player";
+
+export type { DownloadOption };
+
 export interface AnimeEpisodeDetail {
   title: string;
   animeId: string;
@@ -79,6 +87,8 @@ export interface AnimeEpisodeDetail {
   qualities: AnimeQualityGroup[];
   /** Daftar episode dari info episode, urut menaik. */
   episodeList: AnimeEpisodeRef[];
+  /** Link download per kualitas/penyedia (bisa kosong). */
+  downloads: DownloadOption[];
 }
 
 export interface PaginationInfo {

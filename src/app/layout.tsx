@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Montserrat, Roboto } from "next/font/google";
+import { Bricolage_Grotesque, Roboto } from "next/font/google";
 import BottomNav from "@/components/navbar/BottomNav";
 import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
 import "./globals.css";
 
-const montserrat = Montserrat({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
   weight: ["500", "600", "700", "800"],
-  variable: "--font-montserrat",
+  variable: "--font-bricolage",
   display: "swap",
 });
 
@@ -52,7 +52,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`dark ${montserrat.variable} ${roboto.variable}`}>
+    <html lang="id" className={`dark ${bricolage.variable} ${roboto.variable}`}>
       <body>
         <AuthProvider>
           <SplashScreen />

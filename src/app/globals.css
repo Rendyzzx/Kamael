@@ -27,6 +27,14 @@
   --chip-border: #6b2328;
   --nav-active: #4a4560;
 
+  /* ===== Token player & halaman episode (spec rebuild player) ===== */
+  --ink: #0D1320;
+  --deep: #161E31;
+  --deep-2: #1D2740;
+  --glacier: #8FD3E8;
+  --frost: #EAF6FA;
+  --muted: #93A0B8;
+
   --radius-card: 24px;
   --radius-md: 16px;
   --radius-pill: 999px;
@@ -63,7 +71,7 @@ h1,
 h2,
 h3,
 .font-display {
-  font-family: var(--font-montserrat), "Montserrat", sans-serif;
+  font-family: var(--font-bricolage), "Bricolage Grotesque", "Segoe UI", sans-serif;
 }
 
 .material-symbols-rounded {
@@ -102,11 +110,81 @@ h3,
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .line-clamp-5 {
   display: -webkit-box;
   -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Fokus keyboard terlihat (glacier) — aturan aksesibilitas player. */
+:focus-visible {
+  outline: 2px solid var(--glacier);
+  outline-offset: 2px;
+}
+
+/* Bottom sheet player: masuk dari bawah; hormati reduced-motion. */
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.sheet-scrim.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sheet-panel {
+  position: fixed;
+  z-index: 61;
+  left: 50%;
+  bottom: 0;
+  width: min(480px, 100%);
+  transform: translate(-50%, 100%);
+  transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+  background: var(--deep);
+  border-top: 1px solid var(--deep-2);
+  border-radius: 20px 20px 0 0;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+.sheet-panel.on {
+  transform: translate(-50%, 0);
+}
+/* Desktop (>=768px): popover kanan dalam shell 480px, bukan bottom sheet. */
+@media (min-width: 768px) {
+  .sheet-panel {
+    left: calc(50% + 240px - 316px);
+    bottom: 16px;
+    width: 300px;
+    border-radius: 16px;
+    border: 1px solid var(--deep-2);
+    transform: translate(0, 8px);
+    opacity: 0;
+    pointer-events: none;
+    max-height: 60vh;
+  }
+  .sheet-panel.on {
+    transform: translate(0, 0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel,
+  .sheet-scrim {
+    transition: none;
+  }
 }
 
 /* Skeleton shimmer */
@@ -166,8 +244,22 @@ h3,
 
 /* Angka ranking: outline biru, peringkat 1 terisi */
 .rank-num{
-  font-family:var(--font-montserrat),"Montserrat",sans-serif;
+  font-family:var(--font-bricolage),"Bricolage Grotesque","Segoe UI",sans-serif;
   font-weight:800;font-size:38px;line-height:1;text-align:center;
   color:transparent;-webkit-text-stroke:1.5px var(--blue);
 }
 .rank-num.top{color:var(--blue);-webkit-text-stroke:0}
+
+/* Animasi player: hanya spinner fungsional, tanpa animasi dekoratif. */
+@keyframes player-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel,
+  .sheet-scrim,
+  [style*="player-spin"] {
+    transition: none;
+  }
+}

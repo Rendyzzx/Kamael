@@ -59,6 +59,10 @@ export interface DonghuaStreamServer {
   url: string;
 }
 
+import type { DownloadOption } from "@/types/player";
+
+export type { DownloadOption };
+
 export interface DonghuaEpisodeDetail {
   title: string;
   donghuaTitle: string | null;
@@ -70,4 +74,6 @@ export interface DonghuaEpisodeDetail {
   nextEpisodeSlug: string | null;
   /** Daftar episode urut menaik. */
   episodeList: DonghuaEpisodeRef[];
+  /** Link download per kualitas (bisa kosong). */
+  downloads: DownloadOption[];
 }
