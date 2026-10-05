@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { auth, signOut } from "@/lib/auth/session";
+import { auth } from "@/lib/auth/session";
+import { logoutToOnboarding } from "@/lib/auth/logout-action";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 
 export const metadata: Metadata = {
@@ -71,12 +72,7 @@ export default async function ProfilePage() {
         ))}
       </section>
 
-      <form
-        action={async () => {
-          "use server";
-          await signOut({ redirectTo: "/" });
-        }}
-      >
+      <form action={logoutToOnboarding}>
         <button
           type="submit"
           className="w-full rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
