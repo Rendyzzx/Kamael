@@ -156,7 +156,7 @@ function OnboardingSplash() {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-7 px-8 text-center">
       <div className="relative" style={{ width: 160, height: 160 }}>
-        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="160px" className="object-contain" priority />
+        <Image src="/mascot/senja-rimlight.webp" alt="" fill sizes="160px" className="object-contain" priority />
       </div>
       <h1 className="font-display text-[22px] font-bold text-white">Selamat datang di senja</h1>
       <div className="flex items-center gap-1.5" aria-hidden="true">
@@ -205,7 +205,7 @@ function OnboardingDeclined({ onBack }: { onBack: () => void }) {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-5 px-7 text-center">
       <div className="relative" style={{ width: 150, height: 170 }}>
-        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="150px" className="object-contain" />
+        <Image src="/mascot/senja-rimlight.webp" alt="" fill sizes="150px" className="object-contain" />
       </div>
       <h1 className="font-display text-[20px] font-bold text-white">Belum bisa lanjut</h1>
       <p className="max-w-[300px] text-[14px] leading-relaxed" style={{ color: "var(--text-2)" }}>
@@ -224,7 +224,7 @@ function OnboardingIntro({ onStart }: { onStart: () => void }) {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-8 px-7 text-center">
       <div className="relative" style={{ width: 220, height: 220 }}>
-        <Image src="/mascot/senja-rimlight.png" alt="Senja, maskot Cyronime" fill sizes="220px" className="object-contain" priority />
+        <Image src="/mascot/senja-rimlight.webp" alt="Senja, maskot Cyronime" fill sizes="220px" className="object-contain" priority />
       </div>
       <div className="space-y-3">
         <h1 className="font-display text-[22px] font-bold tracking-tight text-white">Halo, aku Senja!</h1>

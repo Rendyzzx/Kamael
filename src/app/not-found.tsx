@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
       <div className="relative" style={{ width: 150, height: 170 }}>
-        <Image src="/mascot/senja-rimlight.png" alt="Maskot Senja kebingungan" fill sizes="150px" className="object-contain" />
+        <Image src="/mascot/senja-rimlight.webp" alt="Maskot Senja kebingungan" fill sizes="150px" className="object-contain" />
       </div>
       <div>
         <p className="font-display text-lg font-bold text-white">Halaman ini tidak ada</p>

@@ -20,7 +20,7 @@ export default function GlobalError({
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
       <div className="relative" style={{ width: 140, height: 160 }}>
-        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="140px" className="object-contain" />
+        <Image src="/mascot/senja-rimlight.webp" alt="" fill sizes="140px" className="object-contain" />
       </div>
       <div>
         <p className="font-display text-lg font-bold text-white">Datanya gagal dimuat</p>
