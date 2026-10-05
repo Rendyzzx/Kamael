@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
+import TesterLoginButton from "@/components/auth/TesterLoginButton";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -27,13 +28,14 @@ export default async function LoginPage() {
 
       <div className="w-full space-y-3">
         <GoogleLoginButton callbackUrl="/profile" />
+        <TesterLoginButton />
         <p className="text-xs" style={{ color: "var(--text-2)" }}>
           Belum punya akun? Login dengan Google untuk mulai — tidak ada password yang perlu diingat.
         </p>
       </div>
 
       <p className="text-xs" style={{ color: "var(--text-2)" }}>
-        Kamu tetap bisa menjelajahi Anime dan Donghua tanpa login.
+        Cyronime butuh akun untuk menjelajahi Anime dan Donghua — seperti aplikasi pada umumnya.
       </p>
     </div>
   );

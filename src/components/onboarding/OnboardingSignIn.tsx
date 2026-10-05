@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import TesterLoginButton from "@/components/auth/TesterLoginButton";
 
 /**
  * Langkah login onboarding — WAJIB, tidak ada opsi tamu (perilaku aplikasi
@@ -60,6 +61,8 @@ export default function OnboardingSignIn() {
           )}
           {isPending ? "Mengalihkan..." : "Lanjut dengan Google"}
         </button>
+        {/* Login tester sementara (QA) — hapus sebelum rilis publik. */}
+        <TesterLoginButton />
       </div>
 
       <p className="max-w-[300px] text-xs" style={{ color: "var(--text-2)" }}>
