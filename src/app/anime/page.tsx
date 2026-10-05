@@ -3,6 +3,7 @@ import InfiniteGridAnime from "@/components/ui/InfiniteGridAnime";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
 import SearchBox from "@/components/navbar/SearchBox";
+import PortalSwitch from "@/components/portal/PortalSwitch";
 import {
   getAnimeByGenre,
   getAnimeGenres,
@@ -47,7 +48,10 @@ export default async function AnimePage({ searchParams }: PageProps) {
       <SearchBox />
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
-        <h1 className="font-display text-[18px] font-bold text-white">Anime</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-[18px] font-bold text-white">Anime</h1>
+          <PortalSwitch portal="anime" />
+        </div>
 
         <Tabs
           items={[

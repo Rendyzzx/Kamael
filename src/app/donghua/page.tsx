@@ -3,6 +3,7 @@ import InfiniteGridDonghua from "@/components/ui/InfiniteGridDonghua";
 import Tabs from "@/components/ui/Tabs";
 import GenreSelect from "@/components/ui/GenreSelect";
 import SearchBox from "@/components/navbar/SearchBox";
+import PortalSwitch from "@/components/portal/PortalSwitch";
 import {
   getCompletedDonghua,
   getDonghuaByGenre,
@@ -53,7 +54,10 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
       <SearchBox />
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
-        <h1 className="font-display text-[18px] font-bold text-white">Donghua</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-[18px] font-bold text-white">Donghua</h1>
+          <PortalSwitch portal="donghua" />
+        </div>
 
         <Tabs
           items={[

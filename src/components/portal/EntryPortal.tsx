@@ -1,91 +1,63 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { PORTAL_COOKIE, PORTAL_SWITCH_EVENT, type Portal } from "./portal-events";
+import type { Portal } from "./portal-events";
 
-const SESSION_SEEN = "cyronime_portal_seen";
-
-function hasPortalCookie(): boolean {
-  if (typeof document === "undefined") return true;
-  return document.cookie
-    .split("; ")
-    .some((c) => c.startsWith(`${PORTAL_COOKIE}=`));
-}
-
-function setPortalCookie(value: Portal) {
-  document.cookie = `${PORTAL_COOKIE}=${value}; path=/; max-age=31536000; samesite=lax`;
-}
+const REQUEST_TIMEOUT_MS = 5_000;
 
 /**
- * Portal pemilih kategori: Anime (khusus anime) atau Donghua (khusus donghua).
- * - Tampil saat pengunjung belum pernah memilih (belum ada cookie).
- * - Pilihan disimpan di cookie 1 tahun → home (server) menampilkan konten
- *   sesuai portal; memilih ulang memakai tombol ganti portal di header home.
- * - "Lewati" hanya menutup untuk sesi ini; portal default = anime.
+ * Portal pembuka fullscreen (hanya di "/"): dua kartu besar Anime & Donghua.
+ * - Fullscreen: bottom nav + FAB settings disembunyikan layout di route "/".
+ * - Pilihan disimpan ke Redis (pref:{id}) lewat POST /api/preference —
+ *   identitas diurus server (user login / cookie visitor httpOnly).
+ * - Navigasi tetap lanjut WALAU Redis gagal (fallback aman).
+ * - Kartu: poster latar + gradient overlay, fade-in saat muncul, scale saat
+ *   tap, dan spinner saat preferensi sedang dikirim.
  */
-export default function EntryPortal({ portal }: { portal: Portal }) {
+export default function EntryPortal({
+  animePoster,
+  donghuaPoster,
+}: {
+  animePoster: string | null;
+  donghuaPoster: string | null;
+}) {
   const router = useRouter();
-  const [visible, setVisible] = useState(false);
-  const [closing, setClosing] = useState(false);
+  const [pending, setPending] = useState<Portal | null>(null);
 
-  useEffect(() => {
-    const seen = sessionStorage.getItem(SESSION_SEEN);
-    if (!hasPortalCookie() && !seen) {
-      setVisible(true);
+  async function choose(value: Portal) {
+    if (pending) return;
+    setPending(value);
+    try {
+      await fetch("/api/preference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value }),
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+    } catch {
+      // Redis/jaringan gagal → biarkan; tetap navigasi (fallback aman).
     }
-
-    const onSwitch = () => {
-      setClosing(false);
-      setVisible(true);
-    };
-    window.addEventListener(PORTAL_SWITCH_EVENT, onSwitch);
-    return () => window.removeEventListener(PORTAL_SWITCH_EVENT, onSwitch);
-  }, []);
-
-  function close() {
-    setClosing(true);
-    setTimeout(() => setVisible(false), 260);
+    router.push(`/${value}`);
   }
-
-  function skip() {
-    sessionStorage.setItem(SESSION_SEEN, "1");
-    close();
-  }
-
-  function choose(next: Portal) {
-    setPortalCookie(next);
-    close();
-    // Server home membaca cookie; refresh agar konten berganti portal.
-    if (next !== portal) router.refresh();
-  }
-
-  if (!visible) return null;
 
   return (
     <div
-      role="dialog"
-      aria-modal="false"
-      aria-label="Pilih portal"
-      className="z-[90] flex flex-col transition-smooth"
+      className="fixed inset-0 z-[90] overflow-y-auto"
       style={{
-        position: "fixed",
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
         maxWidth: 480,
         minWidth: 360,
         marginInline: "auto",
         background:
           "radial-gradient(120% 40% at 50% 0%, rgba(33,150,243,.16), transparent 70%), var(--bg)",
-        opacity: closing ? 0 : 1,
       }}
     >
-      <div className="flex flex-1 flex-col justify-center gap-7 px-5 pb-8">
-        <div className="text-center">
-          <div className="font-display flex items-center justify-center gap-2 text-[24px] font-bold tracking-tight text-white">
-            <span className="material-symbols-rounded" style={{ fontSize: 26, color: "var(--blue)" }}>
+      <div className="flex min-h-full flex-col justify-center gap-8 px-5 py-10">
+        {/* Logo + ajakan */}
+        <div className="portal-fade-in text-center">
+          <div className="font-display flex items-center justify-center gap-2 text-[26px] font-bold tracking-tight text-white">
+            <span className="material-symbols-rounded" style={{ fontSize: 28, color: "var(--blue)" }}>
               movie
             </span>
             Cyro<span style={{ color: "var(--blue)" }}>nime</span>
@@ -95,67 +67,128 @@ export default function EntryPortal({ portal }: { portal: Portal }) {
           </p>
         </div>
 
+        {/* Dua kartu besar, ditumpuk di mobile */}
         <div className="space-y-4">
-          <button
-            type="button"
-            onClick={() => choose("anime")}
-            className="relative flex w-full items-center gap-4 overflow-hidden rounded-card p-5 text-left transition-smooth active:scale-[.98]"
-            style={{ background: "linear-gradient(135deg, rgba(21,101,192,.35), rgba(33,150,243,.16)), var(--surface)" }}
-          >
-            <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-chip"
-              style={{ background: "var(--blue)" }}
-            >
-              <span className="material-symbols-rounded text-white" style={{ fontSize: 26 }}>
-                live_tv
-              </span>
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="font-display block text-[17px] font-bold text-white">Anime</span>
-              <span className="block text-[12px]" style={{ color: "var(--text-2)" }}>
-                Anime Jepang · Sub Indo
-              </span>
-            </span>
-            <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--blue)" }} aria-hidden="true">
-              arrow_forward
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => choose("donghua")}
-            className="relative flex w-full items-center gap-4 overflow-hidden rounded-card p-5 text-left transition-smooth active:scale-[.98]"
-            style={{ background: "linear-gradient(135deg, rgba(122,26,34,.4), rgba(90,26,32,.2)), var(--surface)" }}
-          >
-            <span
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-chip"
-              style={{ background: "var(--maroon)" }}
-            >
-              <span className="material-symbols-rounded text-white" style={{ fontSize: 26 }}>
-                auto_awesome
-              </span>
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="font-display block text-[17px] font-bold text-white">Donghua</span>
-              <span className="block text-[12px]" style={{ color: "var(--text-2)" }}>
-                Anime China · Sub Indo
-              </span>
-            </span>
-            <span className="material-symbols-rounded" style={{ fontSize: 22, color: "#D9535E" }} aria-hidden="true">
-              arrow_forward
-            </span>
-          </button>
+          <PortalCard
+            value="anime"
+            title="Anime"
+            subtitle="Anime Jepang · Sub Indo"
+            icon="live_tv"
+            poster={animePoster}
+            overlay="linear-gradient(180deg, rgba(18,19,22,.25) 0%, rgba(18,19,22,.82) 72%, #121316 100%), linear-gradient(115deg, rgba(33,150,243,.42), rgba(33,150,243,0) 62%)"
+            accent="var(--blue)"
+            pending={pending}
+            delayMs={80}
+            onChoose={choose}
+          />
+          <PortalCard
+            value="donghua"
+            title="Donghua"
+            subtitle="Anime China · Sub Indo"
+            icon="auto_awesome"
+            poster={donghuaPoster}
+            overlay="linear-gradient(180deg, rgba(18,19,22,.25) 0%, rgba(18,19,22,.82) 72%, #121316 100%), linear-gradient(115deg, rgba(122,26,34,.55), rgba(122,26,34,0) 62%)"
+            accent="#D9535E"
+            pending={pending}
+            delayMs={160}
+            onChoose={choose}
+          />
         </div>
-
-        <button
-          type="button"
-          onClick={skip}
-          className="mx-auto block rounded-chip px-4 py-2 text-[13px] font-semibold transition-smooth"
-          style={{ background: "transparent", color: "var(--text-2)" }}
-        >
-          Lewati
-        </button>
       </div>
+    </div>
+  );
+}
+
+function PortalCard({
+  value,
+  title,
+  subtitle,
+  icon,
+  poster,
+  overlay,
+  accent,
+  pending,
+  delayMs,
+  onChoose,
+}: {
+  value: Portal;
+  title: string;
+  subtitle: string;
+  icon: string;
+  poster: string | null;
+  overlay: string;
+  accent: string;
+  pending: Portal | null;
+  delayMs: number;
+  onChoose: (value: Portal) => void;
+}) {
+  const isPending = pending === value;
+  const dimmed = pending !== null && !isPending;
+
+  return (
+    <div className="portal-fade-in" style={{ animationDelay: `${delayMs}ms` }}>
+      <button
+        type="button"
+        onClick={() => onChoose(value)}
+        disabled={pending !== null}
+        aria-label={`Masuk ke ${title}`}
+        className="relative block w-full overflow-hidden rounded-card text-left transition-smooth active:scale-[.98]"
+        style={{
+          height: 188,
+          transform: isPending ? "scale(.97)" : undefined,
+          opacity: dimmed ? 0.55 : 1,
+          background: "var(--surface)",
+        }}
+      >
+        {poster ? (
+          <Image
+            src={poster}
+            alt=""
+            fill
+            sizes="(max-width: 480px) 100vw, 480px"
+            className="object-cover"
+            priority={value === "anime"}
+          />
+        ) : null}
+        <span aria-hidden="true" className="absolute inset-0" style={{ background: overlay }} />
+        <span className="relative flex h-full flex-col justify-end p-5">
+          <span className="flex items-center gap-3">
+            <span
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-chip"
+              style={{ background: accent }}
+            >
+              <span className="material-symbols-rounded text-white" style={{ fontSize: 24 }}>
+                {icon}
+              </span>
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="font-display block text-[20px] font-bold leading-tight text-white">
+                {title}
+              </span>
+              <span className="block text-[12px]" style={{ color: "var(--text-2)" }}>
+                {subtitle}
+              </span>
+            </span>
+            {isPending ? (
+              <span
+                className="material-symbols-rounded animate-spin text-white"
+                style={{ fontSize: 24 }}
+                aria-label="Memuat"
+              >
+                progress_activity
+              </span>
+            ) : (
+              <span
+                className="material-symbols-rounded"
+                style={{ fontSize: 24, color: accent }}
+                aria-hidden="true"
+              >
+                arrow_forward
+              </span>
+            )}
+          </span>
+        </span>
+      </button>
     </div>
   );
 }

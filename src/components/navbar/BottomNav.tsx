@@ -22,8 +22,9 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Player butuh seluruh layar — sembunyikan bottom nav agar tidak mengganggu.
-  if (pathname.includes("/watch/")) return null;
+  // Player butuh seluruh layar; portal pembuka ("/") juga fullscreen —
+  // tanpa bottom nav & header di sana.
+  if (pathname.includes("/watch/") || pathname === "/") return null;
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);

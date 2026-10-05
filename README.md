@@ -87,5 +87,6 @@ Lihat `.env.example` untuk contoh dan catatan redirect URI Google.
   `position`/`duration` penuh untuk player native di masa depan.
 - **Isolasi data user**: semua endpoint activity mengambil userId dari session
   server-side, tidak pernah dari body client.
+- **Portal pembuka**: pilihan Anime/Donghua pertama kali disimpan di Redis (`pref:{id}`; identitas = user ID login atau visitor ID di cookie httpOnly, 1 tahun) via `/api/preference`. Route `/` mengecek Redis di server dan langsung redirect ke `/anime`/`/donghua` tanpa flicker; URL dalam tidak terpengaruh.
 - **Ketahanan**: jika Redis error/down, halaman utama, anime, donghua, dan
   search tetap berfungsi; hanya fitur akun yang menampilkan fallback.
