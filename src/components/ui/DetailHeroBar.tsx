@@ -62,7 +62,7 @@ export default function DetailHeroBar({
           height: scrolled ? 56 : 0,
           opacity: scrolled ? 1 : 0,
           pointerEvents: scrolled ? "auto" : "none",
-          background: "rgba(18,19,22,.75)",
+          background: "rgba(42,27,37,.82)",
           backdropFilter: "blur(12px)",
         }}
       >

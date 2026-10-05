@@ -1,8 +1,12 @@
 "use client";
 
+import Image from "next/image";
+import Button from "@/components/ui/Button";
+
 /**
  * Error boundary global. Tidak pernah menampilkan stack ke user;
- * detail error hanya ke console untuk debugging.
+ * detail error hanya ke console. Maskot Senja menemani, teks menjelaskan
+ * apa yang salah + cara memperbaiki, tanpa minta maaf berlebihan.
  */
 export default function GlobalError({
   error,
@@ -11,22 +15,21 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // Log aman untuk debugging (tidak diekspos ke user)
   console.error("[app-error]", error.message, error.digest ?? "");
 
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 text-center">
-      <p className="text-sm font-semibold text-white">
-        Data sedang tidak tersedia.
-      </p>
-      <p className="text-sm" style={{ color: "var(--text-2)" }}>Silakan coba beberapa saat lagi.</p>
-      <button
-        type="button"
-        onClick={reset}
-        className="rounded-chip px-5 py-2.5 text-sm font-bold text-white transition-smooth" style={{ background: "var(--blue-grad)" }}
-      >
-        Coba lagi
-      </button>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
+      <div className="relative" style={{ width: 140, height: 160 }}>
+        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="140px" className="object-contain" />
+      </div>
+      <div>
+        <p className="font-display text-lg font-bold text-white">Datanya gagal dimuat</p>
+        <p className="mx-auto mt-1 max-w-[300px] text-sm leading-relaxed" style={{ color: "var(--text-2)" }}>
+          Sumber data sedang tidak bisa dihubungi. Coba muat ulang — kalau masih
+          gagal, tunggu beberapa menit, servernya biasanya balik sendiri.
+        </p>
+      </div>
+      <Button onClick={reset}>Coba muat ulang</Button>
     </div>
   );
 }

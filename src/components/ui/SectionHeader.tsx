@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-/** Header section: judul 24px/500 kiri, link kanan 16px/600 --blue ("Lihat Lainnya >"). */
+/** Header section: judul kiri, link tersier kanan (peach, underline). */
 export default function SectionHeader({
   title,
   href,
-  hrefLabel = "Lihat Lainnya",
+  hrefLabel = "Lihat semua",
 }: {
   title: string;
   href?: string;
@@ -16,10 +16,10 @@ export default function SectionHeader({
       {href ? (
         <Link
           href={href}
-          className="shrink-0 text-[14px] font-semibold transition-smooth"
-          style={{ color: "var(--blue)" }}
+          className="shrink-0 text-[14px] font-semibold underline"
+          style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "rgba(255,211,161,.4)" }}
         >
-          {hrefLabel} &gt;
+          {hrefLabel}
         </Link>
       ) : null}
     </div>

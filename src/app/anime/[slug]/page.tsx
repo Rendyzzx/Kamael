@@ -6,6 +6,7 @@ import AnimeCard from "@/components/cards/AnimeCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Synopsis from "@/components/ui/Synopsis";
 import DetailHeroBar from "@/components/ui/DetailHeroBar";
+import Icon from "@/components/ui/Icon";
 import FavoriteButton from "@/components/cards/FavoriteButton";
 import { getAnimeDetail } from "@/lib/api/anime";
 import { validateSlug } from "@/lib/utils/validation";
@@ -134,18 +135,11 @@ export default async function AnimeDetailPage({ params }: PageProps) {
           {detail.episodeList[0] ? (
             <Link
               href={`/anime/watch/${detail.episodeList[0].episodeId}`}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold text-white transition-smooth"
-              style={{ height: 44, fontSize: 16, background: "var(--blue-grad)" }}
+              className="btn btn-play flex-1"
+              style={{ height: 48, fontSize: 16 }}
             >
-              <span
-                className="flex items-center justify-center rounded-full"
-                style={{ width: 24, height: 24, background: "#fff" }}
-              >
-                <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--bg)" }}>
-                  play_arrow
-                </span>
-              </span>
-              Mulai Nonton
+              <Icon name="play" size={20} />
+              Mulai nonton eps 1
             </Link>
           ) : null}
           <FavoriteButton type="anime" contentId={detail.animeId} title={detail.title} poster={detail.poster} />

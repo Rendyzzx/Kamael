@@ -15,10 +15,10 @@ export default function AnimeCard({
   priority?: boolean;
 }) {
   return (
-    <Link href={`/anime/${anime.animeId}`} className="group block" aria-label={anime.title}>
+    <Link href={`/anime/${anime.animeId}`} className="block" aria-label={anime.title}>
       <div className="relative aspect-[3/4] overflow-hidden rounded-card" style={{ background: "var(--surface)" }}>
         {anime.poster ? (
-          <span className="absolute inset-0 transition-smooth group-hover:scale-105">
+          <span className="absolute inset-0">
             <BlurImage
               src={anime.poster}
               alt={anime.title}

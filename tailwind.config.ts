@@ -15,15 +15,10 @@ const config: Config = {
           text: "var(--text)",
           "text-2": "var(--text-2)",
         },
-        blue: {
-          DEFAULT: "var(--blue)",
-        },
-        yellow: {
-          DEFAULT: "var(--yellow)",
-        },
-        maroon: {
-          DEFAULT: "var(--maroon)",
-        },
+        amber: "var(--amber)",
+        sunset: "var(--sunset)",
+        peach: "var(--peach)",
+        violet: "var(--violet)",
         chip: {
           border: "var(--chip-border)",
         },
@@ -32,15 +27,16 @@ const config: Config = {
       borderRadius: {
         card: "var(--radius-card)",
         app: "var(--radius-md)",
-        chip: "var(--radius-pill)",
+        chip: "var(--radius-chip)",
       },
       fontFamily: {
-        display: ["var(--font-montserrat)", "sans-serif"],
-        sans: ["var(--font-roboto)", "sans-serif"],
+        display: ["var(--font-display)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
       },
-      backgroundImage: {
-        "blue-grad": "var(--blue-grad)",
-      },
+      // Keluarga warna lama tetap dipetakan (alias tema golden hour).
+      blue: "var(--amber)",
+      yellow: "var(--peach)",
+      maroon: "var(--maroon)",
     },
   },
   plugins: [],

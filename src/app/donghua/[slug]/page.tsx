@@ -6,6 +6,7 @@ import DonghuaCard from "@/components/cards/DonghuaCard";
 import SectionHeader from "@/components/ui/SectionHeader";
 import Synopsis from "@/components/ui/Synopsis";
 import DetailHeroBar from "@/components/ui/DetailHeroBar";
+import Icon from "@/components/ui/Icon";
 import FavoriteButton from "@/components/cards/FavoriteButton";
 import { getDonghuaDetail } from "@/lib/api/donghua";
 import { validateSlug, episodeLabel } from "@/lib/utils/validation";
@@ -132,15 +133,11 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
           {detail.episodes[0] ? (
             <Link
               href={`/donghua/watch/${detail.episodes[0].slug}`}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-chip font-bold text-white transition-smooth"
-              style={{ height: 44, fontSize: 16, background: "var(--blue-grad)" }}
+              className="btn btn-play flex-1"
+              style={{ height: 48, fontSize: 16 }}
             >
-              <span className="flex items-center justify-center rounded-full" style={{ width: 24, height: 24, background: "#fff" }}>
-                <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--bg)" }}>
-                  play_arrow
-                </span>
-              </span>
-              Mulai Nonton
+              <Icon name="play" size={20} />
+              Mulai nonton eps 1
             </Link>
           ) : null}
           <FavoriteButton type="donghua" contentId={detail.slug} title={detail.title} poster={detail.poster} />

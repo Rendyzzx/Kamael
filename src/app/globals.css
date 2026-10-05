@@ -5,57 +5,78 @@
 @tailwind utilities;
 
 /*
- * Design tokens — redesain tampilan (lihat prompt redesain untuk sumber).
- * Semua warna/radius/spacing di komponen HARUS memakai token ini,
- * tidak ada hardcode warna lain.
+ * DESIGN TOKENS — tema GOLDEN HOUR (senja hangat).
+ * Latar dusk hangat (#2A1B25), aksen amber, cahaya peach, bayangan dingin
+ * violet dipakai hemat. Semua komponen memakai token ini, tidak ada warna
+ * hardcode lain. Nama token lama (--blue, --yellow, dst.) DIPERTAHANKAN
+ * sebagai alias supaya seluruh halaman player/watch ikut berubah tema
+ * tanpa perlu disentuh — nilainya kini hangat, bukan biru.
  */
 :root {
   color-scheme: dark;
 
-  --bg: #121316;
-  --surface: #1e2128;
-  --surface-2: #23262d;
-  --surface-3: #2a2d35;
+  /* ===== Palet inti ===== */
+  --dusk: #2a1b25;          /* latar utama, ungu-cokelat hangat */
+  --surface: #3a2631;      /* kartu/panel */
+  --surface-2: #452e3a;    /* permukaan naik */
+  --surface-3: #523a46;    /* permukaan paling terang / kontrol */
+  --amber: #f5a02e;        /* aksen utama */
+  --sunset: #f26a3d;       /* CTA / aksen sekunder */
+  --peach: #ffd3a1;        /* highlight, teks lembut */
+  --violet: #5b4b8a;       /* bayangan dingin — hemat */
+  --ink-warm: #1f1219;     /* teks di atas amber */
 
-  --text: #ffffff;
-  --text-2: #9aa0a6;
+  /* Teks utama hangat, kontras aman di atas dusk. */
+  --text: #fff1e0;
+  --text-2: #c9a896;
 
-  --blue: #2196f3;
-  --blue-grad: linear-gradient(90deg, #42a5f5, #1e88e5);
-  --yellow: #ffb300;
-  --maroon: #5a1a20;
-  --chip-border: #6b2328;
-  --nav-active: #4a4560;
+  /* ===== Alias tema lama (jangan tambah pemakaian baru) ===== */
+  --bg: var(--dusk);
+  --blue: var(--amber);
+  --blue-grad: var(--amber);
+  --yellow: var(--peach);
+  --maroon: #47232b;
+  --chip-border: #6e3a2e;
+  --nav-active: var(--violet);
 
-  /* ===== Token player & halaman episode (spec rebuild player) ===== */
-  --ink: #0D1320;
-  --deep: #161E31;
-  --deep-2: #1D2740;
-  --glacier: #8FD3E8;
-  --frost: #EAF6FA;
-  --muted: #93A0B8;
+  /* ===== Token player & halaman episode ===== */
+  --ink: #20141b;
+  --deep: #33212c;
+  --deep-2: #452e3a;
+  --glacier: var(--peach);
+  --frost: var(--text);
+  --muted: var(--text-2);
 
-  --radius-card: 24px;
-  --radius-md: 16px;
-  --radius-pill: 999px;
+  /* ===== Radius bermakna (bukan satu nilai untuk semuanya) ===== */
+  --radius-card: 18px;   /* kartu/poster */
+  --radius-md: 12px;     /* kontrol & input */
+  --radius-chip: 8px;    /* badge/chip kecil — tegas, bukan pill */
+  --radius-pill: 999px;  /* HANYA tombol putar (bentuk lingkaran fungsional) */
 
-  --page-x: 12px;
+  --page-x: 14px;
   --page-x-detail: 16px;
   --section-gap: 24px;
+
+  /* Gradien langit senja — dipakai HANYA di splash & hero Home. */
+  --sky: linear-gradient(180deg, #f5a02e 0%, #f2784a 34%, #b04f6b 62%, #5b4b8a 100%);
+
+  /* Bayangan hangat, bukan abu-abu. */
+  --shadow-warm: 0 2px 0 rgba(58, 26, 16, 0.55), 0 8px 20px rgba(20, 6, 12, 0.35);
+  --shadow-warm-pressed: 0 0 0 rgba(58, 26, 16, 0.55), 0 2px 6px rgba(20, 6, 12, 0.3);
 }
 
 html {
   scroll-behavior: smooth;
-  background: #0b0c0e;
+  background: #1a0e14;
   /* Matikan pull-to-refresh & overscroll bounce bawaan browser (ala native). */
   overscroll-behavior-y: none;
 }
 
 body {
   @apply antialiased;
-  background: #0b0c0e;
+  background: #1a0e14;
   color: var(--text);
-  font-family: var(--font-roboto), "Roboto", sans-serif;
+  font-family: var(--font-body), "Figtree", "Segoe UI", sans-serif;
   /* Hilangkan tap highlight abu-abu/flash bawaan mobile browser. */
   -webkit-tap-highlight-color: transparent;
   /* manipulation: pan+pinch tetap boleh, double-tap zoom dimatikan (respons instan). */
@@ -76,16 +97,27 @@ header,
   user-select: none;
 }
 
-/* Efek press ala native: scale .97 saat aktif (hanya perangkat sentuh,
-   supaya klik desktop & keyboard tidak terpengaruh). Menggunakan property
-   `scale` (bukan transform) agar tidak bentrok dengan transform lain. */
-@media (hover: none) and (pointer: coarse) {
-  button:active,
-  a:active,
-  [role="button"]:active {
-    scale: 0.97;
-    transition: scale 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), "Zen Maru Gothic", "Segoe UI", sans-serif;
+}
+
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
 }
 
 /*
@@ -145,27 +177,18 @@ header,
   }
 }
 
-h1,
-h2,
-h3,
-.font-display {
-  font-family: var(--font-bricolage), "Bricolage Grotesque", "Segoe UI", sans-serif;
+/* ===== Tekstur grain halus — permukaan tidak "bersih digital" ===== */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-
-.material-symbols-rounded {
-  font-family: "Material Symbols Rounded";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
+.grain {
+  position: relative;
 }
 
 /* Scrollbar tipis */
@@ -201,10 +224,107 @@ h3,
   overflow: hidden;
 }
 
-/* Fokus keyboard terlihat (glacier) — aturan aksesibilitas player. */
+/* Fokus keyboard terlihat (peach) — aksesibilitas. */
 :focus-visible {
-  outline: 2px solid var(--glacier);
+  outline: 2px solid var(--peach);
   outline-offset: 2px;
+}
+
+/* ============================================================
+ * TOMBOL — terasa dibuat tangan. Detail di Button.tsx.
+ * Press = turun 2px + shadow menyusut (fisik), bukan hover naik.
+ * ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  transition: transform 100ms ease, box-shadow 100ms ease, background 140ms ease;
+}
+.btn:active {
+  transform: translateY(2px);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Primer: satu per layar. Amber padat, radius 14px, shadow hangat "keras". */
+.btn-primary {
+  background: var(--amber);
+  color: var(--ink-warm);
+  border-radius: 14px;
+  padding: 14px 22px;
+  box-shadow: var(--shadow-warm);
+}
+.btn-primary:active {
+  box-shadow: var(--shadow-warm-pressed);
+}
+
+/* Sekunder: outline tipis peach, transparan. */
+.btn-secondary {
+  background: transparent;
+  color: var(--peach);
+  border: 1.5px solid var(--peach);
+  border-radius: 14px;
+  padding: 12px 20px;
+}
+
+/* Tersier: teks + underline, aksi paling ringan. */
+.btn-tertiary {
+  background: none;
+  color: var(--peach);
+  padding: 8px 4px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 211, 161, 0.4);
+  text-underline-offset: 4px;
+}
+
+/* Decline: menolak/batal — outline redup nada hangat, bukan merah menyala. */
+.btn-decline {
+  background: transparent;
+  color: var(--text-2);
+  border: 1.5px solid rgba(201, 168, 150, 0.35);
+  border-radius: 14px;
+  padding: 12px 20px;
+}
+
+/* Play: LINGKARAN fungsional — satu-satunya bentuk pill di sistem. */
+.btn-play {
+  background: var(--amber);
+  color: var(--ink-warm);
+  border-radius: var(--radius-pill);
+  padding: 14px 26px;
+  box-shadow: var(--shadow-warm);
+}
+.btn-play:active {
+  box-shadow: var(--shadow-warm-pressed);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn {
+    transition: none;
+  }
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* Efek press ala native untuk elemen interaktif non-.btn (kartu, nav). */
+@media (hover: none) and (pointer: coarse) {
+  button:active,
+  a:active,
+  [role="button"]:active {
+    scale: 0.97;
+    transition: scale 120ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
 }
 
 /* Bottom sheet player: masuk dari bawah; hormati reduced-motion. */
@@ -212,7 +332,7 @@ h3,
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(15, 6, 11, 0.6);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease;
@@ -285,12 +405,7 @@ h3,
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.06),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 225, 190, 0.07), transparent);
   background-size: 400px 100%;
   animation: shimmer 1.3s infinite;
 }
@@ -300,38 +415,75 @@ h3,
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== Hero Home: efek "es mencair" (tema Cyronime, blue frost) ===== */
-.hero-ice{
-  position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(135deg,rgba(234,246,250,.30),rgba(33,150,243,.18));
-  backdrop-filter:blur(13px) saturate(.8);-webkit-backdrop-filter:blur(13px) saturate(.8);
-  clip-path:polygon(38% 0,43% 9%,39% 18%,45% 29%,41% 41%,47% 52%,42% 63%,48% 74%,43% 86%,46% 100%,100% 100%,100% 0);
-  animation:recede 1.8s cubic-bezier(.2,.7,.2,1) .15s both;
+/* ============================================================
+ * HERO HOME — golden hour: matahari rendah di garis horizon,
+ * kabel listrik mengecil ke kanan, siluet burung. Digambar tangan
+ * (path tidak simetris), BUKAN generator. Gerak hanya sekali saat
+ * masuk: matahari naik 1 tingkat lalu diam.
+ * ============================================================ */
+.hero-sun {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: 88px;
+  height: 88px;
+  margin-left: -44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 46% 42%, #ffd3a1 0%, #f5a02e 52%, #f2784a 100%);
+  filter: drop-shadow(0 0 24px rgba(245, 160, 46, 0.45));
+  animation: sun-rise 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-@keyframes recede{
-  from{clip-path:polygon(1% 0,6% 9%,2% 18%,8% 29%,4% 41%,10% 52%,5% 63%,11% 74%,6% 86%,9% 100%,100% 100%,100% 0)}
+@keyframes sun-rise {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-.hero-edge{position:absolute;inset:0;z-index:3;pointer-events:none;animation:edge-slide 1.8s cubic-bezier(.2,.7,.2,1) .15s both}
-@keyframes edge-slide{from{transform:translateX(-37%)}}
-.hero-edge svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.hero-edge polyline{fill:none;stroke:var(--blue);stroke-width:1.5;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 6px rgba(33,150,243,.9))}
+.hero-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(91, 75, 138, 0.32) 0%, rgba(176, 79, 107, 0.2) 46%, rgba(242, 106, 61, 0.14) 78%, transparent 100%);
+}
+/* Kabel listrik: dua tiang miring + tiga kabel melengkung, digambar tangan. */
+.hero-wires {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.hero-wires svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 
-@media (prefers-reduced-motion:reduce){
-  .hero-ice,.hero-edge{animation:none}
+@media (prefers-reduced-motion: reduce) {
+  .hero-sun {
+    animation: none;
+  }
 }
 
-/* Angka ranking: outline biru, peringkat 1 terisi */
-.rank-num{
-  font-family:var(--font-bricolage),"Bricolage Grotesque","Segoe UI",sans-serif;
-  font-weight:800;font-size:38px;line-height:1;text-align:center;
-  color:transparent;-webkit-text-stroke:1.5px var(--blue);
+/* Angka ranking: outline amber, peringkat 1 terisi peach. */
+.rank-num {
+  font-family: var(--font-display), "Zen Maru Gothic", "Segoe UI", sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--amber);
 }
-.rank-num.top{color:var(--blue);-webkit-text-stroke:0}
+.rank-num.top {
+  color: var(--amber);
+  -webkit-text-stroke: 0;
+}
 
-/* Onboarding first-time experience: fade+slide halus tiap pindah langkah/
-   slide. Key React berganti per langkah supaya animasi replay; translateX
-   kecil (bukan besar) agar tidak terasa seperti "page transition" berat. */
-/* `to` pakai transform:none — alasan sama dengan page-enter di atas:
+/* Onboarding: transisi langkah tetap halus; translateX kecil. */
+/* `to` pakai transform:none — alasan sama dengan page-enter:
    mencegah containing-block transform menyeret layout anak bertumpuk. */
 @keyframes onboard-step-in {
   from {
@@ -356,23 +508,67 @@ h3,
 }
 .onboard-dot.active {
   width: 20px;
-  background: var(--blue);
+  background: var(--amber);
 }
-/* Dot loading di layar Splash onboarding. */
+/* Dot loading di layar Splash onboarding — "matahari berdenyut pelan". */
 @keyframes onboard-loading-pulse {
-  0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
-  40% { opacity: 1; transform: scale(1); }
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .onboard-loading-dot {
   display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--blue);
+  background: var(--amber);
   animation: onboard-loading-pulse 1.1s ease-in-out infinite;
 }
+.onboard-loading-dot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.onboard-loading-dot:nth-child(3) {
+  animation-delay: 0.36s;
+}
 
-/* Animasi player: hanya spinner fungsional, tanpa animasi dekoratif. */
+/* ============================================================
+ * MOMEN GERAK UTAMA (satu-satunya): splash — latar bergeser dari
+ * dusk ke langit golden hour seperti matahari terbit. Sisanya
+ * hanya respons sentuhan. Hormati reduced-motion.
+ * ============================================================ */
+@keyframes sunrise {
+  from {
+    background: var(--dusk);
+  }
+  to {
+    background: linear-gradient(180deg, #f5a02e 0%, #f2784a 34%, #b04f6b 62%, #5b4b8a 100%);
+  }
+}
+.splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dusk);
+  animation: sunrise 0.55s ease-out 0.08s both;
+  transition: opacity 0.3s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen {
+    animation: none;
+    background: var(--dusk);
+  }
+}
+
+/* Animasi player: hanya spinner fungsional. */
 @keyframes player-spin {
   to {
     transform: rotate(360deg);
@@ -400,7 +596,7 @@ h3,
   button:active,
   a:active,
   [role="button"]:active {
-    scale: none;
+    scale: 1;
     transition: none;
   }
 }

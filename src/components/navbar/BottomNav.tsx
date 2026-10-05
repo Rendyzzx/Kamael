@@ -4,23 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Icon, { type IconName } from "@/components/ui/Icon";
 import type { Portal } from "@/components/portal/portal-events";
 import { haptic } from "@/lib/haptic";
 
 /**
- * Bottom navigation — fixed, 68px, Material Symbols Rounded.
+ * Bottom navigation — fixed, 68px, ikon inti custom (Icon.tsx).
  *
- * SCOPED PER PANEL: hanya SATU tab portal ditampilkan (Anime ATAU Donghua),
- * tidak pernah berdua — setiap portal adalah panel sendiri.
- * - Di dalam /anime* -> tab "Anime" (live_tv). Di dalam /donghua* -> tab
- *   "Donghua" (auto_awesome). Di halaman netral (Search/Profil/Settings/
- *   Favorit/History) -> tab mengikuti preferensi portal tersimpan di Redis
- *   (prop `defaultPortal`, dikirim dari layout server component).
- * - Pindah portal HANYA lewat PortalSwitch di header /anime & /donghua, atau
- *   lewat Settings ("Tampilkan portal lagi") — bukan dari bottom nav.
+ * SCOPED PER PANEL: hanya SATU tab portal ditampilkan (Anime ATAU Donghua).
+ * - Di dalam /anime* -> tab "Anime". Di dalam /donghua* -> tab "Donghua".
+ *   Di halaman netral -> tab mengikuti preferensi portal (prop defaultPortal).
  *
- * Item aktif: pill 64x32 bg --nav-active + ikon putih + label 12px/700 di bawah.
- * Item non-aktif: hanya ikon putih 28px, tanpa label.
+ * Item aktif: ikon duotone offset amber (misregistration ala cetak) + label.
+ * Item non-aktif: ikon garis saja, warna teks lembut.
  */
 export default function BottomNav({
   defaultPortal,
@@ -32,29 +28,23 @@ export default function BottomNav({
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Player butuh seluruh layar; onboarding first-time experience (tampil DI
-  // "/" selama belum selesai, lihat src/app/page.tsx) juga fullscreen —
-  // tanpa bottom nav & header di sana. Setelah selesai, "/" jadi dashboard
-  // trending sungguhan dan TETAP menampilkan bottom nav.
   if (pathname.includes("/watch/") || (pathname === "/" && !onboardingDone)) return null;
 
-  // Portal panel aktif: path /anime*|/donghua* menentukan langsung; di luar
-  // itu (halaman netral) ikut preferensi tersimpan.
   const portal: Portal = pathname.startsWith("/donghua")
     ? "donghua"
     : pathname.startsWith("/anime")
       ? "anime"
       : defaultPortal;
 
-  const portalItem =
+  const portalItem: { href: string; label: string; icon: IconName } =
     portal === "anime"
-      ? { href: "/anime", label: "Anime", icon: "live_tv" }
-      : { href: "/donghua", label: "Donghua", icon: "auto_awesome" };
+      ? { href: "/anime", label: "Anime", icon: "anime" }
+      : { href: "/donghua", label: "Donghua", icon: "donghua" };
 
   const items = [
-    { href: "/", label: "Home", icon: "home" },
+    { href: "/", label: "Home", icon: "home" as IconName },
     portalItem,
-    { href: "/search", label: "Cari", icon: "search" },
+    { href: "/search", label: "Cari", icon: "search" as IconName },
   ] as const;
 
   const isActive = (href: string) =>
@@ -69,7 +59,11 @@ export default function BottomNav({
     >
       <ul
         className="flex items-center justify-between px-2"
-        style={{ height: "calc(68px + env(safe-area-inset-bottom))", background: "#1B1C1F" }}
+        style={{
+          height: "calc(68px + env(safe-area-inset-bottom))",
+          background: "var(--surface)",
+          borderTop: "1px solid rgba(245,160,46,.14)",
+        }}
       >
         {items.map(({ href, label, icon }) => {
           const active = isActive(href);
@@ -78,26 +72,17 @@ export default function BottomNav({
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className="flex flex-col items-center"
+                className="flex flex-col items-center gap-1 py-1.5"
                 onPointerDown={() => haptic(8)}
+                style={{ color: active ? "var(--amber)" : "var(--text-2)" }}
               >
-                {active ? (
-                  <span
-                    className="flex items-center justify-center rounded-chip transition-smooth"
-                    style={{ width: 64, height: 32, background: "var(--nav-active)" }}
-                  >
-                    <span className="material-symbols-rounded text-white" style={{ fontSize: 22 }}>
-                      {icon}
-                    </span>
-                  </span>
-                ) : (
-                  <span className="material-symbols-rounded text-white" style={{ fontSize: 24 }}>
-                    {icon}
-                  </span>
-                )}
-                {active ? (
-                  <span className="mt-0.5 text-[12px] font-bold text-white">{label}</span>
-                ) : null}
+                <Icon name={icon} size={24} active={active} />
+                <span
+                  className="text-[11px]"
+                  style={{ fontWeight: active ? 700 : 500, visibility: active ? "visible" : "hidden" }}
+                >
+                  {label}
+                </span>
               </Link>
             </li>
           );
@@ -106,31 +91,36 @@ export default function BottomNav({
           <Link
             href="/profile"
             aria-current={profileActive ? "page" : undefined}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center gap-1 py-1.5"
             onPointerDown={() => haptic(8)}
+            style={{ color: profileActive ? "var(--amber)" : "var(--text-2)" }}
           >
             <span
-              className="overflow-hidden rounded-full"
+              className="overflow-hidden"
               style={{
-                width: 36,
-                height: 36,
-                border: "2px solid #fff",
-                background: profileActive ? "var(--nav-active)" : "var(--surface-3)",
+                width: 30,
+                height: 30,
+                borderRadius: "var(--radius-chip)",
+                border: profileActive ? "1.5px solid var(--amber)" : "1.5px solid var(--surface-3)",
+                background: "var(--surface-2)",
               }}
             >
               {session?.user?.image ? (
-                <Image src={session.user.image} alt="Profil" width={36} height={36} className="h-full w-full object-cover" />
+                <Image src={session.user.image} alt="Profil" width={30} height={30} className="h-full w-full object-cover" />
               ) : (
-                <span className="flex h-full w-full items-center justify-center text-xs font-bold text-white">
+                <span className="flex h-full w-full items-center justify-center text-xs font-bold" style={{ color: "var(--text)" }}>
                   {session?.user?.name?.charAt(0).toUpperCase() ?? (
-                    <span className="material-symbols-rounded" style={{ fontSize: 17 }}>
-                      person
-                    </span>
+                    <Icon name="profile" size={18} />
                   )}
                 </span>
               )}
             </span>
-            {profileActive ? <span className="mt-0.5 text-[12px] font-bold text-white">Profil</span> : null}
+            <span
+              className="text-[11px]"
+              style={{ fontWeight: profileActive ? 700 : 500, visibility: profileActive ? "visible" : "hidden" }}
+            >
+              Profil
+            </span>
           </Link>
         </li>
       </ul>

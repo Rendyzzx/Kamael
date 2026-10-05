@@ -6,6 +6,8 @@ import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import type { Portal } from "@/components/portal/portal-events";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import Button from "@/components/ui/Button";
+import Icon from "@/components/ui/Icon";
 import { getAnimeHome, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
 import { getLatestDonghua, getOngoingDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
@@ -119,36 +121,28 @@ export default async function HomePage() {
 
   return (
     <div className="relative">
-      {/* Gradient biru lembut di area atas (mengikuti mood mockup, tema Cyronime) */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px]"
-        style={{
-          background:
-            "radial-gradient(120% 40% at 50% 0%, rgba(33,150,243,.14), transparent 70%), var(--bg)",
-        }}
-        aria-hidden="true"
-      />
-
       <div className="relative" style={{ paddingTop: 16 }}>
         {/* Header: brand + akses profil */}
         <header className="flex items-center justify-between" style={{ padding: "0 var(--page-x)" }}>
-          <Link href="/" className="font-display flex items-center gap-2 text-[22px] font-bold tracking-tight text-white">
-            <span className="material-symbols-rounded" style={{ fontSize: 26, color: "var(--blue)" }}>
-              movie
-            </span>
-            Cyro<span style={{ color: "var(--blue)" }}>nime</span>
+          <Link href="/" className="font-display flex items-center gap-2 text-[21px] font-bold tracking-tight text-white">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              {/* Logo: matahari senja di garis horizon — digambar tangan, tidak simetris */}
+              <path d="M4.5 17.6h15.2" stroke="var(--peach)" stroke-width="1.75" stroke-linecap="round"/>
+              <path d="M12 4.9c3.9 0 6.7 2.7 6.7 6.4 0 2.5-1.6 4.7-3.9 5.7" stroke="var(--amber)" stroke-width="1.75" stroke-linecap="round" fill="none"/>
+              <path d="M12 4.9c-3.9 0-6.7 2.7-6.7 6.4 0 2.5 1.6 4.7 3.9 5.7" stroke="var(--sunset)" stroke-width="1.75" stroke-linecap="round" fill="none"/>
+              <path d="M12 13.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z" fill="var(--amber)"/>
+            </svg>
+            Cyronime
           </Link>
           <div className="flex items-center gap-2.5">
             <PortalSwitch portal={portal} />
             <Link
               href="/profile"
               aria-label="Profil"
-              className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
-              style={{ background: "var(--surface)" }}
+              className="flex h-11 w-11 items-center justify-center transition-smooth"
+              style={{ background: "var(--surface)", borderRadius: "var(--radius-md)" }}
             >
-              <span className="material-symbols-rounded" style={{ fontSize: 22, color: "var(--text)" }}>
-                person
-              </span>
+              <Icon name="profile" size={22} />
             </Link>
           </div>
         </header>
@@ -237,23 +231,12 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
 
-        {/* Es mencair (dekoratif, tema blue) */}
-        <div className="hero-ice" aria-hidden="true" />
-        <div className="hero-edge" aria-hidden="true">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
-          </svg>
-          {item.episode ? (
-            <span
-              className="absolute rounded-chip font-bold"
-              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--blue)", color: "#fff" }}
-            >
-              EP {item.episode}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+        {/* Cahaya senja: hangat di bawah, bukan abu-abu */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
+          style={{ background: "linear-gradient(180deg, transparent, rgba(42,27,37,.82) 62%, #2A1B25 100%)" }}
+          aria-hidden="true"
+        />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
@@ -266,26 +249,24 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
           <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
             {item.title}
           </h1>
-          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+          <p className="mt-1.5 text-[13px]" style={{ color: "var(--peach)" }}>
             {item.episode ? `Episode ${item.episode}` : "Lanjutkan dari terakhir kali"}
-            {percent !== null ? ` · ${percent}% ditonton` : ""}
+            {percent !== null ? `, sudah ${percent}%` : ""}
           </p>
           <div className="mt-3.5 flex items-center gap-3">
-            <Link
+            <Button
+              variant="play"
               href={`/${item.type}/watch/${item.episodeId}`}
-              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
-              style={{ background: "var(--blue-grad)" }}
+              aria-label={`Lanjut nonton episode ${item.episode ?? ""}`}
             >
-              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
-                play_arrow
-              </span>
-              Lanjutkan
-            </Link>
+              <Icon name="play" size={20} />
+              {item.episode ? `Lanjut nonton eps ${item.episode}` : "Lanjut nonton"}
+            </Button>
             <Link
               href={`/${item.type}/${item.contentId}`}
-              aria-label="Detail"
-              className="flex h-11 w-11 items-center justify-center rounded-full transition-smooth"
-              style={{ background: "rgba(0,0,0,.55)", backdropFilter: "blur(8px)" }}
+              aria-label={`Detail ${item.title}`}
+              className="flex h-11 w-11 items-center justify-center transition-smooth"
+              style={{ background: "rgba(31,18,25,.55)", backdropFilter: "blur(8px)", borderRadius: "var(--radius-md)" }}
             >
               <span className="material-symbols-rounded text-white" style={{ fontSize: 22 }}>
                 info
@@ -311,22 +292,11 @@ function HomeHeroFeatured({
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
 
-        <div className="hero-ice" aria-hidden="true" />
-        <div className="hero-edge" aria-hidden="true">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
-          </svg>
-          {item.score ? (
-            <span
-              className="absolute rounded-chip font-bold"
-              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--blue)", color: "#fff" }}
-            >
-              {item.score}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
+          style={{ background: "linear-gradient(180deg, transparent, rgba(42,27,37,.82) 62%, #2A1B25 100%)" }}
+          aria-hidden="true"
+        />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
@@ -339,21 +309,15 @@ function HomeHeroFeatured({
           <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
             {item.title}
           </h1>
-          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+          <p className="mt-1.5 text-[13px]" style={{ color: "var(--peach)" }}>
             {item.score ? `Skor ${item.score}` : "Tonton sekarang"}
-            {item.episodes ? ` · ${item.episodes} eps` : ""}
+            {item.episodes ? `, ${item.episodes} eps` : ""}
           </p>
           <div className="mt-3.5 flex items-center gap-3">
-            <Link
-              href={`/anime/${item.animeId}`}
-              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
-              style={{ background: "var(--blue-grad)" }}
-            >
-              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
-                play_arrow
-              </span>
-              Mulai Nonton
-            </Link>
+            <Button variant="play" href={`/anime/${item.animeId}`}>
+              <Icon name="play" size={20} />
+              Tonton sekarang
+            </Button>
           </div>
         </div>
       </div>
@@ -370,22 +334,11 @@ function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
 
-        <div className="hero-ice" aria-hidden="true" />
-        <div className="hero-edge" aria-hidden="true">
-          <svg viewBox="0 0 100 100" preserveAspectRatio="none">
-            <polyline points="38,0 43,9 39,18 45,29 41,41 47,52 42,63 48,74 43,86 46,100" />
-          </svg>
-          {item.currentEpisode ? (
-            <span
-              className="absolute rounded-chip font-bold"
-              style={{ left: "48%", top: "44%", padding: "4px 10px", fontSize: 12, background: "var(--maroon)", color: "#fff" }}
-            >
-              {item.currentEpisode}
-            </span>
-          ) : null}
-        </div>
-
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%] bg-gradient-to-t from-black/95 to-transparent" />
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
+          style={{ background: "linear-gradient(180deg, transparent, rgba(42,27,37,.82) 62%, #2A1B25 100%)" }}
+          aria-hidden="true"
+        />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-white"
@@ -398,21 +351,15 @@ function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
           <h1 className="font-display line-clamp-2 text-[28px] font-bold leading-[1.05] tracking-tight text-white">
             {item.title}
           </h1>
-          <p className="mt-1.5 text-[13px]" style={{ color: "#C9D4E6" }}>
+          <p className="mt-1.5 text-[13px]" style={{ color: "var(--peach)" }}>
             {item.status ?? "Donghua"}
-            {item.sub ? ` · ${item.sub}` : ""}
+            {item.sub ? `, ${item.sub}` : ""}
           </p>
           <div className="mt-3.5 flex items-center gap-3">
-            <Link
-              href={`/donghua/${item.slug}`}
-              className="flex h-11 items-center gap-2 rounded-chip pl-4 pr-5 text-[15px] font-bold text-white transition-smooth active:scale-95"
-              style={{ background: "var(--blue-grad)" }}
-            >
-              <span className="material-symbols-rounded" style={{ fontSize: 22 }}>
-                play_arrow
-              </span>
-              Mulai Nonton
-            </Link>
+            <Button variant="play" href={`/donghua/${item.slug}`}>
+              <Icon name="play" size={20} />
+              Tonton sekarang
+            </Button>
           </div>
         </div>
       </div>
@@ -437,8 +384,8 @@ function HomeRail({
       <div className="flex items-baseline justify-between" style={{ padding: "0 var(--page-x)", marginBottom: 4 }}>
         <h2 className="font-display text-[20px] font-bold tracking-tight text-white">{title}</h2>
         {href ? (
-          <Link href={href} className="text-[13px] font-semibold" style={{ color: "var(--blue)" }}>
-            Lihat Semua
+          <Link href={href} className="text-[13px] font-semibold underline" style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "rgba(255,211,161,.4)" }}>
+            Lihat semua
           </Link>
         ) : null}
       </div>

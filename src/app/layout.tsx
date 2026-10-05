@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Roboto } from "next/font/google";
+import { Zen_Maru_Gothic, Figtree } from "next/font/google";
 import BottomNav from "@/components/navbar/BottomNav";
 import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
@@ -14,17 +14,19 @@ import { readVisitorId } from "@/lib/visitor";
 import type { Portal } from "@/components/portal/portal-events";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+// Zen Maru Gothic: judul — ujung huruf membulat hangat, cocok tema senja.
+const display = Zen_Maru_Gothic({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-bricolage",
+  weight: ["500", "700", "900"],
+  variable: "--font-display",
   display: "swap",
 });
 
-const roboto = Roboto({
+// Figtree: teks — jelas & ramah di ukuran kecil, panjang baris nyaman.
+const body = Figtree({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-roboto",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -79,7 +81,7 @@ export const metadata: Metadata = {
 
 /* viewport: cover notch (safe-area dipakai header/nav via env()). */
 export const viewport: Viewport = {
-  themeColor: "#121316",
+  themeColor: "#2A1B25",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -105,7 +107,7 @@ export default async function RootLayout({
   const onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
 
   return (
-    <html lang="id" className={`dark ${bricolage.variable} ${roboto.variable}`}>
+    <html lang="id" className={`dark ${display.variable} ${body.variable}`}>
       <body>
         <AuthProvider>
           <SplashScreen />

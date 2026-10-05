@@ -156,9 +156,9 @@ function OnboardingSplash() {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-7 px-8 text-center">
       <div className="relative" style={{ width: 160, height: 160 }}>
-        <Image src="/onboarding/mascot.png" alt="" fill sizes="160px" className="object-contain" priority />
+        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="160px" className="object-contain" priority />
       </div>
-      <h1 className="font-display text-[22px] font-bold text-white">Selamat Datang!</h1>
+      <h1 className="font-display text-[22px] font-bold text-white">Selamat datang di senja</h1>
       <div className="flex items-center gap-1.5" aria-hidden="true">
         <span className="onboard-loading-dot" style={{ animationDelay: "0ms" }} />
         <span className="onboard-loading-dot" style={{ animationDelay: "150ms" }} />
@@ -172,19 +172,12 @@ function OnboardingSplash() {
 function OnboardingDisclaimer({ onAccept, onDecline }: { onAccept: () => void; onDecline: () => void }) {
   return (
     <div className="relative flex h-full flex-col items-center justify-center overflow-hidden px-6">
-      {/* Glow ungu dekoratif di latar */}
       <div
-        aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-1/3 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(122,90,248,.35), transparent 70%)", filter: "blur(10px)" }}
-      />
-
-      <div
-        className="onboard-step relative w-full max-w-[360px] rounded-card p-6"
+        className="onboard-step grain relative w-full max-w-[360px] rounded-card p-6"
         style={{
-          background: "rgba(255,255,255,.05)",
-          border: "1px solid rgba(255,255,255,.1)",
-          backdropFilter: "blur(18px)",
+          background: "var(--surface)",
+          border: "1px solid rgba(245,160,46,.16)",
+          boxShadow: "var(--shadow-warm)",
         }}
       >
         <h1 className="font-display text-center text-[20px] font-bold text-white">Disclaimer</h1>
@@ -194,22 +187,12 @@ function OnboardingDisclaimer({ onAccept, onDecline }: { onAccept: () => void; o
           judul) tetap menjadi milik pemiliknya masing-masing. Lanjutkan hanya jika kamu memahami
           dan menyetujui hal ini.
         </p>
-        <div className="mt-6 flex gap-3">
-          <button
-            type="button"
-            onClick={onDecline}
-            className="flex-1 rounded-chip border px-4 py-3 text-sm font-bold transition-smooth active:scale-[.97]"
-            style={{ borderColor: "#FF1744", color: "#FF1744" }}
-          >
-            Decline
+        <div className="mt-6 flex flex-col gap-2.5">
+          <button type="button" onClick={onAccept} className="btn btn-primary w-full">
+            Setuju, lanjut
           </button>
-          <button
-            type="button"
-            onClick={onAccept}
-            className="flex-1 rounded-chip px-4 py-3 text-sm font-bold text-white transition-smooth active:scale-[.97]"
-            style={{ background: "var(--blue-grad)" }}
-          >
-            Accept
+          <button type="button" onClick={onDecline} className="btn btn-decline w-full">
+            Nggak dulu
           </button>
         </div>
       </div>
@@ -221,21 +204,16 @@ function OnboardingDisclaimer({ onAccept, onDecline }: { onAccept: () => void; o
 function OnboardingDeclined({ onBack }: { onBack: () => void }) {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-5 px-7 text-center">
-      <span className="material-symbols-rounded" style={{ fontSize: 48, color: "#FF1744" }} aria-hidden="true">
-        block
-      </span>
-      <h1 className="font-display text-[20px] font-bold text-white">Belum Bisa Melanjutkan</h1>
+      <div className="relative" style={{ width: 150, height: 170 }}>
+        <Image src="/mascot/senja-rimlight.png" alt="" fill sizes="150px" className="object-contain" />
+      </div>
+      <h1 className="font-display text-[20px] font-bold text-white">Belum bisa lanjut</h1>
       <p className="max-w-[300px] text-[14px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-        Cyronime hanya bisa digunakan jika kamu menyetujui disclaimer. Tekan kembali untuk membaca
-        dan menyetujuinya.
+        Cyronime hanya bisa dipakai kalau kamu menyetujui disclaimernya. Baca
+        sekali lagi, kamu bisa setuju di bawahnya.
       </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="rounded-chip px-6 py-3 text-sm font-bold text-white transition-smooth active:scale-[.97]"
-        style={{ background: "var(--surface)" }}
-      >
-        Kembali
+      <button type="button" onClick={onBack} className="btn btn-primary">
+        Baca lagi disclaimernya
       </button>
     </div>
   );
@@ -246,22 +224,17 @@ function OnboardingIntro({ onStart }: { onStart: () => void }) {
   return (
     <div className="onboard-step flex h-full flex-col items-center justify-center gap-8 px-7 text-center">
       <div className="relative" style={{ width: 220, height: 220 }}>
-        <Image src="/onboarding/mascot.png" alt="Maskot Cyronime" fill sizes="220px" className="object-contain" priority />
+        <Image src="/mascot/senja-rimlight.png" alt="Senja, maskot Cyronime" fill sizes="220px" className="object-contain" priority />
       </div>
       <div className="space-y-3">
-        <h1 className="font-display text-[22px] font-bold tracking-tight text-white">Halo, aku Cyro!</h1>
+        <h1 className="font-display text-[22px] font-bold tracking-tight text-white">Halo, aku Senja!</h1>
         <p className="mx-auto max-w-[300px] text-[14px] leading-relaxed" style={{ color: "var(--text-2)" }}>
           Aku bakal nemenin kamu jelajahi ribuan anime dan donghua subtitle Indonesia di sini —
           yuk kenalan dulu sama beberapa fitur andalan Cyronime.
         </p>
       </div>
-      <button
-        type="button"
-        onClick={onStart}
-        className="rounded-chip px-7 py-3 text-sm font-bold text-white transition-smooth active:scale-[.97]"
-        style={{ background: "var(--blue-grad)" }}
-      >
-        Ayo Mulai
+      <button type="button" onClick={onStart} className="btn btn-primary">
+        Kenalan dulu
       </button>
     </div>
   );
