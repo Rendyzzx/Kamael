@@ -88,7 +88,17 @@ header,
   }
 }
 
-/* Transisi antarhalaman (PageTransition, key=pathname). */
+/*
+ * Transisi antarhalaman (PageTransition, key=pathname).
+ *
+ * PENTING: keyframe `to` HARUS `transform: none` (bukan translateX(0)).
+ * Transform apa pun (termasuk translateX(0)) pada wrapper membuat
+ * `position: fixed` di dalamnya (mis. overlay OnboardingFlow di "/")
+ * berubah menjadi relatif ke wrapper. Saat onboarding, isi wrapper hanya
+ * elemen fixed tersebut sehingga tingginya 0px -> overlay 0px -> layar
+ * HITAM BLANK total. `transform: none` menghapus containing block begitu
+ * animasi selesai, sehingga fixed kembali relatif viewport.
+ */
 @keyframes page-enter {
   from {
     opacity: 0;
@@ -96,7 +106,7 @@ header,
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
 }
 .page-enter {
@@ -313,6 +323,8 @@ h3,
 /* Onboarding first-time experience: fade+slide halus tiap pindah langkah/
    slide. Key React berganti per langkah supaya animasi replay; translateX
    kecil (bukan besar) agar tidak terasa seperti "page transition" berat. */
+/* `to` pakai transform:none — alasan sama dengan page-enter di atas:
+   mencegah containing-block transform menyeret layout anak bertumpuk. */
 @keyframes onboard-step-in {
   from {
     opacity: 0;
@@ -320,7 +332,7 @@ h3,
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: none;
   }
 }
 .onboard-step {
