@@ -1,80 +1,91 @@
-# ShinStream — Streaming Anime & Donghua
+# Cyronime — Streaming Anime & Donghua
 
-Website streaming anime dan donghua dengan dua ekosistem yang benar-benar
-terpisah, dibangun untuk deploy ke Vercel.
+Aplikasi streaming anime & donghua mobile-first yang dibangun dengan Next.js 15
+(App Router), TypeScript, Tailwind CSS, dan siap deploy ke Vercel.
 
 - **Anime** → data dari Otakudesu (via Sanka Vollerei Anime API)
 - **Donghua** → data dari Anichin (via Sanka Vollerei Anime API, modul donghua)
+- **Akun & aktivitas** → Google Login (Auth.js) + Redis (Upstash) untuk
+  Continue Watching, Watch History, Favorites, dan cache API
 
 Hasil inspeksi API terdokumentasi lengkap di [`docs/API-INSPECTION.md`](docs/API-INSPECTION.md).
 
 ## Stack
 
-- Next.js 15 (App Router) + TypeScript
-- React 19, Server Components untuk semua halaman (client component hanya
-  untuk navbar/search/player)
-- Tailwind CSS (dark mode default)
-- Route Handlers sebagai proxy API (menghindari CORS, rate limit, dan
-  anti-bot pada API sumber)
+- Next.js 15 (App Router) + React 19 + TypeScript — Server Components untuk semua halaman
+- Tailwind CSS — dark theme, desain compact & cinematic
+- Auth.js (NextAuth v5) — Google OAuth, session JWT
+- Upstash Redis (HTTP, serverless-friendly) — data user + cache API
+- Route Handlers sebagai proxy API (menghindari CORS dan rate limit API sumber)
 
 ## Struktur
 
 ```
 src/
 ├── app/
-│   ├── page.tsx                  # Home: hero + Anime Terbaru + Donghua Terbaru
-│   ├── anime/
-│   │   ├── page.tsx              # Listing anime (tab, genre, pagination)
-│   │   ├── [slug]/page.tsx       # Detail anime + daftar episode
-│   │   └── watch/[episode]/      # Player + prev/next + episode list
-│   ├── donghua/
-│   │   ├── page.tsx              # Listing donghua (tab, genre, pagination)
-│   │   ├── [slug]/page.tsx       # Detail donghua + daftar episode
-│   │   └── watch/[episode]/      # Player + prev/next + episode list
+│   ├── page.tsx                  # Home: featured, continue watching, rows horizontal
+│   ├── anime/                    # Listing, detail, watch
+│   ├── donghua/                  # Listing, detail, watch
 │   ├── search/                   # Hasil pencarian dipisah Anime/Donghua
+│   ├── login/  profile/  settings/  history/  favorites/
+│   ├── sitemap.ts  robots.ts
 │   └── api/
-│       ├── search/               # Proxy pencarian gabungan (debounced client)
-│       └── anime/server/[id]/    # Proxy resolve serverId → URL embed
-├── components/                   # navbar, cards, player, ui
-├── lib/api/                      # client.ts + adapter otakudesu.ts + donghua.ts
-├── lib/utils/                    # validasi input (slug, page, query)
-└── types/                        # tipe hasil normalisasi adapter
+│       ├── auth/[...nextauth]/   # Auth.js (Google)
+│       ├── watch/progress/       # Continue watching + history (protected)
+│       ├── history/  favorites/ # Protected
+│       └── search/  anime/server/
+├── components/                   # navbar (top + bottom mobile), cards, player, auth
+├── lib/
+│   ├── api/                      # client.ts + adapter anime.ts + donghua.ts
+│   ├── auth/                     # konfigurasi Auth.js + helper session
+│   ├── redis/                    # client, cache, watching, history, favorites
+│   └── utils/                    # validasi input
+└── types/
 ```
 
 ## Menjalankan
 
 ```bash
-cp .env.example .env.local   # opsional; default sudah berfungsi
+cp .env.example .env.local   # isi minimal AUTH_SECRET; Redis & Google opsional
 npm install
 npm run dev
 ```
+
+Tanpa Redis dan Google credential, website tetap berjalan penuh untuk
+browsing; fitur akun (history/favorites/continue watching) otomatis
+nonaktif dan cache memakai Next.js saja.
 
 ## Environment variables
 
 | Variable | Keterangan |
 |---|---|
 | `API_BASE_URL` | Base URL API sumber (server-side only) |
-| `NEXT_PUBLIC_SITE_URL` | URL publik situs, untuk metadata canonical/OG |
+| `REDIS_URL` / `REDIS_TOKEN` | Upstash Redis REST (server-side only) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth (server-side only) |
+| `AUTH_SECRET` | Secret penandatangan session Auth.js |
+| `NEXT_PUBLIC_SITE_URL` | URL publik situs, untuk metadata canonical/OG/sitemap |
 
-Tidak ada API key yang dibutuhkan; API sumber gratis.
+Lihat `.env.example` untuk contoh dan catatan redirect URI Google.
 
 ## Deploy ke Vercel
 
-1. Push project ke GitHub/GitLab/Bitbucket.
-2. Import di Vercel, framework **Next.js** terdeteksi otomatis.
-3. (Opsional) set `NEXT_PUBLIC_SITE_URL` ke domain produksi.
-4. Deploy. Tidak butuh server/VPS/database — semua data diambil dari API
-   eksternal dan di-cache oleh Next.js.
+1. Import repo di Vercel (framework Next.js terdeteksi otomatis).
+2. Set environment variables sesuai tabel di atas.
+3. Google OAuth: tambahkan `https://<domain>/api/auth/callback/google` ke
+   authorized redirect URI, lalu set `AUTH_TRUST_HOST=true`.
+4. Deploy.
 
 ## Catatan penting
 
-- **Rate limit API sumber: 30 req/menit.** Semua fetch lewat adapter dengan
-  `next: { revalidate }` agar tidak menghujani API (cache 5–60 menit,
-  genre 24 jam).
-- **Anti-bot API sumber**: fetch tanpa User-Agent browser ditolak. Adapter
-  selalu mengirim UA browser — ini juga alasan semua request harus lewat
-  server/proxy, bukan langsung dari browser user.
-- **Streaming = URL embed pihak ketiga** (vidhide, ok.ru, rumble, dll), bukan
-  file video langsung. Player memakai iframe dengan fallback "Server tidak
-  dapat diputar / Coba lagi / Server lain". Video tidak pernah diunduh atau
-  disimpan di server.
+- **Rate limit API sumber: 30 req/menit** (ban permanen jika dilanggar). Semua
+  fetch lewat adapter dengan dua lapis cache: Redis (jika dikonfigurasi, TTL
+  2-15 menit sesuai jenis data) lalu cache Next.js.
+- **Anti-bot API sumber**: semua request server mengirim User-Agent browser.
+- **Streaming = URL embed pihak ketiga** (vidhide, ok.ru, dll) di dalam iframe.
+  Karena itu posisi video tidak dapat dibaca; Continue Watching merekam
+  episode terakhir, bukan detik ke berapa. API progress tetap menerima
+  `position`/`duration` penuh untuk player native di masa depan.
+- **Isolasi data user**: semua endpoint activity mengambil userId dari session
+  server-side, tidak pernah dari body client.
+- **Ketahanan**: jika Redis error/down, halaman utama, anime, donghua, dan
+  search tetap berfungsi; hanya fitur akun yang menampilkan fallback.

@@ -5,6 +5,7 @@ import EmbedPlayer, { type PlayerServer } from "@/components/player/EmbedPlayer"
 import { getDonghuaEpisode } from "@/lib/api/donghua";
 import { validateSlug } from "@/lib/utils/validation";
 import { episodeLabel } from "@/lib/utils/validation";
+import WatchTracker from "@/components/watch/WatchTracker";
 
 interface PageProps {
   params: Promise<{ episode: string }>;
@@ -49,8 +50,20 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
     ? { label: data.mainServer.name, url: data.mainServer.url }
     : (servers[0] ?? null);
 
+  const epNumber = data.episodeList.find((e) => e.slug === episodeSlug)?.episodeNumber ?? null;
+
   return (
     <div className="space-y-6">
+      {data.donghuaSlug ? (
+        <WatchTracker
+          type="donghua"
+          contentId={data.donghuaSlug}
+          episodeId={episodeSlug}
+          episode={epNumber}
+          title={data.donghuaTitle ?? data.title}
+          poster={data.poster ?? ""}
+        />
+      ) : null}
       <EmbedPlayer
         initialServer={initialServer}
         servers={servers}

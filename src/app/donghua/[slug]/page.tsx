@@ -8,6 +8,7 @@ import SectionHeader from "@/components/ui/SectionHeader";
 import { getDonghuaDetail } from "@/lib/api/donghua";
 import { validateSlug } from "@/lib/utils/validation";
 import { episodeLabel } from "@/lib/utils/validation";
+import FavoriteButton from "@/components/cards/FavoriteButton";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -121,6 +122,23 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
               {detail.synopsis}
             </p>
           ) : null}
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {detail.episodes[0] ? (
+              <Link
+                href={`/donghua/watch/${detail.episodes[0].slug}`}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+              >
+                ▶ Watch Now
+              </Link>
+            ) : null}
+            <FavoriteButton
+              type="donghua"
+              contentId={detail.slug}
+              title={detail.title}
+              poster={detail.poster}
+            />
+          </div>
 
           <dl className="grid grid-cols-1 gap-x-8 gap-y-1.5 text-sm sm:grid-cols-2">
             {info

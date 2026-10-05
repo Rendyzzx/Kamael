@@ -3,14 +3,35 @@
  *
  * Fakta terinspeksi (docs/API-INSPECTION.md):
  * - API menolak request tanpa User-Agent browser (anti-bot "Plana AI Detector").
- * - Rate limit 30 req/menit → setiap fetch WAJIB memakai cache Next.js (revalidate).
+ * - Rate limit 30 req/menit -> setiap fetch WAJIB di-cache.
  * - Tidak ada API key; API_BASE_URL dibaca dari env server-side.
+ *
+ * Lapisan cache (prompt Redis #10): User -> Cyronime -> Redis -> API eksternal.
+ * Jika Redis (Upstash) dikonfigurasi, response JSON di-cache di Redis dengan TTL
+ * per jenis data; jika tidak, fallback ke cache bawaan Next.js (revalidate).
  */
+
+import { getRedis, isRedisConfigured } from "@/lib/redis/client";
 
 const DEFAULT_BASE_URL = "https://www.sankavollerei.web.id";
 
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+/** TTL Redis cache per jenis data (detik) — sesuai sifat datanya. */
+const REDIS_TTL = {
+  list: 300, // listing/home/genre/search
+  detail: 900, // detail series/episode metadata
+  stream: 120, // URL embed server (paling cepat berubah)
+} as const;
+
+type CacheKind = keyof typeof REDIS_TTL;
+
+function cacheKindFor(path: string): CacheKind {
+  if (/\/(server|episode)\//.test(path)) return "stream";
+  if (/\/(detail)\//.test(path)) return "detail";
+  return "list";
+}
 
 export class ApiError extends Error {
   status: number;
@@ -23,9 +44,9 @@ export class ApiError extends Error {
 }
 
 interface FetchOptions {
-  /** Detik sebelum request dianggap timeout. */
+  /** Timeout request dalam milidetik. */
   timeoutMs?: number;
-  /** Detik cache Next.js sebelum revalidate. Default 300 (5 menit). */
+  /** Cache Next.js (fallback ketika Redis tidak dikonfigurasi), dalam detik. Default 300. */
   revalidate?: number;
 }
 
@@ -36,13 +57,8 @@ export function apiUrl(path: string): string {
   return `${base.replace(/\/+$/, "")}${path}`;
 }
 
-/** Fetch JSON dari API sumber dengan timeout + cache. Melempar ApiError saat gagal. */
-export async function apiFetch<T>(
-  path: string,
-  options: FetchOptions = {}
-): Promise<T> {
-  const { timeoutMs = 15000, revalidate = 300 } = options;
-
+/** Fetch langsung ke API sumber (tanpa Redis) dengan timeout + cache Next.js. */
+async function fetchFromApi<T>(path: string, timeoutMs: number, revalidate: number): Promise<T> {
   let res: Response;
   try {
     res = await fetch(apiUrl(path), {
@@ -69,5 +85,38 @@ export async function apiFetch<T>(
     return (await res.json()) as T;
   } catch {
     throw new ApiError("Upstream API returned invalid JSON", 502);
+  }
+}
+
+/**
+ * Fetch JSON dari API sumber dengan dua lapis cache: Redis (jika dikonfigurasi)
+ * lalu cache Next.js. Melempar ApiError saat gagal.
+ */
+export async function apiFetch<T>(
+  path: string,
+  options: FetchOptions = {}
+): Promise<T> {
+  const { timeoutMs = 15000, revalidate = 300 } = options;
+
+  if (!isRedisConfigured()) {
+    return fetchFromApi<T>(path, timeoutMs, revalidate);
+  }
+
+  const cacheKey = `cyronime:api:${path}`;
+  const kind = cacheKindFor(path);
+
+  try {
+    const redis = getRedis();
+    const hit = await redis.get<T>(cacheKey);
+    if (hit !== null && hit !== undefined) return hit;
+
+    const value = await fetchFromApi<T>(path, timeoutMs, revalidate);
+    await redis.set(cacheKey, value, { ex: REDIS_TTL[kind] });
+    return value;
+  } catch (err) {
+    // Redis bermasalah tidak boleh membuat website gagal -> langsung ke API
+    // sumber dengan cache Next.js.
+    console.error("[api-client] redis cache failed, falling back:", err);
+    return fetchFromApi<T>(path, timeoutMs, revalidate);
   }
 }

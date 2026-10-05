@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import EmbedPlayer, { type PlayerServer } from "@/components/player/EmbedPlayer";
-import { getAnimeEpisode } from "@/lib/api/otakudesu";
+import { getAnimeEpisode } from "@/lib/api/anime";
 import { validateSlug } from "@/lib/utils/validation";
 import { episodeLabel } from "@/lib/utils/validation";
+import WatchTracker from "@/components/watch/WatchTracker";
+import { getAnimeDetail } from "@/lib/api/anime";
 
 interface PageProps {
   params: Promise<{ episode: string }>;
@@ -56,8 +58,24 @@ export default async function AnimeWatchPage({ params }: PageProps) {
     ? [initialServer, ...servers]
     : servers;
 
+  // Poster untuk continue-watching; detail di-cache (Redis/Next) sehingga murah.
+  const animeDetail = data.animeId
+    ? await getAnimeDetail(data.animeId).catch(() => null)
+    : null;
+  const epNumber = data.episodeList.find((e) => e.episodeId === episodeId)?.eps ?? null;
+
   return (
     <div className="space-y-6">
+      {data.animeId ? (
+        <WatchTracker
+          type="anime"
+          contentId={data.animeId}
+          episodeId={episodeId}
+          episode={epNumber}
+          title={animeDetail?.title ?? seriesTitleFromEpisode(data.title)}
+          poster={animeDetail?.poster ?? ""}
+        />
+      ) : null}
       {/* Player sebagai fokus utama */}
       <EmbedPlayer
         initialServer={initialServer}

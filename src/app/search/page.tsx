@@ -3,7 +3,7 @@ import Link from "next/link";
 import AnimeCard from "@/components/cards/AnimeCard";
 import DonghuaCard from "@/components/cards/DonghuaCard";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { searchAnime } from "@/lib/api/otakudesu";
+import { searchAnime } from "@/lib/api/anime";
 import { searchDonghua } from "@/lib/api/donghua";
 import { sanitizeSearchQuery } from "@/lib/utils/validation";
 

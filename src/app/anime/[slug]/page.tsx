@@ -5,7 +5,8 @@ import { notFound } from "next/navigation";
 import AnimeCard from "@/components/cards/AnimeCard";
 import Badge from "@/components/ui/Badge";
 import SectionHeader from "@/components/ui/SectionHeader";
-import { getAnimeDetail } from "@/lib/api/otakudesu";
+import { getAnimeDetail } from "@/lib/api/anime";
+import FavoriteButton from "@/components/cards/FavoriteButton";
 import { validateSlug } from "@/lib/utils/validation";
 
 interface PageProps {
@@ -118,6 +119,23 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               {detail.synopsis}
             </p>
           ) : null}
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            {detail.episodeList[0] ? (
+              <Link
+                href={`/anime/watch/${detail.episodeList[0].episodeId}`}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-accent-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+              >
+                ▶ Watch Now
+              </Link>
+            ) : null}
+            <FavoriteButton
+              type="anime"
+              contentId={detail.animeId}
+              title={detail.title}
+              poster={detail.poster}
+            />
+          </div>
 
           <dl className="grid grid-cols-1 gap-x-8 gap-y-1.5 text-sm sm:grid-cols-2">
             {info

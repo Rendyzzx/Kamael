@@ -8,7 +8,7 @@ import {
   getAnimeGenres,
   getCompletedAnime,
   getOngoingAnime,
-} from "@/lib/api/otakudesu";
+} from "@/lib/api/anime";
 import { validatePage, validateSlug } from "@/lib/utils/validation";
 
 export const metadata: Metadata = {

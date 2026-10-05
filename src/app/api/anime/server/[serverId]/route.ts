@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { resolveAnimeServerUrl } from "@/lib/api/otakudesu";
+import { resolveAnimeServerUrl } from "@/lib/api/anime";
 import { validateServerId } from "@/lib/utils/validation";
 
 /**

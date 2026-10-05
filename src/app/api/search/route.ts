@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { searchAnime } from "@/lib/api/otakudesu";
+import { searchAnime } from "@/lib/api/anime";
 import { searchDonghua } from "@/lib/api/donghua";
 import { sanitizeSearchQuery } from "@/lib/utils/validation";
 
