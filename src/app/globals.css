@@ -415,58 +415,6 @@ h3,
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ============================================================
- * HERO HOME — golden hour: matahari rendah di garis horizon,
- * kabel listrik mengecil ke kanan, siluet burung. Digambar tangan
- * (path tidak simetris), BUKAN generator. Gerak hanya sekali saat
- * masuk: matahari naik 1 tingkat lalu diam.
- * ============================================================ */
-.hero-sun {
-  position: absolute;
-  left: 50%;
-  bottom: 12%;
-  width: 88px;
-  height: 88px;
-  margin-left: -44px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 46% 42%, #ffd3a1 0%, #f5a02e 52%, #f2784a 100%);
-  filter: drop-shadow(0 0 24px rgba(245, 160, 46, 0.45));
-  animation: sun-rise 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-@keyframes sun-rise {
-  from {
-    transform: translateY(14px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-.hero-sky {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(91, 75, 138, 0.32) 0%, rgba(176, 79, 107, 0.2) 46%, rgba(242, 106, 61, 0.14) 78%, transparent 100%);
-}
-/* Kabel listrik: dua tiang miring + tiga kabel melengkung, digambar tangan. */
-.hero-wires {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-.hero-wires svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-sun {
-    animation: none;
-  }
-}
-
 /* Angka ranking: outline amber, peringkat 1 terisi peach. */
 .rank-num {
   font-family: var(--font-display), "Zen Maru Gothic", "Segoe UI", sans-serif;
