@@ -58,7 +58,7 @@ export default function OnboardingSignIn() {
           {isPending ? "Mengalihkan..." : "Lanjut dengan Google"}
         </button>
         {/* Login tester sementara (QA) — hapus sebelum rilis publik. */}
-        <TesterLoginButton />
+        <TesterLoginButton afterLoginHref="/" />
       </div>
 
       <p className="max-w-[300px] text-xs" style={{ color: "var(--text-2)" }}>

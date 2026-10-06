@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { clearMirror } from "@/lib/onboarding-mirror";
 
 const REQUEST_TIMEOUT_MS = 5_000;
 
 /**
  * Settings > "Ulangi Onboarding": hapus state onboarding di Redis
- * (onboarding:{id}) lewat DELETE /api/onboarding, lalu refresh "/" —
- * tanpa state, "/" akan merender onboarding dari splash lagi.
+ * (onboarding:{id}) lewat DELETE /api/onboarding DAN mirror localStorage,
+ * lalu refresh "/" — tanpa state, "/" akan merender onboarding dari
+ * splash lagi.
  * Redis gagal -> tampilkan pesan (jangan navigasi dulu, supaya tidak
  * memberi kesan berhasil padahal state lama masih tersimpan).
  */
@@ -27,6 +29,12 @@ export default function RestartOnboarding() {
         signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       });
       if (!res.ok) throw new Error("delete-failed");
+      // Mirror localStorage WAJIB ikut dihapus: mirror menyimpan
+      // completed:true dari onboarding yang lalu. Kalau dibiarkan, saat
+      // Redis down, gerbang "/" percaya mirror dan gagal menampilkan
+      // ulang alur onboarding -> user "teleport" ke home anime dan
+      // nyangkut di sana (bug Okt 2026).
+      clearMirror();
       router.push("/");
       router.refresh();
     } catch {

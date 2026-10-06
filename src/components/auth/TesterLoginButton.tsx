@@ -7,11 +7,18 @@ import { signIn } from "next-auth/react";
 /**
  * Login TESTER sementara (QA): satu kode akses (default "Aomi123", env
  * TESTER_CODE). Tombol membuka input kode; salah kode -> pesan inline
- * (redirect:false, tidak ada navigasi ke halaman error). Sukses ->
- * router.refresh() dan gerbang "/" / middleware melanjutkan alur seperti
- * login Google.
+ * (redirect:false, tidak ada navigasi ke halaman error).
+ *
+ * Prop `afterLoginHref` (dipakai di OnboardingSignIn): sukses login ->
+ * window.location.replace(href) — full load. Di tengah onboarding, navigasi
+ * router Next (refresh/replace) terbukti TIDAK reliable dari entri history
+ * sentinel onboarding: request RSC-nya di-abort dan tree baru tidak pernah
+ * diterapkan, user nyangkut di layar login. Full load selalu dihormati
+ * browser dan berperilaku sama seperti jalur login Google (yang balik dari
+ * OAuth lewat full page load juga). Tanpa prop (mis. di /login), tetap pakai
+ * router.refresh() — di halaman biasa entri history milik Next, aman.
  */
-export default function TesterLoginButton() {
+export default function TesterLoginButton({ afterLoginHref }: { afterLoginHref?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
@@ -26,6 +33,10 @@ export default function TesterLoginButton() {
       const res = await signIn("tester", { code, redirect: false });
       if (res?.error) {
         setError("Kode tester salah. Coba lagi.");
+        return;
+      }
+      if (afterLoginHref) {
+        window.location.replace(afterLoginHref);
         return;
       }
       router.refresh();

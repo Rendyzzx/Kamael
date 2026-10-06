@@ -66,6 +66,15 @@ export default function OnboardingFlow({
     carouselRef.current = carouselIndex;
   }, [carouselIndex]);
 
+  // HANDSHAKE selesai onboarding: handlePick mem-pop sentinel sendiri
+  // SEBELUM router.refresh(), lalu popstate handler menjalankan refresh
+  // yang tertunda. Tanpa urutan ini, cleanup effect memanggil
+  // history.back() SETELAH tree dashboard ke-refresh -> popstate
+  // membuat Next.js ME-RESTORE snapshot history lama (tree onboarding)
+  // menimpa dashboard -> overlay onboarding tidak pernah hilang, user
+  // "terkunci" di layar Pilih Tontonan selamanya (bug Okt 2026).
+  const completePopRef = useRef<(() => void) | null>(null);
+
   // JEBATAN TOMBOL BACK (bugfix): langkah onboarding TIDAK menulis history,
   // jadi tombol back fisik Android / swipe-back iOS dulunya mundur ke entri
   // history lama (bisa "teleport" user ke halaman anime dengan onboarding
@@ -74,7 +83,15 @@ export default function OnboardingFlow({
   // satu langkah onboarding" (perilaku aplikasi native), bukan keluar.
   useEffect(() => {
     const SENTINEL = { cyronimeOnboarding: true };
-    history.pushState(SENTINEL, "");
+    // PENTING: push sentinel via pushState MENTAH (prototype), BUKAN
+    // window.history.pushState — yang versi Next 15.3+ sudah di-patch
+    // dan menandai entri sebagai milik router Next. Entri bertanda Next
+    // akan di-RESTORE (tree lama ditimpa balik) saat di-pop, sehingga
+    // dashboard hasil refresh completion tertimpa tree onboarding dan
+    // user nyangkut di Pilih Tontonan. Dengan pushState mentah, entri
+    // sentinel tidak dikenali Next -> pop-nya diabaikan Next sepenuhnya.
+    const rawPushState = History.prototype.pushState;
+    rawPushState.call(history, SENTINEL, "");
 
     function goBackOneStep() {
       const s = stepRef.current;
@@ -93,20 +110,51 @@ export default function OnboardingFlow({
     }
 
     function onPopState() {
+      // Pop yang dijadwalkan handlePick saat onboarding selesai: TIDAK
+      // di-push ulang, TIDAK mundur satu langkah. Ini adalah GELOMBANG POP:
+      // entri saat ini masih bertanda sentinel (bisa lebih dari satu —
+      // mis. PWA reload halaman saat first visit lalu mount ulang) -> pop
+      // lagi; sudah mencapai entri bersih Next -> jalankan refresh yang
+      // tertunda di situ. PENTING: refresh HARIP dijalankan di entri
+      // history milik Next, bukan di sentinel kita — navigasi/refresh Next
+      // yang berjalan di atas entri sentinel yang state-nya sudah
+      // tertimpa replaceState Next selalu di-abort (tree tidak pernah
+      // bertukar -> user nyangkut di layar Pilih Tontonan).
+      const afterComplete = completePopRef.current;
+      if (afterComplete) {
+        if ((history.state as { cyronimeOnboarding?: boolean } | null)?.cyronimeOnboarding) {
+          history.back();
+          return;
+        }
+        completePopRef.current = null;
+        afterComplete();
+        return;
+      }
       // Back "ditelan": kembalikan sentinel ke puncak stack supaya stack
       // tidak habis (mencegah exit tak sengaja di tengah onboarding),
       // lalu jalankan mundur satu langkah.
-      history.pushState(SENTINEL, "");
+      rawPushState.call(history, SENTINEL, "");
       goBackOneStep();
     }
 
     window.addEventListener("popstate", onPopState);
     return () => {
       window.removeEventListener("popstate", onPopState);
-      // Buang sentinel dari stack supaya tombol back SETELAH onboarding
-      // selesai tidak "nyangkut" sekali. history.back() ke entri "/" yang
-      // sama: same-document navigation, tidak ada reload/flash.
-      history.back();
+      // Safety: kalau popstate completion tidak pernah datang (edge case),
+      // tetap jalankan refresh yang tertunda supaya user tidak terkunci.
+      const afterComplete = completePopRef.current;
+      if (afterComplete) {
+        completePopRef.current = null;
+        afterComplete();
+      }
+      // Buang sentinel dari stack HANYA bila kita masih duduk di atasnya.
+      // history.back() SETELAH tree berubah (mis. dashboard hasil refresh)
+      // adalah sumber bug: popstate-nya membuat Next me-restore snapshot
+      // onboarding lama dan menimpanya. Kondisi marker memastikan cleanup
+      // ini tidak pernah pop "asal" saat stack sudah tidak punya sentinel.
+      if ((history.state as { cyronimeOnboarding?: boolean } | null)?.cyronimeOnboarding) {
+        history.back();
+      }
     };
   }, []);
 
@@ -161,8 +209,40 @@ export default function OnboardingFlow({
     setPickPending(type);
     await patchOnboarding({ type, completed: true });
     setPickPending(null);
-    // "/" di-refresh -> gerbang server melihat completed && type -> dashboard.
-    router.refresh();
+    // Mulai gelombang pop completion. Entri teratas stack DIJAMIN salah
+    // satu sentinel kita (didorong saat mount; handler popstate selalu
+    // push ulang; reload PWA mempertahankan entri + markernya) — namun
+    // KEY pada state entri bisa saja sudah DIHAPUS oleh replaceState Next
+    // saat router sinkron (mis. refresh pasca-login tester), jadi
+    // JANGAN cek history.state di sini: selalu pop, dan biarkan handler
+    // popstate yang menghitung sampai entri bersih.
+    //
+    // Sampai di entri bersih, JANGAN pakai router.refresh(): entri awal
+    // E0 menyimpan snapshot tree ONBOARDING (stale) di internal state
+    // Next, dan popstate-nya memicu Next me-restore snapshot itu —
+    // refresh kalah balapan dengan restore dan overlay onboarding tidak
+    // pernah benar-benar hilang (user nyangkut di Pilih Tontonan).
+    // Solusi: router.replace("/") — navigasi nyata yang menimpa entri E0
+    // dengan tree dashboard fresh.
+    completePopRef.current = () => router.replace("/");
+    history.back();
+    // Jaring pengaman ganda:
+    // 1) popstate tidak pernah datang (edge browser) -> tetap replace.
+    // 2) replace tidak mendarat dalam 1.5 detik (overlay masih ada)
+    //    -> reload penuh via location.replace (in-place, tanpa menambah
+    //    entri history).
+    window.setTimeout(() => {
+      const pending = completePopRef.current;
+      if (pending) {
+        completePopRef.current = null;
+        pending();
+      }
+    }, 800);
+    window.setTimeout(() => {
+      if (document.querySelector(".onboard-step")) {
+        window.location.replace("/");
+      }
+    }, 1500);
   }
 
   return (
