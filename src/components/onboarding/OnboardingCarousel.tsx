@@ -107,15 +107,18 @@ export default function OnboardingCarousel({
       </div>
 
       <div key={slide.key} className="onboard-step flex flex-1 flex-col items-center justify-center gap-8 px-7 text-center">
-        <Image
-          src={slide.art}
-          alt={`Airin menjelaskan: ${slide.title}`}
-          width={560}
-          height={560}
-          sizes="220px"
-          className="h-[220px] w-[220px] rounded-2xl object-cover"
-          style={{ border: "1px solid var(--chip-border)" }}
-        />
+        {/* Tanpa kotak/bingkai: webp transparan, Airin melayang langsung di latar.
+            Wadah tinggi tetap supaya judul tidak loncat antar slide. */}
+        <div className="relative h-[280px] w-full max-w-[320px]">
+          <Image
+            src={slide.art}
+            alt={`Airin menjelaskan: ${slide.title}`}
+            fill
+            sizes="320px"
+            priority
+            className="object-contain object-bottom drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+          />
+        </div>
         <div className="space-y-3">
           <h1 className="font-display text-[24px] font-bold tracking-tight text-[var(--text)]">{slide.title}</h1>
           <p className="mx-auto max-w-[320px] text-[14px] leading-relaxed" style={{ color: "var(--text-2)" }}>
