@@ -47,6 +47,10 @@ export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
+    // Callback OAuth gagal (state/redirect mismatch dsb.) default-nya
+    // merender halaman error Auth.js yang cuma teks kecil tanpa styling.
+    // Arahkan ke halaman error sendiri dengan bahasa manusia + tombol coba lagi.
+    error: "/auth/error",
   },
   callbacks: {
     async jwt({ token, profile, user }) {
