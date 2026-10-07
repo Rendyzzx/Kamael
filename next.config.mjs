@@ -23,7 +23,7 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
     // Poster dari API kadang besar & berat; optimasi tetap diaktifkan.
-    formats: ["image/webp"],
+    formats: ["image/avif", "image/webp"],
   },
 };
 

@@ -157,7 +157,7 @@ export default async function DonghuaWatchPage({ params }: PageProps) {
               {seriesTitle}
             </p>
           )}
-          <h1 className="font-display mt-1 text-[30px] font-extrabold leading-[1.05] tracking-tight text-white">
+          <h1 className="font-display mt-1 text-[30px] font-extrabold leading-[1.05] tracking-tight text-[var(--text)]">
             {shortLabel}
           </h1>
           {data.title !== shortLabel ? (

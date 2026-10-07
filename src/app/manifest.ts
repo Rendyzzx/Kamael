@@ -8,10 +8,10 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cyronime — Streaming Anime & Donghua",
+    name: "Cyronime: streaming anime dan donghua",
     short_name: "Cyronime",
     description:
-      "Nonton anime dan donghua subtitle Indonesia dengan tampilan modern, cepat, dan ringan.",
+      "Nonton anime dan donghua subtitle Indonesia. Lanjut dari episode terakhir dan simpan serial favorit.",
     id: "/",
     start_url: "/",
     scope: "/",

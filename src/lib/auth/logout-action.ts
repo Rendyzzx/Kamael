@@ -20,6 +20,7 @@ import { cookies } from "next/headers";
 import { getAuthenticatedUserId, signOut } from "@/lib/auth/session";
 import { deleteOnboarding } from "@/lib/redis/onboarding";
 import { readVisitorId, VISITOR_COOKIE } from "@/lib/visitor";
+import { ONB_COOKIE } from "@/lib/onboarding-cookie";
 
 export async function logoutToOnboarding(): Promise<void> {
   const uid = await getAuthenticatedUserId();
@@ -36,6 +37,9 @@ export async function logoutToOnboarding(): Promise<void> {
   // disclaimer di-accept kembali.
   try {
     (await cookies()).delete(VISITOR_COOKIE);
+    // Cookie penanda onboarding juga dihapus: akun berikutnya (visitor
+    // baru) harus menjalani alur onboarding, bukan mewarasi portal.
+    (await cookies()).delete(ONB_COOKIE);
   } catch {
     // ignore — cookie opsional
   }

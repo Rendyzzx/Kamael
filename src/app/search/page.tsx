@@ -34,7 +34,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       <div style={{ padding: "0 var(--page-x)" }}>
         <SearchBox />
         <div className="mt-8 space-y-6">
-          <h1 className="font-display text-[18px] font-bold text-white">Pencarian</h1>
+          <h1 className="font-display text-[18px] font-bold text-[var(--text)]">Pencarian</h1>
           <p className="text-sm" style={{ color: "var(--text-2)" }}>
             Ketik minimal 2 karakter pada kolom pencarian di atas.
           </p>
@@ -60,11 +60,11 @@ export default async function SearchPage({ searchParams }: PageProps) {
       <SearchBox />
       <div className="mt-4 space-y-8">
         <div>
-          <h1 className="font-display text-[18px] font-bold text-white">
+          <h1 className="font-display text-[18px] font-bold text-[var(--text)]">
             Hasil pencarian: <span style={{ color: "var(--blue)" }}>{q}</span>
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-2)" }}>
-            {anime.length} anime · {donghua.length} donghua
+            {anime.length} anime, {donghua.length} donghua
           </p>
         </div>
 

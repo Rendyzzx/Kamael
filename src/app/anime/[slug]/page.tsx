@@ -88,7 +88,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
           </span>
         ) : null}
 
-        <h1 className="font-display text-[32px] font-medium leading-tight text-white sm:text-[44px]">{detail.title}</h1>
+        <h1 className="font-display text-[32px] font-medium leading-tight text-[var(--text)] sm:text-[44px]">{detail.title}</h1>
         {detail.japaneseTitle ? (
           <p className="mt-1 text-[17px]" style={{ color: "var(--text-2)" }}>
             {detail.japaneseTitle}
@@ -115,7 +115,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
               <Link
                 key={g.id}
                 href={`/anime?genre=${g.id}`}
-                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
+                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth"
                 style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
               >
                 {g.title}
@@ -126,7 +126,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
 
         {detail.synopsis ? (
           <section className="mt-6">
-            <h2 className="font-display mb-2 text-[21px] font-light text-white">Synopsis</h2>
+            <h2 className="font-display mb-2 text-[21px] font-light text-[var(--text)]">Synopsis</h2>
             <Synopsis text={detail.synopsis} />
           </section>
         ) : null}
@@ -159,7 +159,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
                     className="flex items-center justify-between rounded-chip px-4 transition-smooth"
                     style={{ height: 48, background: "var(--surface)" }}
                   >
-                    <span className="line-clamp-1 text-[14px] font-medium text-white">{ep.title}</span>
+                    <span className="line-clamp-1 text-[14px] font-medium text-[var(--text)]">{ep.title}</span>
                     <span className="shrink-0 pl-2 text-[13px]" style={{ color: "var(--text-2)" }}>
                       {ep.date}
                     </span>
@@ -191,7 +191,7 @@ export default async function AnimeDetailPage({ params }: PageProps) {
 function Chip({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-chip px-3.5 text-[14px] font-medium text-white"
+      className="inline-flex items-center gap-1 rounded-chip px-3.5 text-[14px] font-medium text-[var(--text)]"
       style={{ height: 32, background: "var(--surface-3)" }}
     >
       {children}

@@ -5,7 +5,7 @@
  */
 export default function BrandLogo({ size = 21 }: { size?: number }) {
   return (
-    <span className="font-display inline-flex items-center gap-2 font-bold tracking-tight text-white">
+    <span className="font-display inline-flex items-center gap-2 font-bold tracking-tight text-[var(--text)]">
       <svg
         width={size + 3}
         height={size + 3}

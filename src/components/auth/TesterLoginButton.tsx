@@ -18,7 +18,14 @@ import { signIn } from "next-auth/react";
  * OAuth lewat full page load juga). Tanpa prop (mis. di /login), tetap pakai
  * router.refresh() — di halaman biasa entri history milik Next, aman.
  */
-export default function TesterLoginButton({ afterLoginHref }: { afterLoginHref?: string }) {
+export default function TesterLoginButton({
+  afterLoginHref,
+  variant = "button",
+}: {
+  afterLoginHref?: string;
+  /** "link" = tautan kecil di bawah tombol utama (bukan fitur sejajar). */
+  variant?: "button" | "link";
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
@@ -62,15 +69,15 @@ export default function TesterLoginButton({ afterLoginHref }: { afterLoginHref?:
               placeholder="Kode tester"
               aria-label="Kode tester"
               autoComplete="off"
-              className="w-full rounded-chip px-4 py-3 text-sm font-semibold text-white outline-none"
-              style={{ background: "var(--surface)", border: "1px solid rgba(255,255,255,.12)" }}
+              className="w-full rounded-chip px-4 py-3 text-sm font-semibold text-[var(--text)] outline-none"
+              style={{ background: "var(--surface)", border: "1px solid var(--chip-border)" }}
             />
             <button
               type="button"
               onClick={() => void submit()}
               disabled={busy || !code.trim()}
-              className="shrink-0 rounded-chip px-4 py-3 text-sm font-bold text-white transition-smooth active:scale-[.98] disabled:opacity-60"
-              style={{ background: "var(--blue-grad)" }}
+              className="shrink-0 rounded-chip px-4 py-3 text-sm font-bold transition-smooth active:scale-[.98] disabled:opacity-60"
+              style={{ background: "var(--amber)", color: "var(--ink-warm)" }}
             >
               {busy ? (
                 <span className="material-symbols-rounded animate-spin" style={{ fontSize: 18 }}>
@@ -82,16 +89,25 @@ export default function TesterLoginButton({ afterLoginHref }: { afterLoginHref?:
             </button>
           </div>
           {error ? (
-            <p className="text-xs font-semibold" style={{ color: "#FF1744" }}>
+            <p className="text-xs font-semibold" style={{ color: "var(--sunset)" }}>
               {error}
             </p>
           ) : null}
         </div>
+      ) : variant === "link" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-full text-center text-[12px] font-medium underline transition-smooth active:scale-[.98]"
+          style={{ color: "var(--text-2)", textUnderlineOffset: 3, textDecorationColor: "rgba(201,172,159,.4)" }}
+        >
+          Punya kode tester? Masuk di sini
+        </button>
       ) : (
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-bold text-white transition-smooth active:scale-[.98]"
+          className="flex w-full items-center justify-center gap-2 rounded-chip px-4 py-3 text-sm font-bold text-[var(--text)] transition-smooth active:scale-[.98]"
           style={{ background: "var(--surface)" }}
         >
           <span className="material-symbols-rounded" style={{ fontSize: 18 }} aria-hidden="true">

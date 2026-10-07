@@ -8,6 +8,7 @@ import {
   type OnboardingType,
 } from "@/lib/redis/onboarding";
 import { newVisitorId, readVisitorId, visitorCookieOptions, VISITOR_COOKIE } from "@/lib/visitor";
+import { ONB_COOKIE, ONB_COOKIE_MAX_AGE } from "@/lib/onboarding-cookie";
 
 /**
  * State onboarding first-time experience — tersimpan di Redis (onboarding:{id}).
@@ -78,6 +79,16 @@ export async function POST(req: NextRequest) {
   if (!userId && !existingVisitorId) {
     res.cookies.set(VISITOR_COOKIE, id, visitorCookieOptions());
   }
+  // Cookie penanda `onb` (performa): begitu `type` tersimpan, navigasi
+  // berikutnya TIDAK perlu membaca Redis lagi (lihat lib/onboarding-cookie).
+  if (patch.type) {
+    res.cookies.set(ONB_COOKIE, patch.type, {
+      path: "/",
+      maxAge: ONB_COOKIE_MAX_AGE,
+      sameSite: "lax",
+      httpOnly: true,
+    });
+  }
   return res;
 }
 
@@ -88,5 +99,9 @@ export async function DELETE() {
     return NextResponse.json({ ok: true });
   }
   const deleted = await deleteOnboarding(id);
-  return NextResponse.json({ ok: deleted });
+  const res = NextResponse.json({ ok: deleted });
+  // "Ulangi Onboarding": hapus juga cookie penanda supaya layout "/"
+  // kembali membaca Redis dan alur onboarding tampil lagi.
+  res.cookies.delete(ONB_COOKIE);
+  return res;
 }

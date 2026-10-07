@@ -55,7 +55,7 @@ export default async function DonghuaPage({ searchParams }: PageProps) {
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[18px] font-bold text-white">Donghua</h1>
+          <h1 className="font-display text-[18px] font-bold text-[var(--text)]">Donghua</h1>
           <PortalSwitch portal="donghua" />
         </div>
 

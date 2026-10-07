@@ -48,11 +48,11 @@ export default function PortalSwitch({ portal }: { portal: Portal }) {
     >
       <span
         className="material-symbols-rounded"
-        style={{ fontSize: 20, color: portal === "anime" ? "var(--blue)" : "#D9535E" }}
+        style={{ fontSize: 20, color: portal === "anime" ? "var(--text-2)" : "var(--sunset)" }}
       >
         {portal === "anime" ? "live_tv" : "auto_awesome"}
       </span>
-      <span className="text-[13px] font-semibold text-white">
+      <span className="text-[13px] font-semibold text-[var(--text)]">
         {portal === "anime" ? "Anime" : "Donghua"}
       </span>
       {pending ? (

@@ -36,7 +36,7 @@ export default function DonghuaCard({
 
         {donghua.currentEpisode ? (
           <span
-            className="absolute bottom-1.5 left-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium text-white"
+            className="absolute bottom-1.5 left-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium text-[var(--text)]"
             style={{ background: "rgba(30,33,40,.85)" }}
           >
             {donghua.currentEpisode}
@@ -44,7 +44,7 @@ export default function DonghuaCard({
         ) : null}
       </div>
       <h3
-        className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-white transition-smooth"
+        className="mt-2 line-clamp-2 text-[14px] font-semibold leading-snug text-[var(--text)] transition-smooth"
         style={{ fontFamily: "var(--font-montserrat)" }}
       >
         {donghua.title}

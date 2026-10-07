@@ -52,7 +52,7 @@ export default function GenreSheet({
           haptic(8);
           setOpen(true);
         }}
-        className="inline-flex items-center gap-1.5 rounded-chip px-3.5 py-2 text-[13px] font-semibold text-white transition-smooth active:scale-[.97]"
+        className="inline-flex items-center gap-1.5 rounded-chip px-3.5 py-2 text-[13px] font-semibold text-[var(--text)] transition-smooth active:scale-[.97]"
         style={{ height: 36, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
         aria-haspopup="dialog"
       >
@@ -73,7 +73,7 @@ export default function GenreSheet({
               haptic(6);
               setOpen(false);
             }}
-            className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth active:scale-[.97]"
+            className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth active:scale-[.97]"
             style={{
               height: 40,
               border: !activeGenre ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
@@ -92,7 +92,7 @@ export default function GenreSheet({
                   haptic(6);
                   setOpen(false);
                 }}
-                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth active:scale-[.97]"
+                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth active:scale-[.97]"
                 style={{
                   height: 40,
                   border: isActive ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
@@ -105,7 +105,7 @@ export default function GenreSheet({
           })}
         </div>
         <p className="pt-3 text-[12px]" style={{ color: "var(--muted)" }}>
-          {pathname.startsWith("/donghua") ? "Portal Donghua" : "Portal Anime"} — filter langsung diterapkan.
+          {pathname.startsWith("/donghua") ? "Portal Donghua" : "Portal Anime"}: filter langsung diterapkan.
         </p>
       </BottomSheet>
     </>

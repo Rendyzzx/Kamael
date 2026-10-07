@@ -99,8 +99,8 @@ export default function InstallPrompt() {
             ios_share
           </span>
           <p className="flex-1 text-[12.5px] leading-relaxed" style={{ color: "var(--text-2)" }}>
-            Pasang <strong className="text-white">Cyronime</strong> ke layar utama: buka menu Share di Safari, lalu
-            pilih <strong className="text-white">Tambahkan ke Layar Utama</strong>.
+            Pasang <strong className="text-[var(--text)]">Cyronime</strong> ke layar utama: buka menu Share di Safari, lalu
+            pilih <strong className="text-[var(--text)]">Tambahkan ke Layar Utama</strong>.
           </p>
           <button
             type="button"
@@ -133,7 +133,7 @@ export default function InstallPrompt() {
       >
         <Image src="/icons/icon-96.png" alt="" width={40} height={40} style={{ borderRadius: 10 }} priority={false} />
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-bold text-white">Pasang Cyronime</p>
+          <p className="text-[13px] font-bold text-[var(--text)]">Pasang Cyronime</p>
           <p className="text-[12px]" style={{ color: "var(--text-2)" }}>
             Akses cepat dari layar utama, tanpa browser.
           </p>
@@ -141,7 +141,7 @@ export default function InstallPrompt() {
         <button
           type="button"
           onClick={install}
-          className="rounded-chip px-4 py-2 text-[13px] font-bold text-white transition-smooth active:scale-[.97]"
+          className="rounded-chip px-4 py-2 text-[13px] font-bold text-[var(--text)] transition-smooth active:scale-[.97]"
           style={{ background: "var(--blue-grad)" }}
         >
           Install

@@ -83,12 +83,12 @@ export default function SearchBox() {
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Cari Anime Di Sini"
+            placeholder="Cari anime"
             aria-label="Cari anime atau donghua"
             className="w-full rounded-chip outline-none"
             style={{
               height: 48,
-              background: "#1E1F23",
+              background: "var(--surface-2)",
               color: "var(--text)",
               paddingLeft: 58,
               paddingRight: 16,

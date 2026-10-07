@@ -33,7 +33,7 @@ export default function EpisodeSheet({
           haptic(8);
           setOpen(true);
         }}
-        className="inline-flex items-center gap-1.5 rounded-chip px-3.5 py-2 text-[13px] font-semibold text-white transition-smooth active:scale-[.97]"
+        className="inline-flex items-center gap-1.5 rounded-chip px-3.5 py-2 text-[13px] font-semibold text-[var(--text)] transition-smooth active:scale-[.97]"
         style={{ height: 36, border: "1.5px solid var(--deep-2)", background: "var(--deep)" }}
         aria-haspopup="dialog"
       >

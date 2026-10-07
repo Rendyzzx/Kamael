@@ -86,7 +86,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
           </span>
         ) : null}
 
-        <h1 className="font-display text-[32px] font-medium leading-tight text-white sm:text-[44px]">{detail.title}</h1>
+        <h1 className="font-display text-[32px] font-medium leading-tight text-[var(--text)] sm:text-[44px]">{detail.title}</h1>
         {detail.alterTitle ? (
           <p className="mt-1 text-[17px]" style={{ color: "var(--text-2)" }}>
             {detail.alterTitle}
@@ -113,7 +113,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
               <Link
                 key={g.slug}
                 href={`/donghua?genre=${g.slug}`}
-                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
+                className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth"
                 style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
               >
                 {g.name}
@@ -124,7 +124,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
 
         {detail.synopsis ? (
           <section className="mt-6">
-            <h2 className="font-display mb-2 text-[21px] font-light text-white">Synopsis</h2>
+            <h2 className="font-display mb-2 text-[21px] font-light text-[var(--text)]">Synopsis</h2>
             <Synopsis text={detail.synopsis} />
           </section>
         ) : null}
@@ -157,7 +157,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
                     className="flex items-center justify-between rounded-chip px-4 transition-smooth"
                     style={{ height: 48, background: "var(--surface)" }}
                   >
-                    <span className="line-clamp-1 text-[14px] font-medium text-white">
+                    <span className="line-clamp-1 text-[14px] font-medium text-[var(--text)]">
                       {episodeLabel(ep.title, ep.title)}
                       {ep.isFinal ? (
                         <span className="ml-1.5 text-xs font-bold" style={{ color: "var(--blue)" }}>
@@ -195,7 +195,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
 
 function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-chip px-3.5 text-[14px] font-medium text-white" style={{ height: 32, background: "var(--surface-3)" }}>
+    <span className="inline-flex items-center gap-1 rounded-chip px-3.5 text-[14px] font-medium text-[var(--text)]" style={{ height: 32, background: "var(--surface-3)" }}>
       {children}
     </span>
   );

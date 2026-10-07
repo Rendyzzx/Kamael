@@ -49,7 +49,7 @@ export default async function AnimePage({ searchParams }: PageProps) {
 
       <div className="space-y-5" style={{ marginTop: 16 }}>
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[18px] font-bold text-white">Anime</h1>
+          <h1 className="font-display text-[18px] font-bold text-[var(--text)]">Anime</h1>
           <PortalSwitch portal="anime" />
         </div>
 

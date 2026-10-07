@@ -33,11 +33,11 @@ export default function ContinueWatchingCard({ item }: { item: WatchProgress }) 
           </div>
         ) : null}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        <span className="absolute bottom-1 left-1.5 line-clamp-1 max-w-[90%] text-[11px] font-semibold text-white">
+        <span className="absolute bottom-1 left-1.5 line-clamp-1 max-w-[90%] text-[11px] font-semibold text-[var(--text)]">
           {item.episode ? `Episode ${item.episode}` : "Lanjutkan"}
         </span>
       </div>
-      <h3 className="mt-1.5 line-clamp-1 text-[13px] font-medium leading-snug text-white">{item.title}</h3>
+      <h3 className="mt-1.5 line-clamp-1 text-[13px] font-medium leading-snug text-[var(--text)]">{item.title}</h3>
     </Link>
   );
 }

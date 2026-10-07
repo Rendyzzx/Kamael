@@ -20,7 +20,7 @@ export default function ShowMoreChips({ genres, basePath }: { genres: Genre[]; b
           <Link
             key={g.id}
             href={`${basePath}?genre=${encodeURIComponent(g.id)}`}
-            className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-white transition-smooth"
+            className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth"
             style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
           >
             {g.title}
@@ -31,7 +31,7 @@ export default function ShowMoreChips({ genres, basePath }: { genres: Genre[]; b
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-2 text-[14px] font-bold text-white"
+          className="mt-2 text-[14px] font-bold text-[var(--text)]"
         >
           {expanded ? "Show Less" : "Show More"}
         </button>

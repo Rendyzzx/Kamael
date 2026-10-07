@@ -23,7 +23,7 @@ export default async function ProfilePage() {
   if (!session?.user) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col items-center justify-center gap-5 px-4 text-center">
-        <h1 className="font-display text-[18px] font-semibold text-white">Kamu belum login</h1>
+        <h1 className="font-display text-[18px] font-semibold text-[var(--text)]">Kamu belum login</h1>
         <p className="text-sm" style={{ color: "var(--text-2)" }}>
           Login untuk melihat profile, continue watching, history, dan favorite.
         </p>
@@ -38,7 +38,7 @@ export default async function ProfilePage() {
 
   return (
     <div style={{ padding: "0 var(--page-x)" }} className="mx-auto max-w-md space-y-6">
-      <h1 className="font-display text-[18px] font-bold text-white">Profile</h1>
+      <h1 className="font-display text-[18px] font-bold text-[var(--text)]">Profile</h1>
 
       <section className="flex items-center gap-4 rounded-card p-4" style={{ background: "var(--surface)" }}>
         <div className="overflow-hidden rounded-full" style={{ width: 56, height: 56, background: "var(--surface-3)" }}>
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
           ) : null}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-display text-[17px] font-bold text-white">{name}</p>
+          <p className="truncate font-display text-[17px] font-bold text-[var(--text)]">{name}</p>
           <p className="truncate text-sm" style={{ color: "var(--text-2)" }}>
             {email}
           </p>
@@ -61,7 +61,7 @@ export default async function ProfilePage() {
               {l.icon}
             </span>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-white">{l.label}</p>
+              <p className="text-sm font-semibold text-[var(--text)]">{l.label}</p>
               <p className="text-xs" style={{ color: "var(--text-2)" }}>
                 {l.desc}
               </p>

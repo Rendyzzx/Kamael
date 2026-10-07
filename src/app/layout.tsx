@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Zen_Maru_Gothic, Figtree } from "next/font/google";
 import BottomNav from "@/components/navbar/BottomNav";
-import SettingsFab from "@/components/navbar/SettingsFab";
 import SplashScreen from "@/components/ui/SplashScreen";
 import AuthProvider from "@/components/providers/AuthProvider";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
@@ -10,6 +9,7 @@ import PageTransition from "@/components/nav/PageTransition";
 import ScrollRestore from "@/components/nav/ScrollRestore";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { getOnboardingStatus } from "@/lib/redis/onboarding";
+import { readOnbCookie } from "@/lib/onboarding-cookie";
 import { readVisitorId } from "@/lib/visitor";
 import type { Portal } from "@/components/portal/portal-events";
 import "./globals.css";
@@ -30,11 +30,11 @@ const body = Figtree({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cyronime.web.id";
 const SITE_NAME = "Cyronime";
-const DEFAULT_TITLE = "Cyronime — Streaming Anime & Donghua";
+const DEFAULT_TITLE = "Cyronime: streaming anime dan donghua sub Indonesia";
 const DEFAULT_DESC =
-  "Nonton anime dan donghua subtitle Indonesia dengan tampilan modern, cepat, dan ringan — Anime dan Donghua dua area terpisah dalam satu platform.";
+  "Nonton anime dan donghua subtitle Indonesia. Lanjut dari episode terakhir, simpan serial favorit, dan kelola dua portal dalam satu aplikasi.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
 
 /* viewport: cover notch (safe-area dipakai header/nav via env()). */
 export const viewport: Viewport = {
-  themeColor: "#2A1B25",
+  themeColor: "#33232D",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -90,21 +90,32 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Status onboarding (Redis onboarding:{id}) dibaca SEKALI di sini dan
-  // dipakai dua hal:
+  // Status onboarding dipakai dua hal:
   // 1. `portal` -> tab tunggal yang ditampilkan BottomNav di halaman netral
   //    (Search/Profil/Settings/Favorit/History).
-  // 2. `onboardingDone` -> BottomNav & SettingsFab disembunyikan di "/"
-  //    selama onboarding first-time experience masih berjalan di sana.
+  // 2. `onboardingDone` -> BottomNav disembunyikan di "/" selama alur
+  //    first-time masih berjalan di sana.
+  //
+  // PERFORMA (revisi Okt 2026): cookie penanda `onb` (disetel oleh POST
+  // /api/onboarding saat `type` tersimpan) membuat navigasi berikutnya
+  // TIDAK membaca Redis sama sekali. Redis hanya dibaca saat kunjungan
+  // pertama / setelah cookie dihapus (logout, ulangi onboarding).
   // Redis tak terjangkau -> fail-open (onboardingDone=true, portal="anime")
   // supaya nav tidak hilang/macet saat Redis down.
-  const userId = await getAuthenticatedUserId();
-  const id = userId ?? (await readVisitorId());
-  const status = id
-    ? await getOnboardingStatus(id)
-    : { value: { accepted: false, completed: false, type: null as Portal | null }, redisOk: true };
-  const portal: Portal = status.value.type ?? "anime";
-  const onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
+  const onbCookie = await readOnbCookie();
+  let portal: Portal = "anime";
+  let onboardingDone = true;
+  if (onbCookie) {
+    portal = onbCookie;
+  } else {
+    const userId = await getAuthenticatedUserId();
+    const id = userId ?? (await readVisitorId());
+    const status = id
+      ? await getOnboardingStatus(id)
+      : { value: { accepted: false, completed: false, type: null as Portal | null }, redisOk: true };
+    portal = status.value.type ?? "anime";
+    onboardingDone = status.redisOk ? Boolean(status.value.completed && status.value.type) : true;
+  }
 
   return (
     <html lang="id" className={`dark ${display.variable} ${body.variable}`}>
@@ -119,7 +130,6 @@ export default async function RootLayout({
               <PageTransition>{children}</PageTransition>
             </main>
           </div>
-          <SettingsFab onboardingDone={onboardingDone} />
           <BottomNav defaultPortal={portal} onboardingDone={onboardingDone} />
           <InstallPrompt />
           <SwUpdateReload />

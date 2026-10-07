@@ -19,7 +19,7 @@ const TESTER_USER = {
   id: "cyro-tester",
   name: "Tester Cyronime",
   email: "tester@cyronime.local",
-  image: "/onboarding/mascot.png",
+  image: "/mascot/airin.webp",
 } as const;
 
 export const authConfig: NextAuthConfig = {

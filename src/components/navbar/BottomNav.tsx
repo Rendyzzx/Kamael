@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Icon, { type IconName } from "@/components/ui/Icon";
@@ -106,7 +107,7 @@ export default function BottomNav({
               }}
             >
               {session?.user?.image ? (
-                <Image src={session.user.image} alt="Profil" width={30} height={30} className="h-full w-full object-cover" />
+                <NavAvatar src={session.user.image} name={session.user.name ?? ""} />
               ) : (
                 <span className="flex h-full w-full items-center justify-center text-xs font-bold" style={{ color: "var(--text)" }}>
                   {session?.user?.name?.charAt(0).toUpperCase() ?? (
@@ -125,5 +126,29 @@ export default function BottomNav({
         </li>
       </ul>
     </nav>
+  );
+}
+
+
+/** Avatar nav 30px: kalau gambar gagal dimuat (URL mati/404), ganti ke
+ *  inisial supaya ikon profil tidak pernah tampak "rusak". */
+function NavAvatar({ src, name }: { src: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) {
+    return (
+      <span className="flex h-full w-full items-center justify-center text-xs font-bold" style={{ color: "var(--text)" }}>
+        {name.charAt(0).toUpperCase() || "?"}
+      </span>
+    );
+  }
+  return (
+    <Image
+      src={src}
+      alt="Profil"
+      width={30}
+      height={30}
+      className="h-full w-full object-cover"
+      onError={() => setFailed(true)}
+    />
   );
 }

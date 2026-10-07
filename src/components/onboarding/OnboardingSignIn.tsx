@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import BrandLogo from "@/components/ui/BrandLogo";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -25,14 +26,17 @@ export default function OnboardingSignIn() {
   const isPending = busy;
 
   return (
-    <div className="onboard-step flex h-full flex-col items-center justify-center gap-8 px-7 text-center">
-      <BrandLogo size={24} />
+    <div className="onboard-step flex h-full flex-col items-center justify-center gap-6 px-7 text-center">
+      {/* Airin menyapa — layar tidak datar, ruang kosong terisi. */}
+      <div className="relative" style={{ width: 132, height: 132 }} aria-hidden="true">
+        <Image src="/mascot/airin.webp" alt="" fill sizes="132px" className="object-contain" priority />
+      </div>
 
       <div className="space-y-1.5">
-        <h1 className="font-display text-[20px] font-bold text-white">Buat akun / Masuk</h1>
-        <p className="text-[14px]" style={{ color: "var(--text-2)" }}>
-          Masuk dulu dengan Google untuk melanjutkan. Setelah itu kamu bisa memilih tontonan
-          favorit — progres, history, dan favorit tersimpan otomatis di akunmu.
+        <h1 className="font-display text-[20px] font-bold text-[var(--text)]">Masuk dulu ya</h1>
+        <p className="mx-auto max-w-[300px] text-[13.5px] leading-relaxed" style={{ color: "var(--text-2)" }}>
+          Satu langkah lagi. Masuk dengan Google supaya progres, history, dan favorit kamu
+          tersimpan di semua perangkat.
         </p>
       </div>
 
@@ -57,14 +61,14 @@ export default function OnboardingSignIn() {
           )}
           {isPending ? "Mengalihkan..." : "Lanjut dengan Google"}
         </button>
-        {/* Login tester sementara (QA) — hapus sebelum rilis publik. */}
-        <TesterLoginButton afterLoginHref="/" />
+        {/* Login tester sementara (QA) — tautan kecil, bukan fitur sejajar. Hapus sebelum rilis publik. */}
+        <TesterLoginButton afterLoginHref="/" variant="link" />
       </div>
 
       <p className="max-w-[300px] text-xs" style={{ color: "var(--text-2)" }}>
         Dengan masuk, kamu menyetujui{" "}
-        <Link href="/privacy" className="font-semibold" style={{ color: "var(--blue)" }}>
-          Privacy Policy
+        <Link href="/privacy" className="font-semibold underline" style={{ color: "var(--peach)", textUnderlineOffset: 3 }}>
+          kebijakan privasi
         </Link>{" "}
         kami.
       </p>

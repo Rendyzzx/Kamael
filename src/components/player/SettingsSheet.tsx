@@ -71,7 +71,7 @@ export default function SettingsSheet({
     level === "quality"
       ? "Kualitas"
       : level === "server"
-        ? `Server · ${qualityLabel(activeQuality)}`
+        ? `Server: ${qualityLabel(activeQuality)}`
         : level === "speed"
           ? "Kecepatan"
           : "Pengaturan";

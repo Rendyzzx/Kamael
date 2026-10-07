@@ -5,76 +5,79 @@
 @tailwind utilities;
 
 /*
- * DESIGN TOKENS — tema GOLDEN HOUR (senja hangat).
- * Latar dusk hangat (#2A1B25), aksen amber, cahaya peach, bayangan dingin
- * violet dipakai hemat. Semua komponen memakai token ini, tidak ada warna
- * hardcode lain. Nama token lama (--blue, --yellow, dst.) DIPERTAHANKAN
- * sebagai alias supaya seluruh halaman player/watch ikut berubah tema
- * tanpa perlu disentuh — nilainya kini hangat, bukan biru.
+ * DESIGN TOKENS — tema SENJA TENANG (revisi Okt 2026).
+ * Palet saturasi rendah, proporsi 60/30/10:
+ * - 60% permukaan ungu-cokelat hangat (dusk/surface)
+ * - 30% nada tengah (violet & mawar senja) untuk border/state
+ * - maks 10% emas lembut — HANYA aksi utama & state aktif
+ * Teks krem #F6E7D3 (bukan putih murni). Tidak ada blok jenuh besar;
+ * gradien senja hanya di splash & hero Home dengan transisi halus.
+ * Nama token lama (--blue, --yellow, dst.) dipertahankan sebagai alias.
  */
 :root {
   color-scheme: dark;
 
   /* ===== Palet inti ===== */
-  --dusk: #2a1b25;          /* latar utama, ungu-cokelat hangat */
-  --surface: #3a2631;      /* kartu/panel */
-  --surface-2: #452e3a;    /* permukaan naik */
-  --surface-3: #523a46;    /* permukaan paling terang / kontrol */
-  --amber: #f5a02e;        /* aksen utama */
-  --sunset: #f26a3d;       /* CTA / aksen sekunder */
-  --peach: #ffd3a1;        /* highlight, teks lembut */
-  --violet: #5b4b8a;       /* bayangan dingin — hemat */
-  --ink-warm: #1f1219;     /* teks di atas amber */
+  --dusk: #33232D;          /* latar utama, ungu-cokelat hangat */
+  --surface: #3E2C37;      /* kartu/panel */
+  --surface-2: #4A3643;    /* permukaan naik */
+  --surface-3: #574150;    /* kontrol */
+  --amber: #E8B66B;        /* EMAS LEMBUT — aksen utama, hemat */
+  --sunset: #C97B84;       /* MAWAR SENJA — aksen sekunder */
+  --peach: #F2C9A0;        /* highlight halus, teks lembut */
+  --violet: #6C5B8F;       /* bayangan dingin, border, state */
+  --ink-warm: #2A1B25;     /* teks di atas emas */
 
-  /* Teks utama hangat, kontras aman di atas dusk. */
-  --text: #fff1e0;
-  --text-2: #c9a896;
+  /* Teks utama krem, bukan putih murni. */
+  --text: #F6E7D3;
+  --text-2: #C9AC9F;
 
   /* ===== Alias tema lama (jangan tambah pemakaian baru) ===== */
   --bg: var(--dusk);
   --blue: var(--amber);
   --blue-grad: var(--amber);
   --yellow: var(--peach);
-  --maroon: #47232b;
-  --chip-border: #6e3a2e;
+  --maroon: #472F3C;
+  --chip-border: rgba(108, 91, 143, 0.45);
   --nav-active: var(--violet);
 
   /* ===== Token player & halaman episode ===== */
-  --ink: #20141b;
-  --deep: #33212c;
-  --deep-2: #452e3a;
+  --ink: #2A1B25;
+  --deep: #3A2833;
+  --deep-2: #4A3643;
   --glacier: var(--peach);
   --frost: var(--text);
   --muted: var(--text-2);
 
-  /* ===== Radius bermakna (bukan satu nilai untuk semuanya) ===== */
-  --radius-card: 18px;   /* kartu/poster */
-  --radius-md: 12px;     /* kontrol & input */
-  --radius-chip: 8px;    /* badge/chip kecil — tegas, bukan pill */
+  /* ===== Radius bermakna ===== */
+  --radius-card: 18px;
+  --radius-md: 12px;
+  --radius-chip: 8px;
   --radius-pill: 999px;  /* HANYA tombol putar (bentuk lingkaran fungsional) */
 
   --page-x: 14px;
   --page-x-detail: 16px;
   --section-gap: 24px;
 
-  /* Gradien langit senja — dipakai HANYA di splash & hero Home. */
-  --sky: linear-gradient(180deg, #f5a02e 0%, #f2784a 34%, #b04f6b 62%, #5b4b8a 100%);
+  /* Gradien senja lembut — HANYA di splash & hero Home.
+     Transisi nada halus (violet -> mawar -> emas pudar), tanpa oranye menyala. */
+  --sky: linear-gradient(180deg, #6C5B8F 0%, #8A6280 38%, #C97B84 72%, #E8B66B 100%);
 
-  /* Bayangan hangat, bukan abu-abu. */
-  --shadow-warm: 0 2px 0 rgba(58, 26, 16, 0.55), 0 8px 20px rgba(20, 6, 12, 0.35);
-  --shadow-warm-pressed: 0 0 0 rgba(58, 26, 16, 0.55), 0 2px 6px rgba(20, 6, 12, 0.3);
+  /* Bayangan netral-violet, halus. */
+  --shadow-warm: 0 2px 0 rgba(42, 27, 37, 0.6), 0 8px 20px rgba(20, 12, 18, 0.32);
+  --shadow-warm-pressed: 0 0 0 rgba(42, 27, 37, 0.6), 0 2px 6px rgba(20, 12, 18, 0.28);
 }
 
 html {
   scroll-behavior: smooth;
-  background: #1a0e14;
+  background: #2A1B25;
   /* Matikan pull-to-refresh & overscroll bounce bawaan browser (ala native). */
   overscroll-behavior-y: none;
 }
 
 body {
   @apply antialiased;
-  background: #1a0e14;
+  background: #2A1B25;
   color: var(--text);
   font-family: var(--font-body), "Figtree", "Segoe UI", sans-serif;
   /* Hilangkan tap highlight abu-abu/flash bawaan mobile browser. */
@@ -139,18 +142,18 @@ h3,
  *    kembali relatif viewport. (Lapis kedua: PageTransition melepas
  *    kelas .page-enter di onAnimationEnd.)
  */
+/* Fade ringan 130ms — hanya opacity (murah di GPU kelas menengah,
+   dan bebas risiko containing-block transform). */
 @keyframes page-enter {
   from {
     opacity: 0;
-    transform: translateX(18px);
   }
   to {
     opacity: 1;
-    transform: none;
   }
 }
 .page-enter {
-  animation: page-enter 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+  animation: page-enter 0.13s ease-out;
 }
 
 /* Shell mobile-first: 360px minimum, dibungkus 480px di tengah pada layar lebar.
@@ -177,18 +180,10 @@ h3,
   }
 }
 
-/* ===== Tekstur grain halus — permukaan tidak "bersih digital" ===== */
-.grain::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-.grain {
-  position: relative;
+/* Daftar panjang: browser boleh skip render off-screen (performa scroll). */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 240px;
 }
 
 /* Scrollbar tipis */
@@ -265,6 +260,38 @@ h3,
 }
 .btn-primary:active {
   box-shadow: var(--shadow-warm-pressed);
+}
+
+/* Aksi hero Home: kompak (bukan pill selebar layar), sudut asimetris,
+   ikon play dalam lingkaran kecil. Emas lembut — aksi utama satu-satunya
+   di layar Home. */
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--amber);
+  color: var(--ink-warm);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+  border-radius: 16px 20px 16px 20px;
+  padding: 9px 16px 9px 10px;
+  box-shadow: var(--shadow-warm);
+  transition: transform 100ms ease, box-shadow 100ms ease;
+}
+.btn-hero:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-warm-pressed);
+}
+.btn-hero-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(42, 27, 37, 0.18);
 }
 
 /* Sekunder: outline tipis peach, transparan. */
@@ -495,7 +522,7 @@ h3,
     background: var(--dusk);
   }
   to {
-    background: linear-gradient(180deg, #f5a02e 0%, #f2784a 34%, #b04f6b 62%, #5b4b8a 100%);
+    background: var(--sky);
   }
 }
 .splash-screen {
