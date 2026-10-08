@@ -66,14 +66,96 @@ function testerAllowed(ip: string): boolean {
   return true;
 }
 
+/**
+ * Login native Android: app mengirim Google ID Token (Credential Manager,
+ * serverClientId = GOOGLE_CLIENT_ID). Token diverifikasi DI SERVER oleh
+ * endpoint resmi Google (tokeninfo) — signature, expiry, dan audience dicek
+ * oleh Google sendiri; kita hanya memvalidasi aud + email_verified + iss.
+ * Tidak ada rahasia di sisi app: ID token short-lived, sekali pakai.
+ *
+ * Identitas: `sub` Google — sama dengan login web (Redis key konsisten).
+ */
+const googleIdTokenNative = Credentials({
+  id: "google-idtoken",
+  name: "Google (Native)",
+  credentials: { idToken: { label: "Google ID Token", type: "text" } },
+  authorize: async (credentials, request) => {
+    const idToken =
+      typeof credentials?.idToken === "string" ? credentials.idToken.trim() : "";
+    if (!idToken || idToken.length > 4096) return null;
+
+    const ip =
+      (request as unknown as { headers?: Headers })?.headers?.get("x-forwarded-for")?.split(",")[0].trim() ||
+      "unknown";
+    // Rate limit ringan (proteksi abuse — verifikasi sebenarnya tetap di Google).
+    if (!nativeTokenAllowed(ip)) {
+      console.warn("[auth] native login rate-limited");
+      return null;
+    }
+
+    try {
+      const res = await fetch(
+        "https://oauth2.googleapis.com/tokeninfo?id_token=" + encodeURIComponent(idToken),
+        { cache: "no-store" }
+      );
+      if (!res.ok) return null;
+      const payload = (await res.json()) as Record<string, unknown>;
+
+      const aud = typeof payload.aud === "string" ? payload.aud : "";
+      const iss = typeof payload.iss === "string" ? payload.iss : "";
+      const sub = typeof payload.sub === "string" ? payload.sub : "";
+      const email = typeof payload.email === "string" ? payload.email : "";
+      if (
+        !sub ||
+        !email ||
+        aud !== process.env.GOOGLE_CLIENT_ID ||
+        !["https://accounts.google.com", "accounts.google.com"].includes(iss) ||
+        String(payload.email_verified) !== "true"
+      ) {
+        console.warn("[auth] native login ditolak (aud/iss/email tidak valid)");
+        return null;
+      }
+      return {
+        id: sub,
+        name: (typeof payload.name === "string" && payload.name) || email,
+        email,
+        image: (typeof payload.picture === "string" && payload.picture) || null,
+      };
+    } catch {
+      return null;
+    }
+  },
+});
+
 const google = Google({
   clientId: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
 });
 
+/**
+ * Rate limit in-memory untuk login native (10 percobaan / 15 menit / IP) —
+ * best-effort di serverless, cukup untuk mencegah abuse token endpoint.
+ */
+const nativeAttempts = new Map<string, number[]>();
+const NATIVE_LIMIT = 10;
+const NATIVE_WINDOW_MS = 15 * 60 * 1000;
+
+function nativeTokenAllowed(ip: string): boolean {
+  const now = Date.now();
+  const hits = (nativeAttempts.get(ip) ?? []).filter((t) => now - t < NATIVE_WINDOW_MS);
+  if (hits.length >= NATIVE_LIMIT) {
+    nativeAttempts.set(ip, hits);
+    return false;
+  }
+  hits.push(now);
+  nativeAttempts.set(ip, hits);
+  if (nativeAttempts.size > 5000) nativeAttempts.clear();
+  return true;
+}
+
 // Login tester dibangun bersyarat — di produksi (tanpa opt-in eksplisit)
 // provider bahkan tidak diregistrasi, jangan hanya mengandalkan UI disembunyikan.
-const providers: NextAuthConfig["providers"] = [google];
+const providers: NextAuthConfig["providers"] = [google, googleIdTokenNative];
 if (isTesterLoginEnabled()) {
   providers.push(
     Credentials({
