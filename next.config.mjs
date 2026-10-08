@@ -22,8 +22,12 @@ const nextConfig = {
       { protocol: "https", hostname: "www.anichin.moe" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
-    // Poster dari API kadang besar & berat; optimasi tetap diaktifkan.
+    // Aset lokal sudah webp teroptimasi manual. Poster eksternal TIDAK boleh
+    // lewat optimizer Vercel: server Vercel diblokir Cloudflare otakudesu.blog
+    // (403 -> 502 semua poster). Dengan unoptimized, poster dimuat langsung
+    // oleh browser user (IP rumahan) yang tidak diblokir.
     formats: ["image/avif", "image/webp"],
+    unoptimized: true,
   },
 };
 
