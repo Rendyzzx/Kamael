@@ -26,6 +26,8 @@ export interface AnimeListItem {
   studios: string | null;
   genres: GenreRef[];
   synopsis: string | null;
+  /** Jumlah views dari provider (AnimeIn). Legacy tidak menyediakan -> null. */
+  views?: number | null;
 }
 
 export interface AnimeEpisodeRef {

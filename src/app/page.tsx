@@ -9,7 +9,8 @@ import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 import Icon from "@/components/ui/Icon";
 import BrandLogo from "@/components/ui/BrandLogo";
-import { getAnimeHome, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
+import { getAnimeHome, getPopularAnime, getOngoingAnime } from "@/lib/api/anime";
+import type { AnimeListItem } from "@/types/anime";
 import { getLatestDonghua, getOngoingDonghua } from "@/lib/api/donghua";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { getOnboardingStatus } from "@/lib/redis/onboarding";
@@ -130,10 +131,10 @@ async function DashboardPage({
 
   // Hanya fetch data portal aktif; portal lain dilewati (Promise.resolve(null)).
   const skip = () => Promise.resolve(null);
-  const [animeHomeRes, animeCompletedRes, donghuaLatestRes, donghuaOngoingRes, continueRes] =
+  const [animeHomeRes, animePopularRes, donghuaLatestRes, donghuaOngoingRes, continueRes] =
     await Promise.allSettled([
       portal === "anime" ? getAnimeHome() : skip(),
-      portal === "anime" ? getCompletedAnime(1) : skip(),
+      portal === "anime" ? getPopularAnime(1) : skip(),
       portal === "donghua" ? getLatestDonghua(1) : skip(),
       portal === "donghua" ? getOngoingDonghua(1) : skip(),
       userId ? listProgress(userId) : Promise.resolve([] as WatchProgress[]),
@@ -141,8 +142,8 @@ async function DashboardPage({
 
   const animeHome =
     portal === "anime" && animeHomeRes.status === "fulfilled" ? animeHomeRes.value : null;
-  const animeCompleted =
-    portal === "anime" && animeCompletedRes.status === "fulfilled" ? animeCompletedRes.value : null;
+  const animePopular =
+    portal === "anime" && animePopularRes.status === "fulfilled" ? animePopularRes.value : null;
   const donghuaLatest: DonghuaListItem[] =
     portal === "donghua" && donghuaLatestRes.status === "fulfilled"
       ? (donghuaLatestRes.value ?? [])
@@ -152,9 +153,8 @@ async function DashboardPage({
       ? (donghuaOngoingRes.value ?? [])
       : [];
   const animeOngoing = animeHome?.ongoing ?? [];
-  const popularAnime = animeCompleted
-    ? [...animeCompleted.items].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0))
-    : [];
+  // Terpopuler: sudah terurut views dari AnimeIn (skor tidak tersedia di provider).
+  const popularAnime: AnimeListItem[] = animePopular?.items ?? [];
   const continueWatching = continueRes.status === "fulfilled" ? continueRes.value : [];
 
   // Hero: lanjut nonton (data Redis, difilter per portal) atau unggulan portal.
@@ -463,7 +463,7 @@ function HomeRail({
 function HomeRanking({
   items,
 }: {
-  items: { animeId: string; title: string; poster: string; score: string | null; episodes: number | null }[];
+  items: AnimeListItem[];
 }) {
   return (
     <section aria-label="Terpopuler" style={{ padding: "0 var(--page-x)" }}>
@@ -471,7 +471,7 @@ function HomeRanking({
         <h2 className="font-display text-[20px] font-bold tracking-tight text-[var(--text)]">Terpopuler</h2>
       </div>
       <p className="mb-3 text-[12px]" style={{ color: "var(--text-2)" }}>
-        Diurutkan dari skor tertinggi.
+        Diurutkan dari jumlah penonton.
       </p>
       <ol className="grid gap-2.5">
         {items.map((a, i) => (
@@ -494,7 +494,7 @@ function HomeRanking({
               <span className="min-w-0">
                 <span className="block truncate text-[14px] font-semibold text-[var(--text)]">{a.title}</span>
                 <span className="mt-0.5 block text-[12px]" style={{ color: "var(--text-2)" }}>
-                  {a.score ? `Skor ${a.score}` : "Tamat"}
+                  {a.views ? `${formatViews(a.views)} tayangan` : "Populer"}
                   {a.episodes ? `, ${a.episodes} eps` : ""}
                 </span>
               </span>
@@ -507,6 +507,13 @@ function HomeRanking({
       </ol>
     </section>
   );
+}
+
+/** 15834723 -> "15,8 jt". Data asli views AnimeIn, bukan skor karangan. */
+function formatViews(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(".", ",")} jt`;
+  if (n >= 1_000) return `${Math.round(n / 1_000)} rb`;
+  return String(n);
 }
 
 function EmptyFallback() {
