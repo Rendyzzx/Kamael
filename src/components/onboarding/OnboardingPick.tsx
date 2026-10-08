@@ -115,7 +115,7 @@ function PickCard({
       onTouchEnd={() => setPressed(false)}
       disabled={pending !== null}
       aria-label={`Pilih ${title}`}
-      className="relative block w-full overflow-hidden text-left transition-smooth"
+      className="relative block w-full overflow-hidden text-left transition-smooth on-media"
       style={{
         height: 168,
         // Sudut tidak seragam (asimetris) — kartu terasa digambar tangan.

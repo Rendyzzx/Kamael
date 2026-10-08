@@ -99,6 +99,16 @@ function num(v: number | string | null | undefined): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+/**
+ * Poster donghua dari anichin.moe sering diblok browser (ORB/hotlink), jadi
+ * dilewatkan proxy internal /api/img. Aman diulang (sudah ter-proxy = utuh).
+ */
+function proxyPoster(url: string | null): string | null {
+  if (!url) return url;
+  if (url.startsWith("/api/img")) return url;
+  return /^https:\/\/(www\.)?anichin\.moe\//.test(url) ? `/api/img?u=${encodeURIComponent(url)}` : url;
+}
+
 function normalizeItem(raw: RawDongItem): DonghuaListItem | null {
   const slug = str(raw.slug);
   const title = str(raw.title);
@@ -106,7 +116,7 @@ function normalizeItem(raw: RawDongItem): DonghuaListItem | null {
   return {
     title,
     slug,
-    poster: str(raw.poster) ?? "",
+    poster: proxyPoster(str(raw.poster)) ?? "",
     status: str(raw.status),
     type: str(raw.type),
     sub: str(raw.sub),
@@ -244,7 +254,7 @@ export async function getDonghuaDetail(slug: string): Promise<DonghuaDetail> {
   return {
     title: String(res.title),
     slug, // detail endpoint tidak mengirim slug balik; pakai slug request
-    poster: str(res.poster) ?? "",
+    poster: proxyPoster(str(res.poster)) ?? "",
     alterTitle: str(res.alter_title),
     rating: str(res.rating),
     followers: str(res.followers),
@@ -294,7 +304,7 @@ export async function getDonghuaEpisode(
     title: String(res.episode),
     donghuaTitle: str(res.donghua_details?.title),
     donghuaSlug: str(res.donghua_details?.slug),
-    poster: str(res.donghua_details?.poster),
+    poster: proxyPoster(str(res.donghua_details?.poster)),
     servers,
     mainServer,
     prevEpisodeSlug: str(res.navigation?.previous_episode?.slug) ?? null,

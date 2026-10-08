@@ -502,18 +502,18 @@ export default function NativePlayer(props: NativePlayerProps) {
       {/* Gradient gelap atas & bawah (ink 85% → transparan) */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-[30%]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[30%] on-media"
         style={{
-          background: "linear-gradient(180deg, rgba(33,34,55,.85), transparent)",
+          background: "linear-gradient(180deg, var(--overlay), transparent)",
           opacity: idle ? 0 : 1,
           transition: "opacity .2s",
         }}
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%] on-media"
         style={{
-          background: "linear-gradient(0deg, rgba(33,34,55,.85), transparent)",
+          background: "linear-gradient(0deg, var(--overlay), transparent)",
           opacity: idle ? 0 : 1,
           transition: "opacity .2s",
         }}
@@ -526,7 +526,7 @@ export default function NativePlayer(props: NativePlayerProps) {
           className={`absolute top-[44%] rounded-pill px-4 py-2.5 text-[14px] font-bold ${
             skipFlash === "l" ? "left-[12%]" : "right-[12%]"
           }`}
-          style={{ background: "rgba(33,34,55,.65)", color: "var(--frost)" }}
+          style={{ background: "var(--overlay-soft)", color: "var(--frost)" }}
         >
           {skipFlash === "l" ? "-10 dtk" : "+10 dtk"}
         </div>
@@ -535,8 +535,8 @@ export default function NativePlayer(props: NativePlayerProps) {
       {/* Chip "terakhir di MM:SS" (bila auto-resume mati) */}
       {resumeChip ? (
         <div
-          className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-pill px-3 py-2"
-          style={{ background: "rgba(33,34,55,.88)", border: "1px solid var(--deep-2)" }}
+          className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-pill px-3 py-2 on-media"
+          style={{ background: "var(--overlay)", border: "1px solid var(--deep-2)" }}
         >
           <span className="text-[13px]" style={{ color: "var(--muted)" }}>
             Terakhir di {resumeChip}
@@ -700,8 +700,8 @@ export default function NativePlayer(props: NativePlayerProps) {
         <div
           role="dialog"
           aria-label="Putar episode berikutnya"
-          className="absolute inset-x-4 bottom-4 z-20 flex items-center justify-between gap-3 rounded-xl px-4 py-3"
-          style={{ background: "rgba(33,34,55,.92)", border: "1px solid var(--deep-2)" }}
+          className="absolute inset-x-4 bottom-4 z-20 flex items-center justify-between gap-3 rounded-xl px-4 py-3 on-media"
+          style={{ background: "var(--overlay)", border: "1px solid var(--deep-2)" }}
         >
           <p className="text-[14px]" style={{ color: "var(--frost)" }}>
             Episode berikutnya mulai dalam <b style={{ color: "var(--glacier)" }}>{countdown}</b>

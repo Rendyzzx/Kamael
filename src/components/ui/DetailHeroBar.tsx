@@ -34,8 +34,8 @@ export default function DetailHeroBar({
           <Link
             href={backHref}
             aria-label="Kembali ke portal"
-            className="absolute left-3 top-3 z-20 flex items-center justify-center rounded-full"
-            style={{ width: 40, height: 40, background: "rgba(33,34,55,.72)" }}
+            className="absolute left-3 top-3 z-20 flex items-center justify-center rounded-full on-media"
+            style={{ width: 40, height: 40, background: "var(--overlay-soft)" }}
           >
             <span className="material-symbols-rounded text-[var(--text)]" style={{ fontSize: 32 }}>
               arrow_back
@@ -46,8 +46,8 @@ export default function DetailHeroBar({
             type="button"
             onClick={() => router.back()}
             aria-label="Kembali"
-            className="absolute left-3 top-3 z-20 flex items-center justify-center rounded-full"
-            style={{ width: 40, height: 40, background: "rgba(33,34,55,.72)" }}
+            className="absolute left-3 top-3 z-20 flex items-center justify-center rounded-full on-media"
+            style={{ width: 40, height: 40, background: "var(--overlay-soft)" }}
           >
             <span className="material-symbols-rounded text-[var(--text)]" style={{ fontSize: 32 }}>
               arrow_back

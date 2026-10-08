@@ -154,13 +154,10 @@ export default function SettingsView({
                 }}
                 options={[
                   { value: "dark", label: t("appearance.theme.dark"), icon: "dark_mode" },
-                  { value: "light", label: t("appearance.theme.light"), icon: "light_mode", disabled: true },
-                  { value: "system", label: t("appearance.theme.system"), icon: "contrast", disabled: true },
+                  { value: "light", label: t("appearance.theme.light"), icon: "light_mode" },
+                  { value: "system", label: t("appearance.theme.system"), icon: "contrast" },
                 ]}
               />
-              <p className="text-[12px]" style={{ color: "var(--text-2)" }}>
-                {t("appearance.themeNote")}
-              </p>
             </div>
 
             <div className="space-y-2">

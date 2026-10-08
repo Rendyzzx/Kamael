@@ -82,7 +82,7 @@ export const metadata: Metadata = {
 
 /* viewport: cover notch (safe-area dipakai header/nav via env()). */
 export const viewport: Viewport = {
-  themeColor: "#212237",
+  themeColor: "#212237", // diganti dinamis oleh applyTheme() saat tema terang
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -119,7 +119,7 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="id" className={`dark ${display.variable} ${body.variable}`} suppressHydrationWarning>
+    <html lang="id" data-theme="dark" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
       <head>
         {/* Terapkan aksen tersimpan sebelum paint (anti-kedip). */}
         <script dangerouslySetInnerHTML={{ __html: PREFS_BOOT_SCRIPT }} />

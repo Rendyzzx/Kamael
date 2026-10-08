@@ -34,8 +34,8 @@ export default function AnimeCard({
 
         {anime.score ? (
           <span
-            className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-chip px-2 text-[14px] font-medium text-[var(--text)]"
-            style={{ height: 24, background: "rgba(33,34,55,.88)" }}
+            className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-chip px-2 text-[14px] font-medium text-[var(--text)] on-media"
+            style={{ height: 24, background: "var(--overlay)" }}
           >
             <span className="material-symbols-rounded" style={{ fontSize: 14, color: "var(--yellow)" }}>
               star
@@ -46,8 +46,8 @@ export default function AnimeCard({
 
         {anime.episodes ? (
           <span
-            className="absolute bottom-1.5 left-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium text-[var(--text)]"
-            style={{ background: "rgba(33,34,55,.88)" }}
+            className="absolute bottom-1.5 left-1.5 rounded-md px-2 py-0.5 text-[12px] font-medium text-[var(--text)] on-media"
+            style={{ background: "var(--overlay)" }}
           >
             Eps {anime.episodes}
           </span>

@@ -69,10 +69,10 @@ export default function EmbedPlayerV2({
           gradient tipis (bukan panel solid) agar tidak terasa "menumpuk"
           dengan kontrol bawaan server pihak ketiga di dalam iframe. */}
       <div
-        className="absolute inset-x-0 top-0 z-10 flex shrink-0 items-center"
+        className="absolute inset-x-0 top-0 z-10 flex shrink-0 items-center on-media"
         style={{
           height: 44,
-          background: "linear-gradient(180deg, rgba(33,34,55,.85), transparent)",
+          background: "linear-gradient(180deg, var(--overlay), transparent)",
         }}
       >
         {prevHref ? (
@@ -131,8 +131,8 @@ export default function EmbedPlayerV2({
             const src = api.activeSource;
             if (src) api.markFailed(src);
           }}
-          className="absolute bottom-3 right-3 z-20 rounded-pill px-3 py-1.5 text-[12px] font-semibold"
-          style={{ background: "rgba(33,34,55,.85)", border: "1px solid var(--deep-2)", color: "var(--glacier)" }}
+          className="absolute bottom-3 right-3 z-20 rounded-pill px-3 py-1.5 text-[12px] font-semibold on-media"
+          style={{ background: "var(--overlay)", border: "1px solid var(--deep-2)", color: "var(--glacier)" }}
         >
           Tidak bisa diputar? Ganti server
         </button>

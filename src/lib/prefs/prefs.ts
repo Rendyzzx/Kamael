@@ -62,8 +62,21 @@ export function applyAccent(accent: Accent) {
   document.documentElement.setAttribute("data-accent", accent);
 }
 
+/** Tema efektif ("system" diselesaikan lewat prefers-color-scheme). */
+export function resolveTheme(theme: Theme): "dark" | "light" {
+  if (theme !== "system") return theme;
+  try {
+    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
 export function applyTheme(theme: Theme) {
   document.documentElement.setAttribute("data-theme", theme);
+  // Warna address bar / status bar mengikuti tema efektif.
+  const color = resolveTheme(theme) === "light" ? "#E6E4F3" : "#212237";
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", color));
 }
 
 export function saveTheme(theme: Theme) {
@@ -89,4 +102,4 @@ export function saveAutoResume(on: boolean) {
  * Skrip inline pra-hydration (dipasang di layout): terapkan accent tersimpan
  * sebelum paint supaya tidak berkedip dari ungu ke warna pilihan.
  */
-export const PREFS_BOOT_SCRIPT = `(function(){try{var a=localStorage.getItem("${KEYS.accent}");if(a==="blue"||a==="pink"||a==="cyan"||a==="purple"){document.documentElement.setAttribute("data-accent",a);}}catch(e){}})();`;
+export const PREFS_BOOT_SCRIPT = `(function(){try{var t=localStorage.getItem("${KEYS.theme}");if(t==="light"||t==="system"||t==="dark"){document.documentElement.setAttribute("data-theme",t);}var a=localStorage.getItem("${KEYS.accent}");if(a==="blue"||a==="pink"||a==="cyan"||a==="purple"){document.documentElement.setAttribute("data-accent",a);}}catch(e){}})();`;

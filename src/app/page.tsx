@@ -288,7 +288,7 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
 
   return (
     <section aria-label="Lanjut nonton" style={{ padding: "0 var(--page-x)" }}>
-      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+      <div className="relative overflow-hidden rounded-card on-media" style={{ height: 330, background: "var(--surface)" }}>
         {item.poster ? (
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
@@ -301,8 +301,8 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
         />
 
         <span
-          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)] on-media"
+          style={{ padding: "7px 14px", background: "var(--overlay)", border: "1px solid var(--line-strong)" }}
         >
           Lanjut nonton
         </span>
@@ -329,8 +329,8 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
             <Link
               href={`/${item.type}/${item.contentId}`}
               aria-label={`Detail ${item.title}`}
-              className="flex h-10 w-10 items-center justify-center transition-smooth"
-              style={{ background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)", borderRadius: "var(--radius-md)", color: "var(--text-2)" }}
+              className="flex h-10 w-10 items-center justify-center transition-smooth on-media"
+              style={{ background: "var(--overlay)", border: "1px solid var(--line-strong)", borderRadius: "var(--radius-md)", color: "var(--text-2)" }}
             >
               <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
                 info
@@ -351,7 +351,7 @@ function HomeHeroFeatured({
 }) {
   return (
     <section aria-label="Sedang populer" style={{ padding: "0 var(--page-x)" }}>
-      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+      <div className="relative overflow-hidden rounded-card on-media" style={{ height: 330, background: "var(--surface)" }}>
         {item.poster ? (
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
@@ -363,8 +363,8 @@ function HomeHeroFeatured({
         />
 
         <span
-          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)] on-media"
+          style={{ padding: "7px 14px", background: "var(--overlay)", border: "1px solid var(--line-strong)" }}
         >
           Sedang populer
         </span>
@@ -395,7 +395,7 @@ function HomeHeroFeatured({
 function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
   return (
     <section aria-label="Donghua terbaru" style={{ padding: "0 var(--page-x)" }}>
-      <div className="relative overflow-hidden rounded-card" style={{ height: 330, background: "var(--surface)" }}>
+      <div className="relative overflow-hidden rounded-card on-media" style={{ height: 330, background: "var(--surface)" }}>
         {item.poster ? (
           <Image src={item.poster} alt={item.title} fill priority sizes="480px" className="object-cover" />
         ) : null}
@@ -407,8 +407,8 @@ function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
         />
 
         <span
-          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
+          className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)] on-media"
+          style={{ padding: "7px 14px", background: "var(--overlay)", border: "1px solid var(--line-strong)" }}
         >
           Donghua terbaru
         </span>

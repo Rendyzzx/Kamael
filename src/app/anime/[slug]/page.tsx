@@ -76,8 +76,8 @@ export default async function AnimeDetailPage({ params }: PageProps) {
       <div style={{ padding: "0 var(--page-x-detail)", marginTop: -8 }}>
         {detail.status ? (
           <span
-            className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3"
-            style={{ height: 32, background: "rgba(33,34,55,.9)" }}
+            className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3 on-media"
+            style={{ height: 32, background: "var(--overlay)" }}
           >
             <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--yellow)" }}>
               calendar_month

@@ -13,8 +13,8 @@ export function StatusPill({ message }: { message: string | null }) {
   return (
     <div
       role="status"
-      className="absolute left-1/2 top-3 z-20 flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-2 rounded-pill px-3.5 py-2 text-[13px]"
-      style={{ background: "rgba(33,34,55,0.88)", border: "1px solid var(--deep-2)", color: "var(--frost)" }}
+      className="absolute left-1/2 top-3 z-20 flex max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-2 rounded-pill px-3.5 py-2 text-[13px] on-media"
+      style={{ background: "var(--overlay)", border: "1px solid var(--deep-2)", color: "var(--frost)" }}
     >
       <i
         className="block h-3.5 w-3.5 shrink-0 rounded-full"
@@ -55,8 +55,8 @@ export function ErrorOverlay({
   return (
     <div
       role="alert"
-      className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 px-5 text-center"
-      style={{ background: "rgba(33,34,55,0.92)" }}
+      className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 px-5 text-center on-media"
+      style={{ background: "var(--overlay)" }}
     >
       {poster ? (
         <div

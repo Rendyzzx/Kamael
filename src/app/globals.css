@@ -31,6 +31,11 @@
   --peach: #F5C5B7;         /* sangat hemat: badge baru, bintang, detail kecil */
   --line: rgba(121, 105, 176, 0.28);  /* garis 1px lavender, opasitas rendah */
   --line-strong: rgba(121, 105, 176, 0.5);
+  --overlay: rgba(33, 34, 55, 0.88);        /* chip/tombol di atas poster: selalu gelap */
+  --overlay-strong: rgba(33, 34, 55, 0.92);
+  --overlay-soft: rgba(33, 34, 55, 0.72);
+  --scrim: rgba(33, 34, 55, 0.72);
+  --page-bg: #212237;
 
   /* ===== Alias tema lama (jangan tambah pemakaian baru) ===== */
   --dusk: var(--navy);
@@ -70,16 +75,60 @@
   --shadow-warm-pressed: none;
 }
 
+/* ===== TEMA TERANG =====
+ * Hanya token permukaan/teks/garis yang dibalik. Overlay di atas poster
+ * (--overlay*) tetap gelap supaya teks putih di atas gambar terbaca.
+ * data-theme="system" mengikuti prefers-color-scheme lewat blok di bawah. */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --navy: #F4F3FB;
+  --surface: #FFFFFF;
+  --surface-2: #E9E7F6;
+  --text: #1E1F36;
+  --text-2: #55527A;
+  --peach: #B4532F;
+  --line: rgba(96, 81, 174, 0.22);
+  --line-strong: rgba(96, 81, 174, 0.42);
+  --scrim: rgba(30, 31, 54, 0.45);
+  --page-bg: #E6E4F3;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    color-scheme: light;
+    --navy: #F4F3FB;
+    --surface: #FFFFFF;
+    --surface-2: #E9E7F6;
+    --text: #1E1F36;
+    --text-2: #55527A;
+    --peach: #B4532F;
+    --line: rgba(96, 81, 174, 0.22);
+    --line-strong: rgba(96, 81, 174, 0.42);
+    --scrim: rgba(30, 31, 54, 0.45);
+    --page-bg: #E6E4F3;
+  }
+}
+
+/* Elemen di atas poster/video: selalu pakai palet gelap agar teks terbaca
+ * di tema terang (dipakai chip, tombol hero, player). */
+.on-media {
+  --text: #FEFDFF;
+  --text-2: #B9B2E0;
+  --frost: #FEFDFF;
+  --glacier: #B9B2E0;
+  --deep-2: #34365A;
+  --line-strong: rgba(121, 105, 176, 0.5);
+}
+
 html {
   scroll-behavior: smooth;
-  background: #212237;
+  background: var(--page-bg);
   /* Matikan pull-to-refresh & overscroll bounce bawaan browser (ala native). */
   overscroll-behavior-y: none;
 }
 
 body {
   @apply antialiased;
-  background: #212237;
+  background: var(--page-bg);
   color: var(--text);
   font-family: var(--font-body), "Figtree", "Segoe UI", sans-serif;
   /* Hilangkan tap highlight abu-abu/flash bawaan mobile browser. */
@@ -355,7 +404,7 @@ h3,
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(33, 34, 55, 0.72);
+  background: var(--scrim);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease;
