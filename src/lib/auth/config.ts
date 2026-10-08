@@ -68,7 +68,7 @@ function testerAllowed(ip: string): boolean {
 
 /**
  * Login native Android: app mengirim Google ID Token (Credential Manager,
- * serverClientId = GOOGLE_CLIENT_ID). Token diverifikasi DI SERVER oleh
+ * serverClientId = GOOGLE_CLIENT_ID (project kamael-8d83e)). Token diverifikasi DI SERVER oleh
  * endpoint resmi Google (tokeninfo) — signature, expiry, dan audience dicek
  * oleh Google sendiri; kita hanya memvalidasi aud + email_verified + iss.
  * Tidak ada rahasia di sisi app: ID token short-lived, sekali pakai.
