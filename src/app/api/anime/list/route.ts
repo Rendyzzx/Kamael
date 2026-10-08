@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAnimeByGenre, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
+import { getAnimeByGenre, getCompletedAnime, getOngoingAnime, getPopularAnime } from "@/lib/api/anime";
 import { validatePage, validateSlug } from "@/lib/utils/validation";
 import { enforceRateLimit } from "@/lib/rate-limit";
 
@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
   if (limited) return limited;
 
   const { searchParams } = new URL(request.url);
-  const tab = searchParams.get("tab") === "completed" ? "completed" : "ongoing";
+  const rawTab = searchParams.get("tab");
+  // "popular" dipakai klien Android untuk ranking Terpopuler yang sama
+  // dengan Home web (getPopularAnime) — tab web lain tidak berubah.
+  const tab =
+    rawTab === "completed" ? "completed" : rawTab === "popular" ? "popular" : "ongoing";
   const page = validatePage(searchParams.get("page") ?? undefined);
   const genreRaw = searchParams.get("genre");
   const genre = genreRaw ? validateSlug(genreRaw) : null;
@@ -24,7 +28,9 @@ export async function GET(request: NextRequest) {
       ? await getAnimeByGenre(genre, page)
       : tab === "completed"
         ? await getCompletedAnime(page)
-        : await getOngoingAnime(page);
+        : tab === "popular"
+          ? await getPopularAnime(page)
+          : await getOngoingAnime(page);
 
     return NextResponse.json(
       {

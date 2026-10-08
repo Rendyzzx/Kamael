@@ -29,17 +29,33 @@ export async function GET(request: Request) {
     searchDonghua(q),
   ]);
 
+  // Field kartu (poster/score/episodes) dikirim untuk grid hasil di
+  // /search web & aplikasi Android; dropdown SearchBox web tetap hanya
+  // membaca title/animeId sehingga ini backward compatible.
   const anime =
     animeRes.status === "fulfilled"
       ? animeRes.value
           .slice(0, 8)
-          .map((a) => ({ title: a.title, animeId: a.animeId }))
+          .map((a) => ({
+            title: a.title,
+            animeId: a.animeId,
+            poster: a.poster,
+            episodes: a.episodes,
+            score: a.score,
+            status: a.status,
+          }))
       : [];
   const donghua =
     donghuaRes.status === "fulfilled"
       ? donghuaRes.value
           .slice(0, 8)
-          .map((d) => ({ title: d.title, slug: d.slug }))
+          .map((d) => ({
+            title: d.title,
+            slug: d.slug,
+            poster: d.poster,
+            status: d.status,
+            currentEpisode: d.currentEpisode,
+          }))
       : [];
 
   return NextResponse.json(
