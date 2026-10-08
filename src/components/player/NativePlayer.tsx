@@ -490,7 +490,7 @@ export default function NativePlayer(props: NativePlayerProps) {
           <i
             className="block h-9 w-9 rounded-full"
             style={{
-              border: "3px solid rgba(234,246,250,.2)",
+              border: "3px solid rgba(254,253,255,.2)",
               borderTopColor: "var(--glacier)",
               animation: "player-spin .8s linear infinite",
             }}
@@ -504,7 +504,7 @@ export default function NativePlayer(props: NativePlayerProps) {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[30%]"
         style={{
-          background: "linear-gradient(180deg, rgba(13,19,32,.85), transparent)",
+          background: "linear-gradient(180deg, rgba(33,34,55,.85), transparent)",
           opacity: idle ? 0 : 1,
           transition: "opacity .2s",
         }}
@@ -513,7 +513,7 @@ export default function NativePlayer(props: NativePlayerProps) {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[52%]"
         style={{
-          background: "linear-gradient(0deg, rgba(13,19,32,.85), transparent)",
+          background: "linear-gradient(0deg, rgba(33,34,55,.85), transparent)",
           opacity: idle ? 0 : 1,
           transition: "opacity .2s",
         }}
@@ -526,7 +526,7 @@ export default function NativePlayer(props: NativePlayerProps) {
           className={`absolute top-[44%] rounded-pill px-4 py-2.5 text-[14px] font-bold ${
             skipFlash === "l" ? "left-[12%]" : "right-[12%]"
           }`}
-          style={{ background: "rgba(13,19,32,.65)", color: "var(--frost)" }}
+          style={{ background: "rgba(33,34,55,.65)", color: "var(--frost)" }}
         >
           {skipFlash === "l" ? "-10 dtk" : "+10 dtk"}
         </div>
@@ -536,7 +536,7 @@ export default function NativePlayer(props: NativePlayerProps) {
       {resumeChip ? (
         <div
           className="absolute left-1/2 top-3 z-20 flex -translate-x-1/2 items-center gap-2 rounded-pill px-3 py-2"
-          style={{ background: "rgba(13,19,32,.88)", border: "1px solid var(--deep-2)" }}
+          style={{ background: "rgba(33,34,55,.88)", border: "1px solid var(--deep-2)" }}
         >
           <span className="text-[13px]" style={{ color: "var(--muted)" }}>
             Terakhir di {resumeChip}
@@ -636,7 +636,7 @@ export default function NativePlayer(props: NativePlayerProps) {
             style={{ color: "var(--muted)" }}
           >
             Otomatis
-            <span className="relative block h-4 w-8 rounded-full" style={{ background: autonext ? "var(--glacier)" : "rgba(234,246,250,.28)" }}>
+            <span className="relative block h-4 w-8 rounded-full" style={{ background: autonext ? "var(--glacier)" : "rgba(254,253,255,.28)" }}>
               <span
                 className="absolute top-0.5 h-3 w-3 rounded-full"
                 style={{ left: autonext ? "18px" : "2px", background: autonext ? "var(--ink)" : "var(--frost)" }}
@@ -649,7 +649,7 @@ export default function NativePlayer(props: NativePlayerProps) {
               onClick={onOpenSettings}
               aria-label="Pilih kualitas"
               className="flex h-9 items-center rounded-chip px-2.5 text-[12px] font-semibold"
-              style={{ color: "var(--frost)", background: "rgba(234,246,250,.1)" }}
+              style={{ color: "var(--frost)", background: "rgba(254,253,255,.1)" }}
             >
               {qualityLabel(api.quality)}
             </button>
@@ -658,7 +658,7 @@ export default function NativePlayer(props: NativePlayerProps) {
               onClick={onOpenSettings}
               aria-label="Pilih kecepatan"
               className="flex h-9 items-center rounded-chip px-2.5 text-[12px] font-semibold"
-              style={{ color: "var(--frost)", background: "rgba(234,246,250,.1)" }}
+              style={{ color: "var(--frost)", background: "rgba(254,253,255,.1)" }}
             >
               {speed}x
             </button>
@@ -687,8 +687,8 @@ export default function NativePlayer(props: NativePlayerProps) {
               if (e.key === "ArrowRight") skip(5);
             }}
           >
-            <div className="absolute left-0 right-0 top-[9px] h-[3px] rounded" style={{ background: "rgba(234,246,250,.25)" }} />
-            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(234,246,250,.4)" }} />
+            <div className="absolute left-0 right-0 top-[9px] h-[3px] rounded" style={{ background: "rgba(254,253,255,.25)" }} />
+            <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${bufferedPct}%`, background: "rgba(254,253,255,.4)" }} />
             <div className="absolute left-0 top-[9px] h-[3px] rounded" style={{ width: `${progressPct}%`, background: "var(--glacier)" }} />
             <div className="absolute top-[6px] h-3.5 w-3.5 rounded-full" style={{ left: `calc(${progressPct}% - 7px)`, background: "var(--glacier)" }} />
           </div>
@@ -701,7 +701,7 @@ export default function NativePlayer(props: NativePlayerProps) {
           role="dialog"
           aria-label="Putar episode berikutnya"
           className="absolute inset-x-4 bottom-4 z-20 flex items-center justify-between gap-3 rounded-xl px-4 py-3"
-          style={{ background: "rgba(13,19,32,.92)", border: "1px solid var(--deep-2)" }}
+          style={{ background: "rgba(33,34,55,.92)", border: "1px solid var(--deep-2)" }}
         >
           <p className="text-[14px]" style={{ color: "var(--frost)" }}>
             Episode berikutnya mulai dalam <b style={{ color: "var(--glacier)" }}>{countdown}</b>

@@ -26,7 +26,7 @@ export default function ClearHistoryButton() {
         type="button"
         onClick={() => setConfirming(true)}
         className="rounded-chip px-3 py-1.5 text-xs font-semibold transition-smooth"
-        style={{ border: "1px solid var(--surface-3)", color: "#FF1744" }}
+        style={{ border: "1px solid var(--line-strong)", color: "var(--peach)" }}
       >
         Clear History
       </button>
@@ -41,7 +41,7 @@ export default function ClearHistoryButton() {
         onClick={clear}
         disabled={busy}
         className="rounded-chip px-3 py-1.5 text-xs font-bold text-[var(--text)] transition-smooth disabled:opacity-50"
-        style={{ background: "#FF1744" }}
+        style={{ background: "var(--peach)", color: "var(--navy)" }}
       >
         {busy ? "Menghapus…" : "Ya, hapus"}
       </button>
@@ -49,7 +49,7 @@ export default function ClearHistoryButton() {
         type="button"
         onClick={() => setConfirming(false)}
         className="rounded-chip px-3 py-1.5 text-xs font-semibold transition-smooth"
-        style={{ border: "1px solid var(--surface-3)", color: "var(--text-2)" }}
+        style={{ border: "1px solid var(--line-strong)", color: "var(--text-2)" }}
       >
         Batal
       </button>

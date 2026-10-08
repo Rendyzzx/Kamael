@@ -81,7 +81,7 @@ export const metadata: Metadata = {
 
 /* viewport: cover notch (safe-area dipakai header/nav via env()). */
 export const viewport: Viewport = {
-  themeColor: "#33232D",
+  themeColor: "#212237",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

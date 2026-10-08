@@ -116,7 +116,7 @@ export default function OnboardingCarousel({
             fill
             sizes="320px"
             priority
-            className="object-contain object-bottom drop-shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+            className="object-contain object-bottom "
           />
         </div>
         <div className="space-y-3">
@@ -147,7 +147,7 @@ export default function OnboardingCarousel({
           onClick={onNext}
           aria-label={index === SLIDES.length - 1 ? "Lanjut ke pilih tontonan" : "Slide berikutnya"}
           className="flex h-14 w-14 items-center justify-center rounded-full transition-smooth active:scale-90"
-          style={{ background: "var(--amber)", color: "var(--ink-warm)", boxShadow: "var(--shadow-warm)" }}
+          style={{ background: "var(--accent)", color: "var(--text)" }}
         >
           <span className="material-symbols-rounded" style={{ fontSize: 26 }}>
             arrow_forward

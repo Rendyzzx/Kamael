@@ -237,7 +237,7 @@ function SheetItem({
       style={{
         minHeight: 52,
         paddingInline: 20,
-        borderBottom: "1px solid rgba(29, 39, 64, 0.6)",
+        borderBottom: "1px solid rgba(121, 105, 176, 0.28)",
         color: "var(--frost)",
         fontSize: 16,
         textAlign: "left",
@@ -250,7 +250,7 @@ function SheetItem({
             className="text-[11px] font-bold"
             style={{
               color: "var(--glacier)",
-              border: "1px solid rgba(143, 211, 232, 0.55)",
+              border: "1px solid rgba(121, 105, 176, 0.5)",
               borderRadius: 5,
               padding: "1px 5px",
             }}

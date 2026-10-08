@@ -76,8 +76,8 @@ export default function TesterLoginButton({
               type="button"
               onClick={() => void submit()}
               disabled={busy || !code.trim()}
-              className="shrink-0 rounded-chip px-4 py-3 text-sm font-bold transition-smooth active:scale-[.98] disabled:opacity-60"
-              style={{ background: "var(--amber)", color: "var(--ink-warm)" }}
+              className="shrink-0 rounded-chip px-4 py-3 text-[19px] font-bold transition-smooth active:scale-[.98] disabled:opacity-60"
+              style={{ background: "var(--accent)", color: "var(--text)" }}
             >
               {busy ? (
                 <span className="material-symbols-rounded animate-spin" style={{ fontSize: 18 }}>
@@ -89,7 +89,7 @@ export default function TesterLoginButton({
             </button>
           </div>
           {error ? (
-            <p className="text-xs font-semibold" style={{ color: "var(--sunset)" }}>
+            <p className="text-xs font-semibold" style={{ color: "var(--peach)" }}>
               {error}
             </p>
           ) : null}
@@ -99,7 +99,7 @@ export default function TesterLoginButton({
           type="button"
           onClick={() => setOpen(true)}
           className="w-full text-center text-[12px] font-medium underline transition-smooth active:scale-[.98]"
-          style={{ color: "var(--text-2)", textUnderlineOffset: 3, textDecorationColor: "rgba(201,172,159,.4)" }}
+          style={{ color: "var(--text-2)", textUnderlineOffset: 3, textDecorationColor: "var(--line-strong)" }}
         >
           Punya kode tester? Masuk di sini
         </button>

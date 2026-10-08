@@ -21,7 +21,7 @@ export default function ShowMoreChips({ genres, basePath }: { genres: Genre[]; b
             key={g.id}
             href={`${basePath}?genre=${encodeURIComponent(g.id)}`}
             className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth"
-            style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
+            style={{ height: 32, border: "1px solid var(--line)", background: "var(--surface)" }}
           >
             {g.title}
           </Link>

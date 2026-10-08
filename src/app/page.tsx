@@ -286,13 +286,13 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
         {/* Cahaya senja: hangat di bawah, bukan abu-abu */}
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
-          style={{ background: "linear-gradient(180deg, rgba(51,35,45,0) 0%, rgba(51,35,45,.5) 45%, rgba(42,27,37,.94) 100%)" }}
+          style={{ background: "linear-gradient(180deg, rgba(33,34,55,0) 0%, rgba(33,34,55,.6) 50%, rgba(33,34,55,.96) 100%)" }}
           aria-hidden="true"
         />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(42,27,37,.78)", border: "1px solid rgba(108,91,143,.35)" }}
+          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
         >
           Lanjut nonton
         </span>
@@ -320,7 +320,7 @@ function HomeHeroResume({ item }: { item: WatchProgress }) {
               href={`/${item.type}/${item.contentId}`}
               aria-label={`Detail ${item.title}`}
               className="flex h-10 w-10 items-center justify-center transition-smooth"
-              style={{ background: "rgba(42,27,37,.78)", border: "1px solid rgba(108,91,143,.35)", borderRadius: "var(--radius-md)", color: "var(--text-2)" }}
+              style={{ background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)", borderRadius: "var(--radius-md)", color: "var(--text-2)" }}
             >
               <span className="material-symbols-rounded" style={{ fontSize: 20 }}>
                 info
@@ -348,13 +348,13 @@ function HomeHeroFeatured({
 
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
-          style={{ background: "linear-gradient(180deg, rgba(51,35,45,0) 0%, rgba(51,35,45,.5) 45%, rgba(42,27,37,.94) 100%)" }}
+          style={{ background: "linear-gradient(180deg, rgba(33,34,55,0) 0%, rgba(33,34,55,.6) 50%, rgba(33,34,55,.96) 100%)" }}
           aria-hidden="true"
         />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(42,27,37,.78)", border: "1px solid rgba(108,91,143,.35)" }}
+          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
         >
           Sedang populer
         </span>
@@ -392,13 +392,13 @@ function HomeHeroFeaturedDonghua({ item }: { item: DonghuaListItem }) {
 
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[62%]"
-          style={{ background: "linear-gradient(180deg, rgba(51,35,45,0) 0%, rgba(51,35,45,.5) 45%, rgba(42,27,37,.94) 100%)" }}
+          style={{ background: "linear-gradient(180deg, rgba(33,34,55,0) 0%, rgba(33,34,55,.6) 50%, rgba(33,34,55,.96) 100%)" }}
           aria-hidden="true"
         />
 
         <span
           className="absolute left-4 top-4 z-[5] rounded-chip text-[12px] font-semibold text-[var(--text)]"
-          style={{ padding: "7px 14px", background: "rgba(42,27,37,.78)", border: "1px solid rgba(108,91,143,.35)" }}
+          style={{ padding: "7px 14px", background: "rgba(33,34,55,.88)", border: "1px solid var(--line-strong)" }}
         >
           Donghua terbaru
         </span>
@@ -442,7 +442,7 @@ function HomeRail({
       <div className="flex items-baseline justify-between" style={{ padding: "0 var(--page-x)", marginBottom: 4 }}>
         <h2 className="font-display text-[20px] font-bold tracking-tight text-[var(--text)]">{title}</h2>
         {href ? (
-          <Link href={href} className="text-[13px] font-semibold underline" style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "rgba(255,211,161,.4)" }}>
+          <Link href={href} className="text-[13px] font-semibold underline" style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "var(--line-strong)" }}>
             Lihat semua
           </Link>
         ) : null}

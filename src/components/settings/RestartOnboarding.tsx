@@ -64,7 +64,7 @@ export default function RestartOnboarding() {
         Ulangi Onboarding
       </button>
       {error ? (
-        <p className="mt-2 text-xs" style={{ color: "#FF1744" }}>
+        <p className="mt-2 text-xs" style={{ color: "var(--peach)" }}>
           Gagal menghapus progres onboarding. Coba lagi nanti.
         </p>
       ) : null}

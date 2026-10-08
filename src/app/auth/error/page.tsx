@@ -49,15 +49,15 @@ export default async function AuthErrorPage({
       <div className="flex w-full max-w-[320px] flex-col gap-3">
         <Link
           href="/login"
-          className="rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
-          style={{ background: "var(--amber)", color: "var(--ink-warm)" }}
+          className="rounded-chip px-4 py-3 text-[19px] font-bold transition-smooth"
+          style={{ background: "var(--accent)", color: "var(--text)" }}
         >
           Coba login lagi
         </Link>
         <Link
           href="/"
           className="rounded-chip px-4 py-3 text-sm font-semibold transition-smooth"
-          style={{ border: "1px solid var(--chip-border)", color: "var(--text)" }}
+          style={{ border: "1px solid var(--line-strong)", color: "var(--text)" }}
         >
           Kembali ke beranda
         </Link>

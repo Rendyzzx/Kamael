@@ -92,8 +92,8 @@ export default function Icon({
       {active && def.fill ? (
         <path
           d={def.fill}
-          fill="var(--amber)"
-          opacity={0.85}
+          fill="var(--lavender)"
+          opacity={0.7}
           transform="translate(1.3 -1.1)"
         />
       ) : null}

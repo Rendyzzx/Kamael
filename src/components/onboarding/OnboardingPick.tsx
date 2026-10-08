@@ -132,12 +132,12 @@ function PickCard({
           style={{ objectPosition: "right top" }}
         />
       ) : (
-        // Fallback tanpa poster: gradasi senja violet -> mawar + bintang kecil.
+        // Fallback tanpa poster: surface datar.
         <span
           aria-hidden="true"
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, var(--violet) 0%, var(--sunset) 100%)",
+            background: "var(--surface-2)",
           }}
         />
       )}
@@ -147,7 +147,7 @@ function PickCard({
         className="absolute inset-x-0 bottom-0"
         style={{
           height: "72%",
-          background: "linear-gradient(180deg, rgba(51,35,45,0) 0%, rgba(51,35,45,.66) 55%, rgba(51,35,45,.96) 100%)",
+          background: "linear-gradient(180deg, rgba(33,34,55,0) 0%, rgba(33,34,55,.6) 50%, rgba(33,34,55,.96) 100%)",
         }}
       />
       {/* Tipografi display besar menimpa poster; tanpa ikon, tanpa panah. */}
@@ -161,7 +161,7 @@ function PickCard({
         {isPending ? (
           <span
             className="material-symbols-rounded animate-spin"
-            style={{ fontSize: 20, color: "var(--amber)", marginTop: 4 }}
+            style={{ fontSize: 20, color: "var(--text-2)", marginTop: 4 }}
             aria-label="Memuat"
           >
             progress_activity

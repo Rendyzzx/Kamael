@@ -318,11 +318,10 @@ function OnboardingDisclaimer({ onAccept, onDecline }: { onAccept: () => void; o
   return (
     <div className="relative flex h-full flex-col items-center justify-center overflow-hidden px-6">
       <div
-        className="onboard-step grain relative w-full max-w-[360px] rounded-card p-6"
+        className="onboard-step relative w-full max-w-[360px] rounded-card p-6"
         style={{
           background: "var(--surface)",
-          border: "1px solid var(--chip-border)",
-          boxShadow: "var(--shadow-warm)",
+          border: "1px solid var(--line)",
         }}
       >
         <h1 className="font-display text-center text-[20px] font-bold text-[var(--text)]">Disclaimer</h1>

@@ -63,7 +63,7 @@ export default function EpisodeSheet({
                 style={{
                   height: 52,
                   border: active ? "2px solid var(--glacier)" : "1px solid var(--deep-2)",
-                  background: active ? "rgba(143,211,232,.12)" : "var(--deep-2)",
+                  background: active ? "rgba(121,105,176,.18)" : "var(--deep-2)",
                   color: active ? "var(--glacier)" : watched ? "var(--muted)" : "var(--frost)",
                   opacity: watched ? 0.55 : 1,
                 }}

@@ -53,7 +53,7 @@ export default function GenreSheet({
           setOpen(true);
         }}
         className="inline-flex items-center gap-1.5 rounded-chip px-3.5 py-2 text-[13px] font-semibold text-[var(--text)] transition-smooth active:scale-[.97]"
-        style={{ height: 36, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
+        style={{ height: 36, border: "1px solid var(--line)", background: "var(--surface)" }}
         aria-haspopup="dialog"
       >
         <span className="material-symbols-rounded" style={{ fontSize: 17, color: "var(--blue)" }}>
@@ -77,7 +77,7 @@ export default function GenreSheet({
             style={{
               height: 40,
               border: !activeGenre ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
-              background: !activeGenre ? "rgba(33,150,243,.15)" : "rgba(90,26,32,.15)",
+              background: !activeGenre ? "var(--surface-2)" : "rgba(90,26,32,.15)",
             }}
           >
             Semua
@@ -96,7 +96,7 @@ export default function GenreSheet({
                 style={{
                   height: 40,
                   border: isActive ? "1.5px solid var(--blue)" : "1.5px solid var(--chip-border)",
-                  background: isActive ? "rgba(33,150,243,.15)" : "rgba(90,26,32,.15)",
+                  background: isActive ? "var(--surface-2)" : "rgba(90,26,32,.15)",
                 }}
               >
                 {g.title}

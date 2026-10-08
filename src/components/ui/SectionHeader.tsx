@@ -17,7 +17,7 @@ export default function SectionHeader({
         <Link
           href={href}
           className="shrink-0 text-[14px] font-semibold underline"
-          style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "rgba(255,211,161,.4)" }}
+          style={{ color: "var(--peach)", textUnderlineOffset: 3, textDecorationColor: "var(--line-strong)" }}
         >
           {hrefLabel}
         </Link>

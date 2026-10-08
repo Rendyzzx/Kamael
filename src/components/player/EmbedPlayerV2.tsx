@@ -72,7 +72,7 @@ export default function EmbedPlayerV2({
         className="absolute inset-x-0 top-0 z-10 flex shrink-0 items-center"
         style={{
           height: 44,
-          background: "linear-gradient(180deg, rgba(13,19,32,.85), transparent)",
+          background: "linear-gradient(180deg, rgba(33,34,55,.85), transparent)",
         }}
       >
         {prevHref ? (
@@ -132,7 +132,7 @@ export default function EmbedPlayerV2({
             if (src) api.markFailed(src);
           }}
           className="absolute bottom-3 right-3 z-20 rounded-pill px-3 py-1.5 text-[12px] font-semibold"
-          style={{ background: "rgba(13,19,32,.85)", border: "1px solid var(--deep-2)", color: "var(--glacier)" }}
+          style={{ background: "rgba(33,34,55,.85)", border: "1px solid var(--deep-2)", color: "var(--glacier)" }}
         >
           Tidak bisa diputar? Ganti server
         </button>

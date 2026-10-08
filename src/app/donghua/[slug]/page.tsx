@@ -76,7 +76,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
 
       <div style={{ padding: "0 var(--page-x-detail)", marginTop: -8 }}>
         {detail.status ? (
-          <span className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3" style={{ height: 32, background: "rgba(30,30,35,.9)" }}>
+          <span className="mb-3 inline-flex items-center gap-1.5 rounded-chip px-3" style={{ height: 32, background: "rgba(33,34,55,.9)" }}>
             <span className="material-symbols-rounded" style={{ fontSize: 16, color: "var(--yellow)" }}>
               calendar_month
             </span>
@@ -114,7 +114,7 @@ export default async function DonghuaDetailPage({ params }: PageProps) {
                 key={g.slug}
                 href={`/donghua?genre=${g.slug}`}
                 className="inline-flex items-center rounded-chip px-4 text-[14px] font-medium text-[var(--text)] transition-smooth"
-                style={{ height: 32, border: "1.5px solid var(--chip-border)", background: "rgba(90,26,32,.15)" }}
+                style={{ height: 32, border: "1px solid var(--line)", background: "var(--surface)" }}
               >
                 {g.name}
               </Link>

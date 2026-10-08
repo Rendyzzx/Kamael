@@ -7,9 +7,9 @@ export default function Badge({
   tone?: "default" | "success" | "muted";
 }) {
   const toneStyle: Record<string, React.CSSProperties> = {
-    default: { background: "rgba(33,150,243,.16)", color: "var(--blue)" },
-    success: { background: "rgba(76,175,80,.16)", color: "#8BC34A" },
-    muted: { background: "var(--surface-3)", color: "var(--text)" },
+    default: { background: "var(--surface-2)", color: "var(--text-2)" },
+    success: { background: "var(--surface-2)", color: "var(--peach)" },
+    muted: { background: "var(--surface)", color: "var(--text)" },
   };
   return (
     <span

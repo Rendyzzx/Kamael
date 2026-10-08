@@ -27,16 +27,16 @@ export default function SplashScreen() {
       <div className="flex flex-col items-center gap-3">
         <svg width="72" height="72" viewBox="0 0 24 24" fill="none">
           {/* Matahari naik di atas horizon — logo yang sama dgn header */}
-          <path d="M4.5 17.6h15.2" stroke="#2A1B25" stroke-width="1.75" stroke-linecap="round"/>
-          <path d="M12 4.9c3.9 0 6.7 2.7 6.7 6.4 0 2.5-1.6 4.7-3.9 5.7" stroke="#2A1B25" stroke-width="1.75" stroke-linecap="round" fill="none"/>
-          <path d="M12 4.9c-3.9 0-6.7 2.7-6.7 6.4 0 2.5 1.6 4.7 3.9 5.7" stroke="#2A1B25" stroke-width="1.75" stroke-linecap="round" fill="none"/>
-          <path d="M12 13.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z" fill="#2A1B25"/>
+          <path d="M4.5 17.6h15.2" stroke="#FEFDFF" stroke-width="1.75" stroke-linecap="round"/>
+          <path d="M12 4.9c3.9 0 6.7 2.7 6.7 6.4 0 2.5-1.6 4.7-3.9 5.7" stroke="#FEFDFF" stroke-width="1.75" stroke-linecap="round" fill="none"/>
+          <path d="M12 4.9c-3.9 0-6.7 2.7-6.7 6.4 0 2.5 1.6 4.7 3.9 5.7" stroke="#FEFDFF" stroke-width="1.75" stroke-linecap="round" fill="none"/>
+          <path d="M12 13.1a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8z" fill="#FEFDFF"/>
         </svg>
-        <span className="font-display text-2xl font-bold tracking-tight" style={{ color: "var(--ink-warm)" }}>
+        <span className="font-display text-2xl font-bold tracking-tight" style={{ color: "var(--text)" }}>
           Cyronime
         </span>
-        <span className="text-[13px]" style={{ color: "rgba(42,27,37,.8)" }}>
-          Selamat menonton di senja
+        <span className="text-[13px]" style={{ color: "var(--text-2)" }}>
+          Selamat menonton
         </span>
       </div>
     </div>

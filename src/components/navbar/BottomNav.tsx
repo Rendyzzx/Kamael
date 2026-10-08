@@ -63,7 +63,7 @@ export default function BottomNav({
         style={{
           height: "calc(68px + env(safe-area-inset-bottom))",
           background: "var(--surface)",
-          borderTop: "1px solid rgba(245,160,46,.14)",
+          borderTop: "1px solid var(--line)",
         }}
       >
         {items.map(({ href, label, icon }) => {
@@ -75,7 +75,7 @@ export default function BottomNav({
                 aria-current={active ? "page" : undefined}
                 className="flex flex-col items-center gap-1 py-1.5"
                 onPointerDown={() => haptic(8)}
-                style={{ color: active ? "var(--amber)" : "var(--text-2)" }}
+                style={{ color: active ? "var(--text)" : "var(--text-2)" }}
               >
                 <Icon name={icon} size={24} active={active} />
                 <span
@@ -94,7 +94,7 @@ export default function BottomNav({
             aria-current={profileActive ? "page" : undefined}
             className="flex flex-col items-center gap-1 py-1.5"
             onPointerDown={() => haptic(8)}
-            style={{ color: profileActive ? "var(--amber)" : "var(--text-2)" }}
+            style={{ color: profileActive ? "var(--text)" : "var(--text-2)" }}
           >
             <span
               className="overflow-hidden"
@@ -102,7 +102,7 @@ export default function BottomNav({
                 width: 30,
                 height: 30,
                 borderRadius: "var(--radius-chip)",
-                border: profileActive ? "1.5px solid var(--amber)" : "1.5px solid var(--surface-3)",
+                border: profileActive ? "1.5px solid var(--text-2)" : "1px solid var(--line-strong)",
                 background: "var(--surface-2)",
               }}
             >

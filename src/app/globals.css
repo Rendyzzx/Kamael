@@ -5,47 +5,53 @@
 @tailwind utilities;
 
 /*
- * DESIGN TOKENS — tema SENJA TENANG (revisi Okt 2026).
- * Palet saturasi rendah, proporsi 60/30/10:
- * - 60% permukaan ungu-cokelat hangat (dusk/surface)
- * - 30% nada tengah (violet & mawar senja) untuk border/state
- * - maks 10% emas lembut — HANYA aksi utama & state aktif
- * Teks krem #F6E7D3 (bukan putih murni). Tidak ada blok jenuh besar;
- * gradien senja hanya di splash & hero Home dengan transisi halus.
- * Nama token lama (--blue, --yellow, dst.) dipertahankan sebagai alias.
+ * DESIGN TOKENS — tema NAVY (revisi Okt 2026, palet referensi layar intro).
+ * Proporsi: ~70% navy & surface, ~20% lavender/teks, maks ~10% aksen #6A69F3.
+ * ATURAN:
+ * - Warna DATAR. Tanpa gradien, tanpa glow/bayangan berwarna, tanpa blur kaca.
+ * - Satu elemen beraksen --accent per layar; lainnya netral/lavender/outline.
+ * - Kedalaman = beda surface + garis 1px lavender opasitas rendah (--line).
+ * - --lavender (3.31:1) & --deep-purple (2.44:1) HANYA border/dekor/rim-light,
+ *   JANGAN untuk teks. Teks pakai --text / --text-2 / --peach.
+ * - Teks di atas --accent (4.20:1) wajib bold >= 19px (teks besar, AA 3:1).
+ * Nama token lama (--amber, --sunset, dst.) jadi alias agar komponen lama aman.
  */
 :root {
   color-scheme: dark;
 
   /* ===== Palet inti ===== */
-  --dusk: #33232D;          /* latar utama, ungu-cokelat hangat */
-  --surface: #3E2C37;      /* kartu/panel */
-  --surface-2: #4A3643;    /* permukaan naik */
-  --surface-3: #574150;    /* kontrol */
-  --amber: #E8B66B;        /* EMAS LEMBUT — aksen utama, hemat */
-  --sunset: #C97B84;       /* MAWAR SENJA — aksen sekunder */
-  --peach: #F2C9A0;        /* highlight halus, teks lembut */
-  --violet: #6C5B8F;       /* bayangan dingin, border, state */
-  --ink-warm: #2A1B25;     /* teks di atas emas */
-
-  /* Teks utama krem, bukan putih murni. */
-  --text: #F6E7D3;
-  --text-2: #C9AC9F;
+  --navy: #212237;          /* latar utama */
+  --surface: #2A2B46;       /* kartu/panel */
+  --surface-2: #34365A;     /* permukaan naik */
+  --accent: #6A69F3;        /* aksen utama: tombol utama, state aktif */
+  --lavender: #7969B0;      /* aksen sekunder: border, rim-light */
+  --deep-purple: #6051AE;   /* detail kecil, dot nonaktif */
+  --text: #FEFDFF;
+  --text-2: #B9B2E0;
+  --peach: #F5C5B7;         /* sangat hemat: badge baru, bintang, detail kecil */
+  --line: rgba(121, 105, 176, 0.28);  /* garis 1px lavender, opasitas rendah */
+  --line-strong: rgba(121, 105, 176, 0.5);
 
   /* ===== Alias tema lama (jangan tambah pemakaian baru) ===== */
-  --bg: var(--dusk);
-  --blue: var(--amber);
-  --blue-grad: var(--amber);
+  --dusk: var(--navy);
+  --bg: var(--navy);
+  --surface-3: var(--surface-2);
+  --amber: var(--accent);
+  --sunset: var(--lavender);
+  --violet: var(--lavender);
+  --ink-warm: var(--text);
+  --blue: var(--accent);
+  --blue-grad: var(--accent);
   --yellow: var(--peach);
-  --maroon: #472F3C;
-  --chip-border: rgba(108, 91, 143, 0.45);
-  --nav-active: var(--violet);
+  --maroon: var(--surface);
+  --chip-border: var(--line);
+  --nav-active: var(--accent);
 
   /* ===== Token player & halaman episode ===== */
-  --ink: #2A1B25;
-  --deep: #3A2833;
-  --deep-2: #4A3643;
-  --glacier: var(--peach);
+  --ink: var(--navy);
+  --deep: var(--surface);
+  --deep-2: var(--surface-2);
+  --glacier: var(--text-2);
   --frost: var(--text);
   --muted: var(--text-2);
 
@@ -59,25 +65,21 @@
   --page-x-detail: 16px;
   --section-gap: 24px;
 
-  /* Gradien senja lembut — HANYA di splash & hero Home.
-     Transisi nada halus (violet -> mawar -> emas pudar), tanpa oranye menyala. */
-  --sky: linear-gradient(180deg, #6C5B8F 0%, #8A6280 38%, #C97B84 72%, #E8B66B 100%);
-
-  /* Bayangan netral-violet, halus. */
-  --shadow-warm: 0 2px 0 rgba(42, 27, 37, 0.6), 0 8px 20px rgba(20, 12, 18, 0.32);
-  --shadow-warm-pressed: 0 0 0 rgba(42, 27, 37, 0.6), 0 2px 6px rgba(20, 12, 18, 0.28);
+  /* Tidak ada bayangan: kedalaman lewat surface + garis tipis. */
+  --shadow-warm: none;
+  --shadow-warm-pressed: none;
 }
 
 html {
   scroll-behavior: smooth;
-  background: #2A1B25;
+  background: #212237;
   /* Matikan pull-to-refresh & overscroll bounce bawaan browser (ala native). */
   overscroll-behavior-y: none;
 }
 
 body {
   @apply antialiased;
-  background: #2A1B25;
+  background: #212237;
   color: var(--text);
   font-family: var(--font-body), "Figtree", "Segoe UI", sans-serif;
   /* Hilangkan tap highlight abu-abu/flash bawaan mobile browser. */
@@ -219,9 +221,9 @@ h3,
   overflow: hidden;
 }
 
-/* Fokus keyboard terlihat (peach) — aksesibilitas. */
+/* Fokus keyboard terlihat (lavender terang) — aksesibilitas. */
 :focus-visible {
-  outline: 2px solid var(--peach);
+  outline: 2px solid var(--text-2);
   outline-offset: 2px;
 }
 
@@ -250,39 +252,35 @@ h3,
   cursor: not-allowed;
 }
 
-/* Primer: satu per layar. Amber padat, radius 14px, shadow hangat "keras". */
+/* Primer: satu per layar. Aksen datar. Teks putih 4.20:1 -> wajib bold 19px
+   (teks besar AA 3:1). Tanpa bayangan. */
 .btn-primary {
-  background: var(--amber);
-  color: var(--ink-warm);
+  background: var(--accent);
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 700;
   border-radius: 14px;
   padding: 14px 22px;
-  box-shadow: var(--shadow-warm);
-}
-.btn-primary:active {
-  box-shadow: var(--shadow-warm-pressed);
 }
 
-/* Aksi hero Home: kompak (bukan pill selebar layar), sudut asimetris,
-   ikon play dalam lingkaran kecil. Emas lembut — aksi utama satu-satunya
-   di layar Home. */
+/* Aksi hero Home: kompak, sudut asimetris, ikon play dalam lingkaran kecil.
+   Aksen utama satu-satunya di layar Home. Bold 19px untuk kontras AA. */
 .btn-hero {
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  background: var(--amber);
-  color: var(--ink-warm);
+  background: var(--accent);
+  color: var(--text);
   font-weight: 700;
-  font-size: 14px;
+  font-size: 19px;
   line-height: 1;
   text-decoration: none;
   border-radius: 16px 20px 16px 20px;
   padding: 9px 16px 9px 10px;
-  box-shadow: var(--shadow-warm);
-  transition: transform 100ms ease, box-shadow 100ms ease;
+  transition: transform 100ms ease;
 }
 .btn-hero:active {
   transform: translateY(2px);
-  box-shadow: var(--shadow-warm-pressed);
 }
 .btn-hero-circle {
   display: inline-flex;
@@ -291,14 +289,14 @@ h3,
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  background: rgba(42, 27, 37, 0.18);
+  background: rgba(33, 34, 55, 0.28);
 }
 
-/* Sekunder: outline tipis peach, transparan. */
+/* Sekunder: outline tipis lavender, teks lavender terang. */
 .btn-secondary {
   background: transparent;
-  color: var(--peach);
-  border: 1.5px solid var(--peach);
+  color: var(--text-2);
+  border: 1px solid var(--lavender);
   border-radius: 14px;
   padding: 12px 20px;
 }
@@ -306,11 +304,11 @@ h3,
 /* Tersier: teks + underline, aksi paling ringan. */
 .btn-tertiary {
   background: none;
-  color: var(--peach);
+  color: var(--text-2);
   padding: 8px 4px;
   font-weight: 600;
   text-decoration: underline;
-  text-decoration-color: rgba(255, 211, 161, 0.4);
+  text-decoration-color: var(--line-strong);
   text-underline-offset: 4px;
 }
 
@@ -318,21 +316,19 @@ h3,
 .btn-decline {
   background: transparent;
   color: var(--text-2);
-  border: 1.5px solid rgba(201, 168, 150, 0.35);
+  border: 1px solid var(--line-strong);
   border-radius: 14px;
   padding: 12px 20px;
 }
 
 /* Play: LINGKARAN fungsional — satu-satunya bentuk pill di sistem. */
 .btn-play {
-  background: var(--amber);
-  color: var(--ink-warm);
+  background: var(--accent);
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 700;
   border-radius: var(--radius-pill);
   padding: 14px 26px;
-  box-shadow: var(--shadow-warm);
-}
-.btn-play:active {
-  box-shadow: var(--shadow-warm-pressed);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -359,7 +355,7 @@ h3,
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(15, 6, 11, 0.6);
+  background: rgba(33, 34, 55, 0.72);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.18s ease;
@@ -377,7 +373,7 @@ h3,
   transform: translate(-50%, 100%);
   transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
   background: var(--deep);
-  border-top: 1px solid var(--deep-2);
+  border-top: 1px solid var(--line);
   border-radius: 20px 20px 0 0;
   max-height: 70vh;
   overflow-y: auto;
@@ -432,7 +428,7 @@ h3,
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 225, 190, 0.07), transparent);
+  background: linear-gradient(90deg, transparent, rgba(185, 178, 224, 0.07), transparent);
   background-size: 400px 100%;
   animation: shimmer 1.3s infinite;
 }
@@ -442,7 +438,7 @@ h3,
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Angka ranking: outline amber, peringkat 1 terisi peach. */
+/* Angka ranking: outline lavender terang, peringkat 1 terisi peach. */
 .rank-num {
   font-family: var(--font-display), "Zen Maru Gothic", "Segoe UI", sans-serif;
   font-weight: 700;
@@ -450,10 +446,10 @@ h3,
   line-height: 1;
   text-align: center;
   color: transparent;
-  -webkit-text-stroke: 1.5px var(--amber);
+  -webkit-text-stroke: 1.5px var(--text-2);
 }
 .rank-num.top {
-  color: var(--amber);
+  color: var(--peach);
   -webkit-text-stroke: 0;
 }
 
@@ -478,12 +474,12 @@ h3,
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--surface-3);
+  background: var(--deep-purple);
   transition: all 0.25s ease;
 }
 .onboard-dot.active {
   width: 20px;
-  background: var(--amber);
+  background: var(--accent);
 }
 /* Dot loading di layar Splash onboarding — "matahari berdenyut pelan". */
 @keyframes onboard-loading-pulse {
@@ -502,7 +498,7 @@ h3,
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--amber);
+  background: var(--text-2);
   animation: onboard-loading-pulse 1.1s ease-in-out infinite;
 }
 .onboard-loading-dot:nth-child(2) {
@@ -512,19 +508,7 @@ h3,
   animation-delay: 0.36s;
 }
 
-/* ============================================================
- * MOMEN GERAK UTAMA (satu-satunya): splash — latar bergeser dari
- * dusk ke langit golden hour seperti matahari terbit. Sisanya
- * hanya respons sentuhan. Hormati reduced-motion.
- * ============================================================ */
-@keyframes sunrise {
-  from {
-    background: var(--dusk);
-  }
-  to {
-    background: var(--sky);
-  }
-}
+/* Splash: latar navy datar (tanpa gradien). Satu-satunya gerak: fade keluar. */
 .splash-screen {
   position: fixed;
   inset: 0;
@@ -532,15 +516,8 @@ h3,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--dusk);
-  animation: sunrise 0.55s ease-out 0.08s both;
+  background: var(--navy);
   transition: opacity 0.3s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .splash-screen {
-    animation: none;
-    background: var(--dusk);
-  }
 }
 
 /* Animasi player: hanya spinner fungsional. */

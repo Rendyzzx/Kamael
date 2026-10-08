@@ -19,7 +19,7 @@ export default function LogoutButton() {
       type="submit"
       onClick={() => clearMirror()}
       className="w-full rounded-chip px-4 py-3 text-sm font-bold transition-smooth"
-      style={{ background: "var(--surface)", color: "#FF1744" }}
+      style={{ background: "var(--surface)", color: "var(--peach)" }}
     >
       Logout
     </button>
