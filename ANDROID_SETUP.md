@@ -88,6 +88,15 @@ build baru (signature beda package = dua app terpisah).
    bisa mengirim push ke SEMUA user. Hanya `google-services.json` (public)
    yang masuk APK.
 
+## Client Android (sudah dibuat)
+
+Repo client native: **[Rendyzzx/Cyronime-Android](https://github.com/Rendyzzx/Cyronime-Android)** (Kotlin + Jetpack Compose, package `id.my.id.cyronime.app`). Client mengikuti semua kontrak di bawah; endpoint detail/episode/me ditambahkan di commit `ece204c`:
+
+- `GET /api/anime/{slug}` — detail anime (JSON)
+- `GET /api/anime/episode/{episode}` — episode anime (kualitas + serverId)
+- `GET /api/donghua/{slug}` dan `GET /api/donghua/episode/{slug}` — padanan donghua
+- `GET /api/me` — info akun dari session
+
 ## Endpoint yang dipakai Android (kontrak backend, semua sudah aktif)
 
 | Endpoint | Method | Fungsi |
