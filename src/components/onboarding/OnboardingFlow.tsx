@@ -40,11 +40,13 @@ export default function OnboardingFlow({
   authed,
   animePoster,
   donghuaPoster,
+  testerEnabled = false,
 }: {
   initial: OnboardingInitialState;
   authed: boolean;
   animePoster: string | null;
   donghuaPoster: string | null;
+  testerEnabled?: boolean;
 }) {
   const router = useRouter();
   const resumeStep: Step = useMemo(() => {
@@ -289,7 +291,7 @@ export default function OnboardingFlow({
             pending={pickPending}
           />
         ) : (
-          <OnboardingSignIn />
+          <OnboardingSignIn testerEnabled={testerEnabled} />
         )
       ) : null}
     </div>

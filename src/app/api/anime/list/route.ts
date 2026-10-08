@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAnimeByGenre, getCompletedAnime, getOngoingAnime } from "@/lib/api/anime";
 import { validatePage, validateSlug } from "@/lib/utils/validation";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Endpoint internal untuk infinite scroll listing Anime.
@@ -9,6 +10,9 @@ import { validatePage, validateSlug } from "@/lib/utils/validation";
  * jadi tidak ada data yang dibuat-buat di sisi client.
  */
 export async function GET(request: NextRequest) {
+  const limited = await enforceRateLimit(request, { bucket: "anime-list", limit: 60, windowSec: 60 });
+  if (limited) return limited;
+
   const { searchParams } = new URL(request.url);
   const tab = searchParams.get("tab") === "completed" ? "completed" : "ongoing";
   const page = validatePage(searchParams.get("page") ?? undefined);
@@ -22,10 +26,14 @@ export async function GET(request: NextRequest) {
         ? await getCompletedAnime(page)
         : await getOngoingAnime(page);
 
-    return NextResponse.json({
-      items: result.items,
-      hasNextPage: result.pagination.hasNextPage,
-    });
+    return NextResponse.json(
+      {
+        items: result.items,
+        hasNextPage: result.pagination.hasNextPage,
+      },
+      // Data listing publik (sama untuk semua user) — cache edge singkat.
+      { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } }
+    );
   } catch {
     return NextResponse.json({ items: [], hasNextPage: false }, { status: 200 });
   }

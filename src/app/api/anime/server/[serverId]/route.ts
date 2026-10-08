@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { resolveAnimeServerUrl } from "@/lib/api/anime";
 import { validateServerId } from "@/lib/utils/validation";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Resolve serverId episode anime → URL embed.
@@ -12,7 +13,10 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ serverId: string }> }
 ) {
-  const { serverId } = await params;
+    const limited = await enforceRateLimit(_request, { bucket: "server-resolve", limit: 60, windowSec: 60 });
+  if (limited) return limited;
+
+const { serverId } = await params;
   const id = validateServerId(serverId);
 
   if (!id) {

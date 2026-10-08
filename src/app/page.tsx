@@ -6,6 +6,7 @@ import SearchBox from "@/components/navbar/SearchBox";
 import PortalSwitch from "@/components/portal/PortalSwitch";
 import type { Portal } from "@/components/portal/portal-events";
 import OnboardingFlow from "@/components/onboarding/OnboardingFlow";
+import { isTesterLoginEnabled } from "@/lib/auth/config";
 import OnboardingGate from "@/components/onboarding/OnboardingGate";
 import Icon from "@/components/ui/Icon";
 import BrandLogo from "@/components/ui/BrandLogo";
@@ -95,6 +96,7 @@ export default async function HomePage() {
         authed={Boolean(userId)}
         animePoster={animePoster}
         donghuaPoster={donghuaPoster}
+        testerEnabled={isTesterLoginEnabled()}
       />
     );
   }

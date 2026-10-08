@@ -9,6 +9,7 @@ import {
 } from "@/lib/redis/onboarding";
 import { newVisitorId, readVisitorId, visitorCookieOptions, VISITOR_COOKIE } from "@/lib/visitor";
 import { ONB_COOKIE, ONB_COOKIE_MAX_AGE } from "@/lib/onboarding-cookie";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * State onboarding first-time experience — tersimpan di Redis (onboarding:{id}).
@@ -26,7 +27,10 @@ function isOnboardingType(value: unknown): value is OnboardingType {
   return value === "anime" || value === "donghua";
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const limited = await enforceRateLimit(req, { bucket: "onboarding", limit: 60, windowSec: 60 });
+  if (limited) return limited;
+
   const userId = await getAuthenticatedUserId();
   const id = userId ?? (await readVisitorId());
   if (!id) {
@@ -37,6 +41,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = await enforceRateLimit(req, { bucket: "onboarding", limit: 30, windowSec: 60 });
+  if (limited) return limited;
+
   let body: { accepted?: unknown; type?: unknown; completed?: unknown };
   try {
     body = (await req.json()) as typeof body;
@@ -92,7 +99,10 @@ export async function POST(req: NextRequest) {
   return res;
 }
 
-export async function DELETE() {
+export async function DELETE(req: NextRequest) {
+  const limited = await enforceRateLimit(req, { bucket: "onboarding", limit: 30, windowSec: 60 });
+  if (limited) return limited;
+
   const userId = await getAuthenticatedUserId();
   const id = userId ?? (await readVisitorId());
   if (!id) {

@@ -5,6 +5,7 @@ import { getAuthenticatedUserId } from "@/lib/auth/session";
 import GoogleLoginButton from "@/components/auth/GoogleLoginButton";
 import BrandLogo from "@/components/ui/BrandLogo";
 import TesterLoginButton from "@/components/auth/TesterLoginButton";
+import { isTesterLoginEnabled } from "@/lib/auth/config";
 
 export const metadata: Metadata = {
   title: "Login",
@@ -35,7 +36,7 @@ export default async function LoginPage() {
       <div className="w-full space-y-3">
         <GoogleLoginButton callbackUrl="/profile" />
         {/* Login tester sementara (QA) — tautan kecil, bukan fitur sejajar. */}
-        <TesterLoginButton variant="link" />
+        {isTesterLoginEnabled() ? <TesterLoginButton variant="link" /> : null}
         <p className="text-xs" style={{ color: "var(--text-2)" }}>
           Belum punya akun? Masuk dengan Google untuk mulai, tanpa password baru.
         </p>

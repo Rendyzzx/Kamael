@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import BrandLogo from "@/components/ui/BrandLogo";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import TesterLoginButton from "@/components/auth/TesterLoginButton";
@@ -13,7 +12,7 @@ import TesterLoginButton from "@/components/auth/TesterLoginButton";
  * (Auth.js). Setelah login sukses, user kembali ke "/" dan melanjutkan ke
  * langkah Pilih Tontonan.
  */
-export default function OnboardingSignIn() {
+export default function OnboardingSignIn({ testerEnabled = false }: { testerEnabled?: boolean }) {
   const [busy, setBusy] = useState(false);
 
   async function handleGoogle() {
@@ -62,7 +61,7 @@ export default function OnboardingSignIn() {
           {isPending ? "Mengalihkan..." : "Lanjut dengan Google"}
         </button>
         {/* Login tester sementara (QA) — tautan kecil, bukan fitur sejajar. Hapus sebelum rilis publik. */}
-        <TesterLoginButton afterLoginHref="/" variant="link" />
+        {testerEnabled ? <TesterLoginButton afterLoginHref="/" variant="link" /> : null}
       </div>
 
       <p className="max-w-[300px] text-xs" style={{ color: "var(--text-2)" }}>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { addFavorite, listFavorites, removeFavorite } from "@/lib/redis/favorites";
 import type { ContentType } from "@/lib/redis/watching";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * GET    /api/favorites?type=anime|donghua            -> daftar snapshot favorite (login wajib)
@@ -26,13 +27,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const limited = await enforceRateLimit(req, { bucket: "fav-read", limit: 60, windowSec: 60 }, userId);
+  if (limited) return limited;
+
   const type = parseType(req.nextUrl.searchParams.get("type"));
   if (!type) {
     return NextResponse.json({ error: "type harus anime atau donghua" }, { status: 400 });
   }
 
   const favorites = await listFavorites(userId, type);
-  return NextResponse.json({ favorites });
+  // Data pribadi per-user: JANGAN pernah di-cache edge/CDN bersama.
+  return NextResponse.json({ favorites }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function POST(req: NextRequest) {
@@ -56,11 +61,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  await addFavorite(userId, type, {
-    contentId: body.contentId,
-    title: typeof body.title === "string" ? body.title : "",
-    poster: typeof body.poster === "string" ? body.poster : "",
-  });
+  // Batasi panjang field supaya Redis tidak jadi tempat nyimpan payload besar.
+  const MAX_ID = 120, MAX_TITLE = 200, MAX_POSTER = 500;
+  const contentId = body.contentId.slice(0, MAX_ID);
+  const title = typeof body.title === "string" ? body.title.slice(0, MAX_TITLE) : "";
+  const poster = typeof body.poster === "string" ? body.poster.slice(0, MAX_POSTER) : "";
+  if (poster && !/^https?:\/\//i.test(poster)) {
+    return NextResponse.json({ error: "poster harus URL http(s)" }, { status: 400 });
+  }
+
+  const limited = await enforceRateLimit(req, { bucket: "fav-write", limit: 60, windowSec: 60 }, userId);
+  if (limited) return limited;
+
+  await addFavorite(userId, type, { contentId, title, poster });
   return NextResponse.json({ ok: true });
 }
 
@@ -70,9 +83,12 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const limited = await enforceRateLimit(req, { bucket: "fav-write", limit: 60, windowSec: 60 }, userId);
+  if (limited) return limited;
+
   const type = parseType(req.nextUrl.searchParams.get("type"));
   const contentId = req.nextUrl.searchParams.get("contentId");
-  if (!type || !contentId) {
+  if (!type || !contentId || contentId.length > 120) {
     return NextResponse.json({ error: "type dan contentId wajib diisi" }, { status: 400 });
   }
 

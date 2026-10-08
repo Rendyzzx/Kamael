@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
 import { clearAllProgress, deleteProgress, getProgress, listProgress, upsertProgress } from "@/lib/redis/watching";
 import { recordHistory } from "@/lib/redis/history";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST   /api/watch/progress  -> simpan/update continue-watching + history (login wajib)
@@ -49,6 +50,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Batasi panjang field string dari client (anti payload besar ke Redis).
+  const MAX_ID = 120, MAX_TITLE = 200, MAX_POSTER = 500;
+  if (
+    body.contentId.length > MAX_ID ||
+    body.episodeId.length > MAX_ID ||
+    (typeof body.title === "string" && body.title.length > MAX_TITLE) ||
+    (typeof body.poster === "string" && body.poster.length > MAX_POSTER)
+  ) {
+    return NextResponse.json({ error: "Field terlalu panjang" }, { status: 400 });
+  }
+  if (typeof body.poster === "string" && body.poster && !/^https?:\/\//i.test(body.poster)) {
+    return NextResponse.json({ error: "poster harus URL http(s)" }, { status: 400 });
+  }
+
+  const limited = await enforceRateLimit(req, { bucket: "progress-write", limit: 60, windowSec: 60 }, userId);
+  if (limited) return limited;
+
   const validationError = await upsertProgress(userId, {
     contentId: body.contentId,
     type: body.type,
@@ -82,14 +100,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const limited = await enforceRateLimit(req, { bucket: "progress-read", limit: 60, windowSec: 60 }, userId);
+  if (limited) return limited;
+
   const contentId = req.nextUrl.searchParams.get("contentId");
   if (contentId) {
     const progress = await getProgress(userId, contentId);
-    return NextResponse.json({ progress });
+    return NextResponse.json({ progress }, { headers: { "Cache-Control": "private, no-store" } });
   }
 
   const progress = await listProgress(userId);
-  return NextResponse.json({ progress });
+  return NextResponse.json({ progress }, { headers: { "Cache-Control": "private, no-store" } });
 }
 
 export async function DELETE(req: NextRequest) {
@@ -97,6 +118,9 @@ export async function DELETE(req: NextRequest) {
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const limited = await enforceRateLimit(req, { bucket: "progress-write", limit: 30, windowSec: 60 }, userId);
+  if (limited) return limited;
 
   if (req.nextUrl.searchParams.get("all") === "1") {
     const ok = await clearAllProgress(userId);
@@ -107,7 +131,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   const contentId = req.nextUrl.searchParams.get("contentId");
-  if (!contentId) {
+  if (!contentId || contentId.length > 120) {
     return NextResponse.json({ error: "contentId wajib diisi" }, { status: 400 });
   }
 

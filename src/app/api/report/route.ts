@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/report — terima laporan "video rusak" dari player.
@@ -15,6 +16,10 @@ function clean(value: unknown): string | null {
 }
 
 export async function POST(req: Request) {
+  // Endpoint spam by design (pesan sembarang dari player) -> paling ketat.
+  const limited = await enforceRateLimit(req, { bucket: "report", limit: 10, windowSec: 60 });
+  if (limited) return limited;
+
   let body: Record<string, unknown>;
   try {
     body = (await req.json()) as Record<string, unknown>;

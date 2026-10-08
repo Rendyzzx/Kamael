@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { searchAnime } from "@/lib/api/anime";
 import { searchDonghua } from "@/lib/api/donghua";
 import { sanitizeSearchQuery } from "@/lib/utils/validation";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Proxy pencarian gabungan untuk search box (client).
@@ -11,6 +12,11 @@ import { sanitizeSearchQuery } from "@/lib/utils/validation";
  * keyword populer tidak menghujani API sumber.
  */
 export async function GET(request: Request) {
+  // Proxy publik ke API sumber (rate-limit upstream ketat) -> dibatasi supaya
+  // tidak jadi pintu scraping massal. 30x/menit jauh di atas kebutuhan ketik.
+  const limited = await enforceRateLimit(request, { bucket: "search", limit: 30, windowSec: 60 });
+  if (limited) return limited;
+
   const { searchParams } = new URL(request.url);
   const q = sanitizeSearchQuery(searchParams.get("q"));
 
@@ -36,5 +42,10 @@ export async function GET(request: Request) {
           .map((d) => ({ title: d.title, slug: d.slug }))
       : [];
 
-  return NextResponse.json({ anime, donghua });
+  return NextResponse.json(
+    { anime, donghua },
+    // Hasil pencarian publik per keyword — cache edge singkat menghemat
+    // bandwidth & melindungi API sumber dari keyword populer yang diulang.
+    { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+  );
 }

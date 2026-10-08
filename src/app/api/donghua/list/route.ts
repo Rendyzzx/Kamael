@@ -6,6 +6,7 @@ import {
   getOngoingDonghua,
 } from "@/lib/api/donghua";
 import { validatePage, validateSlug } from "@/lib/utils/validation";
+import { enforceRateLimit } from "@/lib/rate-limit";
 
 /**
  * Endpoint internal untuk infinite scroll listing Donghua.
@@ -15,6 +16,9 @@ import { validatePage, validateSlug } from "@/lib/utils/validation";
  * dianggap mungkin masih ada halaman berikutnya.
  */
 export async function GET(request: NextRequest) {
+  const limited = await enforceRateLimit(request, { bucket: "donghua-list", limit: 60, windowSec: 60 });
+  if (limited) return limited;
+
   const { searchParams } = new URL(request.url);
   const tabRaw = searchParams.get("tab");
   const tab = tabRaw === "ongoing" || tabRaw === "completed" ? tabRaw : "latest";
@@ -33,10 +37,13 @@ export async function GET(request: NextRequest) {
 
     const mayHaveNext = genre ? items.length >= 10 : items.length >= 30;
 
-    return NextResponse.json({
-      items,
-      hasNextPage: items.length ? mayHaveNext : false,
-    });
+    return NextResponse.json(
+      {
+        items,
+        hasNextPage: items.length ? mayHaveNext : false,
+      },
+      { headers: { "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600" } }
+    );
   } catch {
     return NextResponse.json({ items: [], hasNextPage: false }, { status: 200 });
   }
