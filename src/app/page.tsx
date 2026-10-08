@@ -471,7 +471,9 @@ function HomeRanking({
         <h2 className="font-display text-[20px] font-bold tracking-tight text-[var(--text)]">Terpopuler</h2>
       </div>
       <p className="mb-3 text-[12px]" style={{ color: "var(--text-2)" }}>
-        Diurutkan dari jumlah penonton.
+        {items[0]?.views != null
+          ? "Diurutkan dari jumlah penonton."
+          : "Diurutkan dari skor tertinggi."}
       </p>
       <ol className="grid gap-2.5">
         {items.map((a, i) => (
@@ -494,7 +496,11 @@ function HomeRanking({
               <span className="min-w-0">
                 <span className="block truncate text-[14px] font-semibold text-[var(--text)]">{a.title}</span>
                 <span className="mt-0.5 block text-[12px]" style={{ color: "var(--text-2)" }}>
-                  {a.views ? `${formatViews(a.views)} tayangan` : "Populer"}
+                  {a.views
+                    ? `${formatViews(a.views)} tayangan`
+                    : a.score
+                      ? `Skor ${a.score}`
+                      : "Populer"}
                   {a.episodes ? `, ${a.episodes} eps` : ""}
                 </span>
               </span>

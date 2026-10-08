@@ -2,8 +2,8 @@
  * AnimeProvider — facade pemilihan provider sumber data anime.
  *
  * Provider aktif dikontrol env ANIME_PROVIDER:
- * - "animein" (default): AnimeIn scraper (src/lib/api/animein/)
- * - "legacy": Otakudesu via Sanka Vollerei (src/lib/api/legacy/)
+ * - "legacy" (default): Otakudesu via Sanka Vollerei (src/lib/api/legacy/)
+ * - "animein": AnimeIn scraper (src/lib/api/animein/)
  *
  * Kontrak fungsi & bentuk data IDENTIK untuk semua provider — frontend dan
  * route internal hanya import file ini, tidak pernah menyentuh provider
@@ -19,7 +19,7 @@ import * as legacyProvider from "./legacy/anime";
 
 export type AnimeListPage = animeInProvider.AnimeListPage;
 
-const useAnimeIn = (process.env.ANIME_PROVIDER ?? "animein") !== "legacy";
+const useAnimeIn = (process.env.ANIME_PROVIDER ?? "legacy") === "animein";
 
 const provider = useAnimeIn ? animeInProvider : legacyProvider;
 
@@ -39,12 +39,16 @@ export const resolveAnimeServerUrl = (serverId: string) =>
   provider.resolveAnimeServerUrl(serverId);
 
 /**
- * Terpopuler (views asli AnimeIn). Legacy tidak punya padanan langsung —
- * fallback ke completed agar facade tetap aman dipanggil.
+ * Terpopuler. AnimeIn punya views asli. Legacy tidak punya padanan —
+ * fallback: item "Tamat" diurut skor tertinggi (perilaku pra-migrasi).
  */
 export async function getPopularAnime(page = 1): Promise<AnimeListPage> {
   if ("getPopularAnime" in provider) {
     return (provider as typeof animeInProvider).getPopularAnime(page);
   }
-  return legacyProvider.getCompletedAnime(page);
+  const completed = await legacyProvider.getCompletedAnime(page);
+  const items = [...completed.items].sort(
+    (a, b) => Number(b.score ?? 0) - Number(a.score ?? 0)
+  );
+  return { ...completed, items };
 }
