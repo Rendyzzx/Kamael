@@ -22,7 +22,7 @@ import { Button, Card, CardList, Chevron, Dialog, Icon, Row, Section, Segmented,
 /** Nomor admin: satu sumber untuk tautan WhatsApp dan tampilan. */
 const ADMIN_WA_E164 = "6281249578370";
 const ADMIN_WA_DISPLAY = "0812 4957 8370";
-const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://cyronime.web.id").replace(/\/+$/, "");
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://kamael.vercel.app").replace(/\/+$/, "");
 
 type Confirm = "history" | "progress" | null;
 
