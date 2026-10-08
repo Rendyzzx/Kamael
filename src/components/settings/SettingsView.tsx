@@ -47,6 +47,15 @@ export default function SettingsView({
   const [theme, setTheme] = useState<Theme>("dark");
   const [accent, setAccent] = useState<Accent>("purple");
   const [autoResume, setAutoResume] = useState(true);
+  const [notify, setNotify] = useState({
+    newEpisode: true,
+    favorite: true,
+    announcement: true,
+    maintenance: true,
+    appUpdate: true,
+  });
+  const [notifyLoaded, setNotifyLoaded] = useState(false);
+  const [notifySaving, setNotifySaving] = useState(false);
   const [confirm, setConfirm] = useState<Confirm>(null);
   const [busy, setBusy] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -60,6 +69,34 @@ export default function SettingsView({
     setAutoResume(readAutoResume());
   }, []);
 
+  // Preferensi notifikasi tersimpan di BACKEND (bukan localStorage) supaya
+  // konsisten antara Web dan Android. Gagal fetch (offline/anonymous) ->
+  // toggle tetap tampil tapi nonaktif.
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch("/api/notifications/prefs", { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) throw new Error("failed");
+        const json = (await res.json()) as { prefs?: Record<string, boolean> };
+        if (!alive || !json.prefs) return;
+        setNotify((prev) => ({
+          ...prev,
+          ...Object.fromEntries(
+            (Object.keys(prev) as (keyof typeof prev)[]).map((k) => [k, json.prefs?.[k] !== false])
+          ),
+        }));
+      } catch {
+        /* offline / belum login: biarkan default, toggle disabled */
+      } finally {
+        if (alive) setNotifyLoaded(true);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const t = useCallback((k: MessageKey) => MESSAGES[locale][k], [locale]);
 
   const showToast = useCallback((msg: string) => {
@@ -71,6 +108,29 @@ export default function SettingsView({
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
   }, []);
+
+  // Toggle preferensi notifikasi — tersimpan di backend (sinkron Web/Android).
+  async function toggleNotify(key: keyof typeof notify) {
+    if (notifySaving) return;
+    setNotifySaving(true);
+    const next = !notify[key];
+    setNotify((prev) => ({ ...prev, [key]: next })); // optimistic
+    try {
+      const res = await fetch("/api/notifications/prefs", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prefs: { [key]: next } }),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error("failed");
+      showToast(t("notif.saved"));
+    } catch {
+      setNotify((prev) => ({ ...prev, [key]: !next })); // revert
+      showToast(t("notif.saveFailed"));
+    } finally {
+      setNotifySaving(false);
+    }
+  }
 
   async function runDestructive(kind: Exclude<Confirm, null>) {
     if (busy) return;
@@ -281,9 +341,86 @@ export default function SettingsView({
       {/* 6. Notifications */}
       <Section title={t("notif.title")}>
         <CardList>
-          <Row icon="notifications" title={t("notif.newEpisode")} desc={t("notif.newEpisodeDesc")} disabled right={<SoonBadge label={t("common.soon")} />} />
-          <Row icon="favorite" title={t("notif.favorite")} desc={t("notif.favoriteDesc")} disabled right={<SoonBadge label={t("common.soon")} />} />
-          <Row icon="campaign" title={t("notif.system")} desc={t("notif.systemDesc")} disabled right={<SoonBadge label={t("common.soon")} />} />
+          <Row
+            icon="notifications"
+            title={t("notif.newEpisode")}
+            desc={t("notif.newEpisodeDesc")}
+            disabled={!notifyLoaded}
+            right={
+              <Toggle
+                checked={notify.newEpisode}
+                onChange={() => toggleNotify("newEpisode")}
+                label={t("notif.newEpisode")}
+                disabled={!notifyLoaded}
+                onText={t("common.on")}
+                offText={t("common.off")}
+              />
+            }
+          />
+          <Row
+            icon="favorite"
+            title={t("notif.favorite")}
+            desc={t("notif.favoriteDesc")}
+            disabled={!notifyLoaded}
+            right={
+              <Toggle
+                checked={notify.favorite}
+                onChange={() => toggleNotify("favorite")}
+                label={t("notif.favorite")}
+                disabled={!notifyLoaded}
+                onText={t("common.on")}
+                offText={t("common.off")}
+              />
+            }
+          />
+          <Row
+            icon="campaign"
+            title={t("notif.announcement")}
+            desc={t("notif.announcementDesc")}
+            disabled={!notifyLoaded}
+            right={
+              <Toggle
+                checked={notify.announcement}
+                onChange={() => toggleNotify("announcement")}
+                label={t("notif.announcement")}
+                disabled={!notifyLoaded}
+                onText={t("common.on")}
+                offText={t("common.off")}
+              />
+            }
+          />
+          <Row
+            icon="build"
+            title={t("notif.maintenance")}
+            desc={t("notif.maintenanceDesc")}
+            disabled={!notifyLoaded}
+            right={
+              <Toggle
+                checked={notify.maintenance}
+                onChange={() => toggleNotify("maintenance")}
+                label={t("notif.maintenance")}
+                disabled={!notifyLoaded}
+                onText={t("common.on")}
+                offText={t("common.off")}
+              />
+            }
+          />
+          <Row
+            icon="system_update"
+            title={t("notif.appUpdate")}
+            desc={t("notif.appUpdateDesc")}
+            disabled={!notifyLoaded}
+            right={
+              <Toggle
+                checked={notify.appUpdate}
+                onChange={() => toggleNotify("appUpdate")}
+                label={t("notif.appUpdate")}
+                disabled={!notifyLoaded}
+                onText={t("common.on")}
+                offText={t("common.off")}
+              />
+            }
+          />
         </CardList>
         <p className="px-1 text-[12px]" style={{ color: "var(--text-2)" }}>
           {t("notif.note")}

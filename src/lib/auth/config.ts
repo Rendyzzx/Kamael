@@ -16,6 +16,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
+import { getRedis, safeRedis } from "@/lib/redis/client";
 /**
  * CATATAN PENTING: file ini diimpor juga oleh middleware (edge runtime) lewat
  * session.ts — JANGAN mengimpor lib server-only (Redis dsb.) di sini.
@@ -124,6 +125,20 @@ export const authConfig: NextAuthConfig = {
     // merender halaman error Auth.js yang cuma teks kecil tanpa styling.
     // Arahkan ke halaman error sendiri dengan bahasa manusia + tombol coba lagi.
     error: "/auth/error",
+  },
+  events: {
+    // Registrasi user ke set statistik (SCARD users:known) — untuk /users
+    // di bot admin & dashboard. Gagal Redis diabaikan (fail-open, non-blocking).
+    async signIn({ user, profile }) {
+      const uid =
+        (profile as { sub?: string } | undefined)?.sub ?? user?.id ?? null;
+      if (!uid) return;
+      await safeRedis(async () => {
+        const redis = getRedis();
+        await redis.sadd("users:known", String(uid));
+        return true;
+      }, false);
+    },
   },
   callbacks: {
     async jwt({ token, profile, user }) {

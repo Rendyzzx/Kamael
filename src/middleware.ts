@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/session";
+import { getMaintenanceCached, isWebMaintenance } from "@/lib/system/settings";
 
 /**
- * Gerbang auth ala aplikasi native: SEMUA halaman app (anime, donghua,
- * favorites, history, profile, settings, search) hanya bisa diakses setelah
- * login. Belum login -> redirect ke "/" yang menampilkan alur onboarding
- * (disclaimer -> info -> login Google -> pilih tontonan).
+ * Dua gerbang server-side:
  *
- * "/" sendiri TIDAK ada di matcher — page.tsx menangani gerbangnya sendiri
- * (render OnboardingFlow, bukan redirect, supaya tidak ada loop).
- * Route publik lain (/_next, /api, /privacy, /login, aset PWA) juga di luar
- * matcher.
+ * 1. Gerbang auth ala aplikasi native: SEMUA halaman app (anime, donghua,
+ *    favorites, history, profile, settings, search) hanya bisa diakses setelah
+ *    login. Belum login -> redirect ke "/" (alur onboarding).
+ *
+ * 2. Gerbang maintenance (WEB): jika maintenance Web/global aktif, halaman
+ *    app + "/" di-redirect ke /maintenance — dijalankan di SERVER, bukan
+ *    disembunyikan lewat JavaScript. /api sengaja TIDAK diblokir karena
+ *    masih melayani Android (maintenance per-platform). Bypass HANYA untuk
+ *    akun admin (email di env ADMIN_EMAILS, dicek dari session server-side) —
+ *    tidak ada bypass via query parameter.
+ *
+ * "/" ada di matcher untuk gerbang maintenance; gerbang auth untuk "/" tetap
+ * ditangani page.tsx (render OnboardingFlow, bukan redirect, tanpa loop).
  */
 
 /**
@@ -42,14 +49,39 @@ function originGuard(req: NextRequest): NextResponse | null {
   return null;
 }
 
-export default auth((req) => {
+/** Email admin (env ADMIN_EMAILS, koma-separated) — bypass maintenance. */
+function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const list = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return list.includes(email.toLowerCase());
+}
+
+export default auth(async (req) => {
   const blocked = originGuard(req as NextRequest);
   if (blocked) return blocked;
 
-  // Untuk request API: middleware TIDAK menegakkan auth (redirect akan merusak
-  // kontrak 401 JSON klien) — tiap route API memvalidasi session sendiri
-  // via getAuthenticatedUserId(). Middleware hanya menambahkan origin guard.
+  // Untuk request API: middleware TIDAK menegakkan auth maupun maintenance —
+  // tiap route API memvalidasi session sendiri via getAuthenticatedUserId(),
+  // dan Android harus tetap bisa membaca /api/system/status saat Web maintenance.
   if (req.nextUrl.pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  // ---- Gerbang maintenance Web (server-side, fail-open saat Redis error) ----
+  // "/maintenance" sendiri tidak pernah di-redirect (halaman status).
+  if (req.nextUrl.pathname !== "/maintenance") {
+    const maintenance = await getMaintenanceCached();
+    if (isWebMaintenance(maintenance) && !isAdminEmail(req.auth?.user?.email)) {
+      return NextResponse.redirect(new URL("/maintenance", req.url));
+    }
+  }
+
+  // "/" menangani gerbangnya sendiri (render OnboardingFlow) — tidak di-
+  // redirect supaya tidak ada loop.
+  if (req.nextUrl.pathname === "/") {
     return NextResponse.next();
   }
 
@@ -60,6 +92,7 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
+    "/",
     "/anime/:path*",
     "/donghua/:path*",
     "/favorites/:path*",
@@ -67,7 +100,7 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/search/:path*",
-    // Origin guard untuk mutasi API (matcher auth tetap tidak mencakup /api,
+    // Origin guard untuk mutasi API (matcher auth tidak memblokir /api,
     // guard origin berjalan di atas request API yang cocok pola ini).
     "/api/:path*",
   ],

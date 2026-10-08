@@ -45,6 +45,39 @@ src/
 └── types/
 ```
 
+## Multi-platform & Admin (Cyronime Web + Android + Bot)
+
+Web dan Android memakai backend/API yang sama — tidak ada backend streaming
+kedua dan tidak ada database terpisah. Detail lengkap: [`ANDROID_SETUP.md`](ANDROID_SETUP.md)
+dan [`docs/ADMIN-TELEGRAM.md`](docs/ADMIN-TELEGRAM.md).
+
+```
+                CYRONIME BACKEND (Next.js /api + Upstash Redis)
+                       |                        |
+                CYRONIME WEB               ANDROID APP (native)
+                (tidak berubah)      - API yang sama, FCM notification,
+                                      maintenance & versi via API
+```
+
+- **Maintenance (server-side)**: state per platform (web / android / global)
+  disimpan di Redis, dikontrol via bot Telegram. Web dicegah di middleware
+  (redirect ke `/maintenance` — bukan disembunyikan via JS); `/api` tetap
+  hidup supaya Android masih bisa dipakai saat hanya Web yang maintenance.
+  Bypass admin hanya via session Google + env `ADMIN_EMAILS` (tidak ada
+  bypass query param).
+- **`GET /api/system/status?platform=web|android`**: status maintenance +
+  pesan + perkiraan selesai (fail-open: Redis down = dianggap ONLINE).
+- **`GET /api/app/version`**: latestVersion / minimumVersion / downloadUrl /
+  forceUpdate untuk update system Android.
+- **Notification**: token FCM device dan preferensi notifikasi per user
+  disimpan di Redis (`devices:*`, `notify:prefs:*`) — toggle di Settings sudah
+  berfungsi dan tersinkron antara Web dan Android. Backend yang melakukan
+  dispatch (`src/lib/notify/dispatch.ts`) via FCM HTTP v1 tanpa dependency
+  tambahan (`src/lib/fcm.ts`). Web push = opsional, belum diaktifkan.
+- **Telegram bot admin**: `/maintenance`, `/status`, `/notify`, `/broadcast`,
+  `/users`, `/version`, dll — hanya numeric user ID di `ADMIN_TELEGRAM_IDS`
+  yang diakui; broadcast selalu minta konfirmasi jumlah device dulu.
+
 ## Menjalankan
 
 ```bash
@@ -66,6 +99,13 @@ nonaktif dan cache memakai Next.js saja.
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Google OAuth (server-side only) |
 | `AUTH_SECRET` | Secret penandatangan session Auth.js |
 | `NEXT_PUBLIC_SITE_URL` | URL publik situs, untuk metadata canonical/OG/sitemap |
+| `ADMIN_EMAILS` | Email akun admin (bypass maintenance Web, dicek dari session server-side) |
+| `TELEGRAM_BOT_TOKEN` | Token bot admin (BotFather) — server-side only |
+| `ADMIN_TELEGRAM_IDS` | Numeric Telegram user ID admin — server-side only |
+| `TELEGRAM_WEBHOOK_SECRET` | Secret verifikasi webhook Telegram |
+| `FIREBASE_PROJECT_ID` / `FIREBASE_CLIENT_EMAIL` / `FIREBASE_PRIVATE_KEY` | FCM HTTP v1 untuk notification Android — server-side only |
+| `APP_LATEST_VERSION` / `APP_MINIMUM_VERSION` / `APP_DOWNLOAD_URL` / `APP_FORCE_UPDATE` | Info versi app Android (`/api/app/version`) |
+| `ANDROID_PACKAGE_NAME` | Package name app Android (`id.my.id.cyronime.app`) |
 
 Lihat `.env.example` untuk contoh dan catatan redirect URI Google.
 
