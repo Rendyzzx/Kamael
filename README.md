@@ -9,6 +9,8 @@ Aplikasi streaming anime & donghua mobile-first yang dibangun dengan Next.js 15
   Continue Watching, Watch History, Favorites, dan cache API
 
 Hasil inspeksi API terdokumentasi lengkap di [`docs/API-INSPECTION.md`](docs/API-INSPECTION.md).
+Dokumen hardening keamanan (lapisan, rate limit, trade-off yang disadari)
+adalah [`docs/SECURITY.md`](docs/SECURITY.md).
 
 ## Stack
 
