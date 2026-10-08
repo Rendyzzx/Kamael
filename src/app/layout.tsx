@@ -12,6 +12,7 @@ import { getOnboardingStatus } from "@/lib/redis/onboarding";
 import { readOnbCookie } from "@/lib/onboarding-cookie";
 import { readVisitorId } from "@/lib/visitor";
 import type { Portal } from "@/components/portal/portal-events";
+import { PREFS_BOOT_SCRIPT } from "@/lib/prefs/prefs";
 import "./globals.css";
 
 // Zen Maru Gothic: judul — ujung huruf membulat hangat, cocok tema senja.
@@ -118,7 +119,11 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="id" className={`dark ${display.variable} ${body.variable}`}>
+    <html lang="id" className={`dark ${display.variable} ${body.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Terapkan aksen tersimpan sebelum paint (anti-kedip). */}
+        <script dangerouslySetInnerHTML={{ __html: PREFS_BOOT_SCRIPT }} />
+      </head>
       <body>
         <AuthProvider>
           <SplashScreen />

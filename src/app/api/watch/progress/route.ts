@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth/session";
-import { deleteProgress, getProgress, listProgress, upsertProgress } from "@/lib/redis/watching";
+import { clearAllProgress, deleteProgress, getProgress, listProgress, upsertProgress } from "@/lib/redis/watching";
 import { recordHistory } from "@/lib/redis/history";
 
 /**
  * POST   /api/watch/progress  -> simpan/update continue-watching + history (login wajib)
  * GET    /api/watch/progress?contentId=... -> ambil progress satu content, atau semua jika tanpa query
  * DELETE /api/watch/progress?contentId=... -> hapus progress satu content
+ * DELETE /api/watch/progress?all=1          -> hapus SEMUA progress user (Settings > Reset Progress)
  *
  * userId SELALU berasal dari session server-side, tidak pernah dari body client.
  * position/duration opsional: player embed iframe tidak mengekspos posisi video;
@@ -95,6 +96,14 @@ export async function DELETE(req: NextRequest) {
   const userId = await getAuthenticatedUserId();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (req.nextUrl.searchParams.get("all") === "1") {
+    const ok = await clearAllProgress(userId);
+    if (!ok) {
+      return NextResponse.json({ error: "Gagal menghapus progress" }, { status: 503 });
+    }
+    return NextResponse.json({ ok: true });
   }
 
   const contentId = req.nextUrl.searchParams.get("contentId");

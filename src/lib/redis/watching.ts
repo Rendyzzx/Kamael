@@ -113,3 +113,12 @@ export async function deleteProgress(userId: string, contentId: string): Promise
     return true;
   }, false);
 }
+
+/** Hapus SEMUA progress Continue Watching milik user (Settings > Reset Progress). */
+export async function clearAllProgress(userId: string): Promise<boolean> {
+  return safeRedis(async () => {
+    const redis = getRedis();
+    await redis.del(key(userId));
+    return true;
+  }, false);
+}

@@ -101,6 +101,9 @@ function PickCard({
   onPick: (value: Portal) => void;
 }) {
   const [pressed, setPressed] = useState(false);
+  // Gambar gagal dimuat (hotlink diblok, URL mati) -> jatuh ke placeholder.
+  const [imgFailed, setImgFailed] = useState(false);
+  const showPoster = Boolean(poster) && !imgFailed;
   const isPending = pending === value;
   const dimmed = pending !== null && !isPending;
 
@@ -122,7 +125,7 @@ function PickCard({
         background: poster ? "var(--surface)" : "var(--surface)",
       }}
     >
-      {poster ? (
+      {showPoster && poster ? (
         <Image
           src={poster}
           alt=""
@@ -130,16 +133,20 @@ function PickCard({
           sizes="(max-width: 480px) 100vw, 480px"
           className="object-cover"
           style={{ objectPosition: "right top" }}
+          onError={() => setImgFailed(true)}
         />
       ) : (
-        // Fallback tanpa poster: surface datar.
+        // Fallback tanpa poster: surface datar + maskot samar supaya kartu
+        // tidak terlihat kosong/rusak.
         <span
           aria-hidden="true"
-          className="absolute inset-0"
-          style={{
-            background: "var(--surface-2)",
-          }}
-        />
+          className="absolute inset-0 flex items-start justify-end overflow-hidden"
+          style={{ background: "var(--surface-2)" }}
+        >
+          <span className="relative mr-3 mt-3 opacity-40" style={{ width: 84, height: 84 }}>
+            <Image src="/mascot/airin.webp" alt="" fill sizes="84px" className="object-contain" />
+          </span>
+        </span>
       )}
       {/* Kabut bawah: poster memudar ke nada dusk, teks tetap terbaca. */}
       <span

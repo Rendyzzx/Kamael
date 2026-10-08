@@ -552,3 +552,13 @@ h3,
     transition: none;
   }
 }
+
+/*
+ * Pilihan warna aksen (Settings > Appearance > Accent Color).
+ * Semua alias (--amber, --blue, --nav-active, ...) merujuk var(--accent),
+ * jadi override di sini langsung berlaku di seluruh UI tanpa reload.
+ * Default (ungu) = nilai :root, tidak perlu override.
+ */
+:root[data-accent="blue"] { --accent: #3B8EF0; }
+:root[data-accent="pink"] { --accent: #E5589B; }
+:root[data-accent="cyan"] { --accent: #1CB8CF; }

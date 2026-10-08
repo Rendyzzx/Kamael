@@ -70,11 +70,19 @@ export default async function HomePage() {
     // tiap kategori. Gagal -> kartu tetap tampil dengan gradient saja.
     const [animePoster, donghuaPoster] = await Promise.all([
       getOngoingAnime(1)
-        .then((res) => res.items[0]?.poster ?? null)
+        .then((res) => res.items.find((i) => i.poster)?.poster ?? null)
         .catch(() => null),
+      // Donghua: coba "latest" dulu, lalu "ongoing" bila gagal/kosong. Ambil
+      // poster pertama yang BENAR-BENAR terisi (string kosong dilewati).
       getLatestDonghua(1)
-        .then((items) => items[0]?.poster ?? null)
-        .catch(() => null),
+        .then((items) => items.find((i) => i.poster)?.poster ?? null)
+        .catch(() => null)
+        .then(async (poster) => {
+          if (poster) return poster;
+          return getOngoingDonghua(1)
+            .then((items) => items.find((i) => i.poster)?.poster ?? null)
+            .catch(() => null);
+        }),
     ]);
 
     return (
@@ -260,8 +268,8 @@ async function DashboardPage({
       redisOk={false}
       initial={gate.initial}
       authed={gate.authed}
-      animePoster={animeOngoing[0]?.poster ?? popularAnime[0]?.poster ?? null}
-      donghuaPoster={donghuaLatest[0]?.poster ?? donghuaOngoing[0]?.poster ?? null}
+      animePoster={animeOngoing.find((a) => a.poster)?.poster ?? popularAnime.find((a) => a.poster)?.poster ?? null}
+      donghuaPoster={donghuaLatest.find((d) => d.poster)?.poster ?? donghuaOngoing.find((d) => d.poster)?.poster ?? null}
     >
       {content}
     </OnboardingGate>
