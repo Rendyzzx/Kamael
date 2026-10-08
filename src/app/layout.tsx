@@ -31,7 +31,7 @@ const body = Figtree({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kamael.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cyronime.web.id";
 const SITE_NAME = "Cyronime";
 const DEFAULT_TITLE = "Cyronime: streaming anime dan donghua sub Indonesia";
 const DEFAULT_DESC =
