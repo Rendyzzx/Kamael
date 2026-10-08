@@ -279,11 +279,26 @@ export async function getAnimeEpisode(
       : null;
   const nextEpisodeId = ep.next_episode_id ?? nextFromList;
 
+  // Hanya server yang BENAR-BENAR bisa diputar browser yang masuk race
+  // player: file .mp4/.webm/.m3u8 atau tipe "direct" dari storages AnimeIn
+  // (terverifikasi: <video> lintas-origin memuatnya tanpa blokir CF/CORP).
+  // Server "semi" (mis. uservideo.xyz, file .mkv) tidak didukung decoder
+  // browser -> jadi opsi unduh saja, tidak dipaksa masuk player.
+  const isPlayable = (url: string) => {
+    try {
+      const ext = new URL(url).pathname.split(".").pop()?.toLowerCase() ?? "";
+      return ["mp4", "webm", "m3u8", "m4v"].includes(ext);
+    } catch {
+      return false;
+    }
+  };
+
   // Grup kualitas: satu grup per label quality, serverId komposit
   // "<episodeId>:<rowId>" agar resolve lazy tetap lewat route internal
   // yang sama (/api/anime/server/[serverId]) tanpa membocorkan URL dini.
   const qualityMap = new Map<string, AnimeQualityGroup>();
   for (const s of stream.servers) {
+    if (!isPlayable(s.url)) continue;
     const quality = s.quality ?? "auto";
     const group = qualityMap.get(quality) ?? { quality, servers: [] };
     group.servers.push({
