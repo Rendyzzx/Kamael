@@ -214,25 +214,83 @@ export async function searchAnime(keyword: string): Promise<AnimeListItem[]> {
   return items.map(normalizeItem);
 }
 
+/**
+ * Judul dasar franchise: buang penanda season/part/OVA/film/subtitle di akhir
+ * judul supaya "X Season 2", "X 2nd Season", "X OVA" semuanya menghasilkan "X".
+ */
+export function baseTitle(title: string): string {
+  return title
+    .replace(/\(.*?\)/g, " ")
+    .replace(/\b(subtitle indonesia|sub indo)\b/gi, " ")
+    .replace(
+      /\b(season|musim|part|cour|bagian)\s*\d+\b|\b\d+(st|nd|rd|th)\s+season\b|\b(final season|the final|ova|oad|ona|special|movie|film|the movie|tv)\b.*$/gi,
+      " "
+    )
+    .replace(/\s+\d+\s*$/, " ")
+    .replace(/[:\-–]\s*$/, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Kata-kata judul yang bermakna (>=3 huruf) untuk uji kemiripan franchise. */
+function titleTokens(t: string): string[] {
+  return baseTitle(t)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 3);
+}
+
+/** Anggap satu franchise bila judul dasar sama atau saling memuat (urutan kata awal). */
+function sameFranchise(a: string, b: string): boolean {
+  const ta = titleTokens(a);
+  const tb = titleTokens(b);
+  if (ta.length === 0 || tb.length === 0) return false;
+  const [short, long] = ta.length <= tb.length ? [ta, tb] : [tb, ta];
+  const need = Math.max(1, Math.min(short.length, 3));
+  return short.slice(0, need).every((w, i) => long[i] === w);
+}
+
 export async function getAnimeDetail(slug: string): Promise<AnimeDetail> {
   const { anime, episodes } = await animeIn.getDetail(slug, true);
   const episodeList = episodes.map(normalizeEpisode); // sudah urut menaik
 
-  // Rekomendasi: tidak ada "related anime" di AnimeIn -> padanan fungsional
-  // yang jujur adalah anime segenre terpopuler (data asli, self dikecualikan).
-  const firstGenre = anime.genres[0];
-  let recommended: AnimeListItem[] = [];
-  if (firstGenre) {
+  // "Anime Terkait": prioritas 1 = satu franchise (season lain, OVA, film)
+  // lewat pencarian judul dasar; sisanya diisi anime segenre terpopuler.
+  const related: ScrapeAnimeItem[] = [];
+  const seen = new Set<string>([anime.id]);
+  const franchiseQuery = baseTitle(anime.title);
+  if (franchiseQuery.length >= 3) {
     try {
-      const sameGenre = await animeIn.getByGenre(firstGenre, 0, "views");
-      recommended = sameGenre
-        .filter((x) => x.id !== anime.id)
-        .slice(0, 12)
-        .map(normalizeItem);
+      const found = await animeIn.search(franchiseQuery, 0, "views");
+      for (const x of found) {
+        if (seen.has(x.id)) continue;
+        if (!sameFranchise(x.title, anime.title)) continue;
+        seen.add(x.id);
+        related.push(x);
+      }
     } catch {
-      recommended = [];
+      /* franchise opsional -> lanjut ke fallback genre */
     }
   }
+  // Season/OVA diurut berdasarkan judul agar urutan natural (S1, S2, OVA ...).
+  related.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+
+  const firstGenre = anime.genres[0];
+  if (related.length < 12 && firstGenre) {
+    try {
+      const sameGenre = await animeIn.getByGenre(firstGenre, 0, "views");
+      for (const x of sameGenre) {
+        if (related.length >= 12) break;
+        if (seen.has(x.id)) continue;
+        seen.add(x.id);
+        related.push(x);
+      }
+    } catch {
+      /* abaikan */
+    }
+  }
+  const recommended: AnimeListItem[] = related.slice(0, 12).map(normalizeItem);
 
   const aired = anime.aired_start
     ? anime.aired_end
