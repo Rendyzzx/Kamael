@@ -316,11 +316,17 @@ export async function getAnimeDetail(slug: string): Promise<AnimeDetail> {
   // Season/OVA/film diurut berdasarkan judul agar urutan natural (S1, S2, OVA ...).
   related.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
 
-  for (const r of normalizeItems(d.recommendedAnimeList)) {
-    if (related.length >= 12) break;
-    if (seen.has(r.animeId)) continue;
-    seen.add(r.animeId);
-    related.push(r);
+  // Rekomendasi upstream Otakudesu pada dasarnya acak (tidak berhubungan dengan
+  // judul), jadi JANGAN dipakai untuk mengisi sisa slot di belakang item
+  // franchise (laporan owner: "yang pertama benar, sisanya random"). Hanya
+  // dipakai sebagai cadangan bila tidak ada satu pun item franchise, dan dibatasi.
+  if (related.length === 0) {
+    for (const r of normalizeItems(d.recommendedAnimeList)) {
+      if (related.length >= 4) break;
+      if (seen.has(r.animeId)) continue;
+      seen.add(r.animeId);
+      related.push(r);
+    }
   }
 
   return {
