@@ -1,11 +1,12 @@
 /**
- * LEGACY provider (Otakudesu via Sanka Vollerei). Dipertahankan sebagai fallback ANIME_PROVIDER=legacy.
- * Jangan tambah fitur baru di sini; provider aktif ada di src/lib/api/animein/.
+ * LEGACY provider (Otakudesu via Sanka Vollerei). Provider AKTIF di produksi
+ * (env ANIME_PROVIDER=legacy, default).
  * Semua akses data anime harus lewat sini — jika struktur API berubah,
  * cukup perbaiki file ini; UI tetap memakai tipe dari src/types/anime.ts.
  * Struktur mentah terdokumentasi di docs/API-INSPECTION.md.
  */
 import { apiFetch } from "../client";
+import { baseTitle, sameFranchise } from "../franchise";
 import { normalizeAnimeDownloads } from "@/lib/player/sources";
 import type {
   AnimeDetail,
@@ -290,8 +291,40 @@ export async function getAnimeDetail(slug: string): Promise<AnimeDetail> {
     .filter((x): x is AnimeEpisodeRef => x !== null);
 
   const animeId = str(d.animeId) ?? slug;
+  const title = str(d.title) ?? slug;
+
+  // "Anime Terkait": prioritas 1 = satu franchise (season lain, OVA, film)
+  // lewat pencarian judul dasar; sisanya diisi rekomendasi upstream Otakudesu
+  // (paling tidak segenre). Sebelumnya hanya meneruskan recommendedAnimeList
+  // upstream yang sering tidak ada hubungannya dengan judul yang dibuka.
+  const related: AnimeListItem[] = [];
+  const seen = new Set<string>([animeId]);
+  const franchiseQuery = baseTitle(title);
+  if (franchiseQuery.length >= 3) {
+    try {
+      const found = await searchAnime(franchiseQuery);
+      for (const x of found) {
+        if (seen.has(x.animeId)) continue;
+        if (!sameFranchise(x.title, title)) continue;
+        seen.add(x.animeId);
+        related.push(x);
+      }
+    } catch {
+      /* franchise opsional -> lanjut fallback rekomendasi upstream */
+    }
+  }
+  // Season/OVA/film diurut berdasarkan judul agar urutan natural (S1, S2, OVA ...).
+  related.sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }));
+
+  for (const r of normalizeItems(d.recommendedAnimeList)) {
+    if (related.length >= 12) break;
+    if (seen.has(r.animeId)) continue;
+    seen.add(r.animeId);
+    related.push(r);
+  }
+
   return {
-    title: str(d.title) ?? slug,
+    title,
     animeId,
     poster: str(d.poster) ?? "",
     japaneseTitle: str(d.japanese),
@@ -306,7 +339,7 @@ export async function getAnimeDetail(slug: string): Promise<AnimeDetail> {
     synopsis: normalizeSynopsis(d.synopsis),
     genres: normalizeGenres(d.genreList),
     episodeList: sortEpisodes(episodes),
-    recommended: normalizeItems(d.recommendedAnimeList),
+    recommended: related.slice(0, 12),
   };
 }
 
