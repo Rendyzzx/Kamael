@@ -27,7 +27,7 @@ import type { TargetPlatform } from "@/lib/notify/records";
 import { countTargetDevices, dispatchBroadcast } from "@/lib/notify/dispatch";
 import { checkRateLimit } from "@/lib/rate-limit";
 import pkg from "../../../package.json";
-import { answerCallbackQuery, editMessageText, esc, sendMessage } from "./api";
+import { answerCallbackQuery, callTelegram, editMessageText, esc, sendMessage } from "./api";
 
 /* ---------- struktur update ---------- */
 
@@ -177,6 +177,7 @@ const HELP_TEXT = [
   "<b>Info</b>",
   "/users — statistik user & device",
   "/version — versi Web & Android",
+  "/fixwebhook — pasang ulang webhook (aktifkan tombol inline)",
   "/help — daftar command",
 ].join("\n");
 
@@ -212,6 +213,38 @@ async function handleCommand(chatId: number, text: string): Promise<void> {
 
     case "/users": {
       await sendMessage(chatId, await userStats());
+      return;
+    }
+
+    case "/fixwebhook": {
+      // Pasang ulang webhook dari server: memakai TELEGRAM_WEBHOOK_SECRET asli
+      // di env, dan WAJIB menyertakan callback_query supaya tombol inline
+      // (wizard /notify, CONFIRM/CANCEL) sampai ke server.
+      const secret = process.env.TELEGRAM_WEBHOOK_SECRET?.trim();
+      const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://cyronime.web.id").trim().replace(/\/+$/, "");
+      if (!secret) {
+        await sendMessage(chatId, "TELEGRAM_WEBHOOK_SECRET belum diset di server.");
+        return;
+      }
+      const res = await callTelegram("setWebhook", {
+        url: `${site}/api/telegram/webhook`,
+        secret_token: secret,
+        allowed_updates: ["message", "callback_query"],
+        drop_pending_updates: false,
+      });
+      const info = await callTelegram<{ allowed_updates?: string[]; last_error_message?: string }>("getWebhookInfo", {});
+      await sendMessage(
+        chatId,
+        res.ok
+          ? [
+              "Webhook <b>dipasang ulang</b>.",
+              `Update diizinkan: <code>${esc((info.result?.allowed_updates ?? []).join(", ") || "-")}</code>`,
+              `Error terakhir: ${esc(info.result?.last_error_message ?? "-")}`,
+              "",
+              "Coba /notify lagi — tombol sekarang harus merespons.",
+            ].join("\n")
+          : `Gagal memasang webhook: ${esc(res.description ?? "unknown")}`
+      );
       return;
     }
 
