@@ -12,11 +12,11 @@ import {
  *
  * GET /api/notifications/prefs       -> { prefs }
  * PUT /api/notifications/prefs       -> body { prefs: { newEpisode?, favorite?,
- *        announcement?, maintenance?, appUpdate? } } (partial update boleh)
+ *        newAnime?, announcement?, maintenance?, appUpdate? } } (partial update boleh)
  */
 export const dynamic = "force-dynamic";
 
-const PREF_KEYS = ["newEpisode", "favorite", "announcement", "maintenance", "appUpdate"] as const;
+const PREF_KEYS = ["newEpisode", "newAnime", "favorite", "announcement", "maintenance", "appUpdate"] as const;
 type PrefKey = (typeof PREF_KEYS)[number];
 
 export async function GET(req: NextRequest) {

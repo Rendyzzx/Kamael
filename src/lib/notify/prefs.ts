@@ -10,6 +10,8 @@ import { getRedis, safeRedis } from "@/lib/redis/client";
 
 export interface NotificationPreferences {
   newEpisode: boolean;
+  /** Anime BARU (judul baru masuk katalog) — bukan episode baru. */
+  newAnime: boolean;
   favorite: boolean;
   announcement: boolean;
   maintenance: boolean;
@@ -18,6 +20,7 @@ export interface NotificationPreferences {
 
 export const DEFAULT_NOTIFY_PREFS: NotificationPreferences = {
   newEpisode: true,
+  newAnime: true,
   favorite: true,
   announcement: true,
   maintenance: true,
@@ -25,10 +28,17 @@ export const DEFAULT_NOTIFY_PREFS: NotificationPreferences = {
 };
 
 /** Kategori broadcast (dipakai admin/telegram) -> kunci preferensi user. */
-export type BroadcastCategory = "episode" | "favorite" | "announcement" | "maintenance" | "update";
+export type BroadcastCategory =
+  | "episode"
+  | "newanime"
+  | "favorite"
+  | "announcement"
+  | "maintenance"
+  | "update";
 
 export const BROADCAST_CATEGORIES: BroadcastCategory[] = [
   "episode",
+  "newanime",
   "favorite",
   "announcement",
   "maintenance",
@@ -39,6 +49,8 @@ function categoryPrefKey(category: BroadcastCategory): keyof NotificationPrefere
   switch (category) {
     case "episode":
       return "newEpisode";
+    case "newanime":
+      return "newAnime";
     case "favorite":
       return "favorite";
     case "update":

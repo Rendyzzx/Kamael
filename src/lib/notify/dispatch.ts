@@ -25,6 +25,8 @@ export interface BroadcastInput {
   targetPlatform: TargetPlatform;
   createdBy: string;
   data?: Record<string, string>;
+  /** URL gambar (poster dsb.) — ditampilkan sebagai foto di notifikasi. */
+  image?: string | null;
 }
 
 export interface BroadcastResult {
@@ -81,6 +83,7 @@ export async function dispatchBroadcast(input: BroadcastInput): Promise<Broadcas
       {
         title: input.title,
         body: input.body,
+        image: input.image ?? null,
         data: input.data,
       }
     );

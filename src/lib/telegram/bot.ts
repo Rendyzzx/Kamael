@@ -25,6 +25,7 @@ import {
 } from "@/lib/notify/prefs";
 import type { TargetPlatform } from "@/lib/notify/records";
 import { countTargetDevices, dispatchBroadcast } from "@/lib/notify/dispatch";
+import { checkNewAnimeNotifications } from "@/lib/notify/newAnime";
 import { checkRateLimit } from "@/lib/rate-limit";
 import pkg from "../../../package.json";
 import { answerCallbackQuery, callTelegram, editMessageText, esc, sendMessage } from "./api";
@@ -77,9 +78,10 @@ export function isAdminTelegramUser(fromId: number): boolean {
 /* ---------- state wizard /notify (Redis, TTL 10 menit) ---------- */
 
 interface PendingBroadcast {
-  step: "title" | "body" | "platform" | "category" | "confirm";
+  step: "title" | "body" | "image" | "platform" | "category" | "confirm";
   title?: string;
   body?: string;
+  image?: string | null;
   platform?: TargetPlatform;
   category?: BroadcastCategory;
 }
@@ -178,6 +180,7 @@ const HELP_TEXT = [
   "/users — statistik user & device",
   "/version — versi Web & Android",
   "/fixwebhook — pasang ulang webhook (aktifkan tombol inline)",
+  "/newanime — cek anime baru & kirim notifikasi sekarang",
   "/help — daftar command",
 ].join("\n");
 
@@ -208,6 +211,27 @@ async function handleCommand(chatId: number, text: string): Promise<void> {
           `Android: <b>${esc(version.latestVersion)}</b> (min. didukung: ${esc(version.minimumVersion)})`,
         ].join("\n")
       );
+      return;
+    }
+
+    case "/newanime": {
+      // Cek anime baru secara manual (cron harian juga memanggilnya).
+      await sendMessage(chatId, "Memeriksa daftar ongoing untuk judul baru…");
+      const check = await checkNewAnimeNotifications();
+      const lines = [
+        "<b>Hasil cek anime baru</b>",
+        "",
+        check.baselineSeeded
+          ? "Run pertama: baseline ditanam (tidak ada broadcast). Cek berikutnya akan mendeteksi judul baru."
+          : `Judul baru terdeteksi: <b>${check.detected}</b>`,
+      ];
+      for (const b of check.broadcasted) {
+        lines.push(`• ${esc(b.title)} — terkirim ${b.sent}/${b.targets}${b.failed ? `, gagal ${b.failed}` : ""}`);
+      }
+      if (!check.baselineSeeded && check.detected > 0 && check.broadcasted.length === 0) {
+        lines.push("(Tidak ada broadcast: Redis tidak aktif / tidak ada target)");
+      }
+      await sendMessage(chatId, lines.join("\n"));
       return;
     }
 
@@ -377,8 +401,16 @@ async function handleCommand(chatId: number, text: string): Promise<void> {
   }
 }
 
-async function askConfirm(chatId: number, title: string, body: string, platform: TargetPlatform, category: BroadcastCategory): Promise<void> {
+async function askConfirm(
+  chatId: number,
+  title: string,
+  body: string,
+  platform: TargetPlatform,
+  category: BroadcastCategory,
+  image?: string | null
+): Promise<void> {
   const targets = await countTargetDevices(category, platform);
+  const pendingImage = image ?? null;
   await sendMessage(
     chatId,
     [
@@ -386,6 +418,7 @@ async function askConfirm(chatId: number, title: string, body: string, platform:
       "",
       `Judul: <b>${esc(title)}</b>`,
       `Isi: ${esc(body)}`,
+      `Foto: ${esc(pendingImage || "-")}`,
       `Target: <b>${platform === "all" ? "Semua device" : platform === "android" ? "Android" : "Web"}</b>`,
       `Kategori: <b>${esc(categoryLabel(category))}</b>`,
       "",
@@ -406,6 +439,8 @@ function categoryLabel(c: BroadcastCategory): string {
   switch (c) {
     case "episode":
       return "Episode baru";
+    case "newanime":
+      return "Anime baru";
     case "favorite":
       return "Anime favorit";
     case "maintenance":
@@ -443,22 +478,40 @@ async function handleWizardText(chatId: number, text: string): Promise<void> {
         await sendMessage(chatId, "Isi tidak boleh kosong. Kirim Isi:");
         return;
       }
-      await setPending(chatId, { ...pending, step: "platform", body });
-      await sendMessage(chatId, `<b>3/4</b> — Pilih <b>Target</b> platform:`, {
-        buttons: [
-          [
-            { text: "Semua device", callback_data: "np:all" },
-            { text: "Android", callback_data: "np:android" },
-            { text: "Web", callback_data: "np:web" },
-          ],
-        ],
-      });
+      await setPending(chatId, { ...pending, step: "image", body });
+      await sendMessage(
+        chatId,
+        "<b>2b/4</b> — Foto notification (opsional).\nKirim URL gambar (http/https), atau ketik <code>/skip</code> untuk tanpa foto:",
+        { buttons: [[{ text: "Tanpa foto", callback_data: "ni:skip" }]] }
+      );
+      return;
+    }
+    case "image": {
+      const url = text.trim();
+      if (!/^https?:\/\/\S+$/i.test(url)) {
+        await sendMessage(chatId, "URL tidak valid. Kirim URL gambar (http/https), atau ketik /skip:");
+        return;
+      }
+      await setPending(chatId, { ...pending, step: "platform", image: url.slice(0, 2048) });
+      await askPlatform(chatId);
       return;
     }
     default: {
       await sendMessage(chatId, "Selesaikan konfirmasi sebelumnya (CONFIRM/CANCEL), atau /help.");
     }
   }
+}
+
+async function askPlatform(chatId: number): Promise<void> {
+  await sendMessage(chatId, "<b>3/4</b> — Pilih <b>Target</b> platform:", {
+    buttons: [
+      [
+        { text: "Semua device", callback_data: "np:all" },
+        { text: "Android", callback_data: "np:android" },
+        { text: "Web", callback_data: "np:web" },
+      ],
+    ],
+  });
 }
 
 /* ---------- callback (tombol inline) ---------- */
@@ -483,6 +536,7 @@ async function handleCallback(cb: TgCallbackQuery): Promise<void> {
       buttons: [
         [
           { text: "Episode baru", callback_data: "nc:episode" },
+          { text: "Anime baru", callback_data: "nc:newanime" },
           { text: "Anime favorit", callback_data: "nc:favorite" },
         ],
         [
@@ -507,7 +561,19 @@ async function handleCallback(cb: TgCallbackQuery): Promise<void> {
     }
     await setPending(chatId, { ...pending, step: "confirm", category });
     await answerCallbackQuery(cb.id, "Kategori dipilih");
-    await askConfirm(chatId, pending.title ?? "", pending.body ?? "", pending.platform ?? "all", category);
+    await askConfirm(chatId, pending.title ?? "", pending.body ?? "", pending.platform ?? "all", category, pending.image);
+    return;
+  }
+
+  if (data === "ni:skip") {
+    if (!pending || pending.step !== "image") {
+      await answerCallbackQuery(cb.id, "Sesi kedaluwarsa. Mulai ulang dengan /notify.");
+      await clearPending(chatId);
+      return;
+    }
+    await setPending(chatId, { ...pending, step: "platform", image: null });
+    await answerCallbackQuery(cb.id, "Tanpa foto");
+    await askPlatform(chatId);
     return;
   }
 
@@ -532,6 +598,7 @@ async function handleCallback(cb: TgCallbackQuery): Promise<void> {
       category: pending.category ?? "announcement",
       targetPlatform: pending.platform ?? "all",
       createdBy: `telegram:${cb.from.id}`,
+      image: pending.image ?? null,
     });
     await clearPending(chatId);
     if (messageId) {
