@@ -33,7 +33,22 @@ function isPlatform(v: unknown): v is DevicePlatform {
   return v === "web" || v === "android";
 }
 
-function parseRecord(raw: unknown): DeviceRecord | null {
+/**
+ * Upstash mem-parse nilai JSON secara otomatis: hget/hgetall mengembalikan
+ * OBJEK, bukan string. Terima keduanya agar record tak terbuang diam-diam
+ * (bug sebelumnya: JSON.parse(objek) -> catch -> null -> 0 device).
+ */
+function coerceRaw(raw: unknown): unknown {
+  if (typeof raw !== "string") return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function parseRecord(input: unknown): DeviceRecord | null {
+  const raw = coerceRaw(input);
   if (typeof raw !== "object" || raw === null) return null;
   const r = raw as Record<string, unknown>;
   if (typeof r.token !== "string" || typeof r.userId !== "string" || !isPlatform(r.platform)) return null;
@@ -136,16 +151,10 @@ export async function touchDevice(userId: string, deviceId: string): Promise<voi
 export async function listDevices(platform?: DevicePlatform): Promise<DeviceRecord[]> {
   return safeRedis(async () => {
     const redis = getRedis();
-    const all = await redis.hgetall<Record<string, string>>(INDEX_KEY);
+    const all = await redis.hgetall<Record<string, unknown>>(INDEX_KEY);
     if (!all) return [];
     const records = Object.values(all)
-      .map((raw) => {
-        try {
-          return parseRecord(JSON.parse(raw));
-        } catch {
-          return null;
-        }
-      })
+      .map((raw) => parseRecord(raw))
       .filter((r): r is DeviceRecord => r !== null);
     return platform ? records.filter((r) => r.platform === platform) : records;
   }, []);
@@ -167,10 +176,10 @@ export interface UserDeviceSummary {
 export async function listUserDevices(userId: string): Promise<UserDeviceSummary[]> {
   return safeRedis(async () => {
     const redis = getRedis();
-    const all = await redis.hgetall<Record<string, string>>(userKey(userId));
+    const all = await redis.hgetall<Record<string, unknown>>(userKey(userId));
     if (!all) return [];
     return Object.entries(all).map(([deviceId, raw]) => {
-      const record = parseRecord(safeParse(raw));
+      const record = parseRecord(raw);
       return {
         deviceId,
         platform: record?.platform ?? "android",
@@ -179,14 +188,6 @@ export async function listUserDevices(userId: string): Promise<UserDeviceSummary
       };
     });
   }, []);
-}
-
-function safeParse(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
 }
 
 /** Info konfigurasi — dipakai endpoint untuk memberi pesan jujur ke client. */

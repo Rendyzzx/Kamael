@@ -70,11 +70,12 @@ export async function logNotification(record: NotificationRecord): Promise<void>
 export async function listNotifications(limit = 10): Promise<NotificationRecord[]> {
   return safeRedis(async () => {
     const redis = getRedis();
-    const rows = await redis.lrange<string>(KEY, 0, Math.max(0, Math.min(limit, 50)) - 1);
+    // Upstash mem-parse JSON otomatis -> baris bisa objek ATAU string.
+    const rows = await redis.lrange<unknown>(KEY, 0, Math.max(0, Math.min(limit, 50)) - 1);
     return rows
       .map((raw) => {
         try {
-          return parseRecord(JSON.parse(raw));
+          return parseRecord(typeof raw === "string" ? JSON.parse(raw) : raw);
         } catch {
           return null;
         }
