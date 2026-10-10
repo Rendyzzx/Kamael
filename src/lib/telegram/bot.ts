@@ -487,6 +487,11 @@ async function handleWizardText(chatId: number, text: string): Promise<void> {
       return;
     }
     case "image": {
+      if (text.trim().toLowerCase() === "/skip") {
+        await setPending(chatId, { ...pending, step: "platform", image: null });
+        await askPlatform(chatId);
+        return;
+      }
       const url = text.trim();
       if (!/^https?:\/\/\S+$/i.test(url)) {
         await sendMessage(chatId, "URL tidak valid. Kirim URL gambar (http/https), atau ketik /skip:");
